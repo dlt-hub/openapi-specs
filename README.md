@@ -2,10 +2,7 @@
 
 Here we keep the specs for the openapi project
 
-Structure
-folder: source_name
-  spec.json
-
+Structure: 1 folder per source containing the spec file. Make the folder the official source name.
 Links maintained here:
 
 | Name           | Link                                                                                       |
