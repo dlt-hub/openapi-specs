@@ -1,0 +1,859 @@
+openapi: 3.0.0
+paths:
+  /v1/template:
+    post:
+      operationId: createTemplate
+      summary: Create template
+      description: >-
+        Create a template from a `.docx`, `.doc`, `.odt`, `.rtf`, `.txt`, `.sql`
+        or `.html` file.<br><br>
+
+        Make sure to use the `multipart/form-data` content type when making the
+        request.<br><br>
+
+        This is required for submitting the binary `file` containing the
+        template.
+      parameters: []
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file:
+                  type: string
+                  format: binary
+                  description: >-
+                    Template file in the `.docx`, `.doc`, `.odt`, `.rtf`,
+                    `.txt`, `.sql` or `.html` format.
+                  example: ''
+                name:
+                  type: string
+                  description: >-
+                    The template’s name. If not provided, it will be initialized
+                    with the name of the uploaded template file.
+                  example: ''
+                delimiters:
+                  type: object
+                  description: >-
+                    Delimiters used to detect the tags. If not provided, they
+                    will be determined automatically.<br>For example, if the
+                    tags defined in the template are `[Name]`, `[Address]`,
+                    etc., then the left delimiter is `[` and the right delimiter
+                    is `]`.
+                  properties:
+                    left:
+                      type: string
+                      description: Left delimiter for the tags.
+                      example: '['
+                    right:
+                      type: string
+                      description: Right delimiter for the tags.
+                      example: ']'
+                enhanced_syntax:
+                  type: boolean
+                  description: >-
+                    Flag to determine if nested properties of objects and
+                    logical & mathematical operators can be used for this
+                    template. The default value is `false`.<br>Enabling this
+                    flag make it possible to use tags like `[item.name]` in the
+                    template, where `item` is an object containing the `name`
+                    property.<br>
+                  default: false
+              required:
+                - file
+      responses:
+        '201':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Template'
+        '401':
+          description: Unauthorized
+      tags:
+        - Template
+      security:
+        - API Key: []
+    get:
+      operationId: queryTemplates
+      summary: Get all templates
+      description: Get all the templates ordered by the `created` time in descending order.
+      parameters: []
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Template'
+        '401':
+          description: Unauthorized
+      tags:
+        - Template
+      security:
+        - API Key: []
+  '/v1/template/{id}':
+    get:
+      operationId: getTemplate
+      summary: Get template
+      description: Get a template by `id`.
+      parameters:
+        - name: id
+          required: true
+          in: path
+          description: ID of the template.
+          schema:
+            type: string
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Template'
+        '401':
+          description: Unauthorized
+        '404':
+          description: Template not found
+      tags:
+        - Template
+      security:
+        - API Key: []
+    put:
+      operationId: updateTemplate
+      summary: Update template
+      description: Update a template by `id`.
+      parameters:
+        - name: id
+          required: true
+          in: path
+          description: ID of the template.
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file:
+                  type: string
+                  format: binary
+                  description: >-
+                    Template file in the `.docx`, `.doc`, `.odt`, `.rtf`,
+                    `.txt`, `.sql` or `.html` format.<br>If provided, the new
+                    template will be processed and will replace the current
+                    template.<br>Unless specified explicitely, the current
+                    template delimiters will be used for processing.
+                  example: ''
+                name:
+                  type: string
+                  description: >-
+                    The template’s name. If provided, it will be override the
+                    current name of the template.
+                  example: ''
+                delimiters:
+                  type: object
+                  description: >-
+                    Delimiters used to detect the tags. If provided, the
+                    template will be re-processed to determine the tags based on
+                    the new delimiters.
+                  properties:
+                    left:
+                      type: string
+                      description: Left delimiter for the tags.
+                      example: '['
+                    right:
+                      type: string
+                      description: Right delimiter for the tags.
+                      example: ']'
+                enhanced_syntax:
+                  type: boolean
+                  description: >-
+                    Flag to determine if nested properties of objects and
+                    logical & mathematical operators can be used for this
+                    template.<br>Enabling this flag make it possible to use tags
+                    like `[item.name]` in the template, where `item` is an
+                    object containing the `name` property.
+                  default: false
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Template'
+        '401':
+          description: Unauthorized
+        '404':
+          description: Template not found
+      tags:
+        - Template
+      security:
+        - API Key: []
+    delete:
+      operationId: deleteTemplate
+      summary: Delete template
+      description: Delete a template by `id`.
+      parameters:
+        - name: id
+          required: true
+          in: path
+          description: ID of the template.
+          schema:
+            type: string
+      responses:
+        '204':
+          description: Template successfully deleted
+        '401':
+          description: Unauthorized
+        '404':
+          description: Template not found
+      tags:
+        - Template
+      security:
+        - API Key: []
+  /v1/document:
+    post:
+      operationId: generateDocument
+      summary: Generate document
+      description: >-
+        Generate a document based on a template and a data set.<br><br>
+
+        It is possible to specify one of the following values for the
+        `Content-Type` header when making the request:
+
+        - `multipart/form-data` : using this content type is mandatory if you
+        pass a binary `file` containing the data<br><br>
+
+        - `application/json` : if you pass the `data` as JSON, then either one
+        the content types can be used<br><br>
+
+
+        You can also specify one of the following values for the `Accept`
+        header, depending on how you want to receive the generated document:
+
+        - `application/json` : the generated document is stored in the cloud and
+        the response is a JSON object following the Document schema<br><br>
+
+        - `application/octet-stream` : the generated document is not stored in
+        the cloud and the response represents the document in binary
+        format<br><br>
+
+
+        In case of the binary format response, the server will return two
+        additional headers:
+
+        - `Content-Disposition` : which specifies the filename of the generated
+        document<br><br>
+
+        - `X-Document-Id` : which contains the unique ID associated with the
+        generated document<br><br>
+      parameters: []
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                template_id:
+                  type: string
+                  description: ID of the template to use for generating the document.
+                  example: ''
+                data:
+                  oneOf:
+                    - type: array
+                      items:
+                        type: object
+                    - type: object
+                  description: >-
+                    Data that will be used to generate documents based on the
+                    template.<br>The expected format is an array of JSON objects
+                    or a single JSON object.<br>A document will be generated for
+                    each object by replacing the tags from the template with the
+                    object's values.<br>Either the `data` or `file` parameter
+                    may be provided in the request.
+                  example: {}
+                file:
+                  type: string
+                  format: binary
+                  description: >-
+                    Data file in the `.xlsx`, `.xls`, `.ods`, `.csv` or `.tsv`
+                    format.<br>A document will be generated for each row in the
+                    file by replacing the tags from the template with the row's
+                    values.<br>Either the `data` or `file` parameter may be
+                    provided in the request.
+                  example: ''
+                sheet:
+                  type: string
+                  description: >-
+                    If a spreadsheet `file` is uploaded, this parameter
+                    represents the name of the sheet to be used to extract the
+                    data from.<br>If the `sheet` value is not specified, then
+                    the first sheet in the spreadsheet will be used.
+                  example: ''
+                name:
+                  type: string
+                  description: >-
+                    The document’s name. If not provided, it will be initialized
+                    with template’s name.<br>This is a logical name for
+                    identifying the document and is different from the
+                    `output_name` which specifies the filename of the generated
+                    document. 
+                  example: ''
+                output_name:
+                  type: string
+                  description: >-
+                    The filename without extension of the generated document. If
+                    not provided, it will be initialized based on the document’s
+                    name.<br>For example, if `output_name`=`invoices` and
+                    `output_format`=`.pdf` then the filename of the generated
+                    document will be `invoices.pdf`.
+                  example: ''
+                output_format:
+                  type: string
+                  enum:
+                    - .docx
+                    - .pdf
+                    - .doc
+                    - .odt
+                    - .txt
+                    - .html
+                    - .png
+                  description: >-
+                    Output format of the generated document. If no format is
+                    specified, then the default format is `.docx`.<br>The
+                    supported formats are `.docx`, `.pdf`, `.doc`, `.odt`,
+                    `.txt`, `.html` and `.png`.<br>If the format is `.png`, then
+                    only the first page is exported. This is useful for
+                    generating document thumbnails for example.
+                  default: .docx
+                output_quality:
+                  type: integer
+                  description: >-
+                    Specifies quality of the generated document if the
+                    `output_format` is `.pdf` or `.png`. A higher value results
+                    in higher quality and file size.<br>The lower the value, the
+                    less good is the image compression quality and the bigger is
+                    the file size. The minimum value is `1`.<br>The higher the
+                    value, the better is the image compression quality and the
+                    smaller is the file size. The maximum value is `100`.
+                  minimum: 1
+                  maximum: 100
+                  default: 100
+                single_file:
+                  type: boolean
+                  description: >-
+                    If the flag is `true`, then all the generated documents will
+                    be combined in a single file with the `output_format`
+                    format.<br>If the flag is `false`, then for each data item a
+                    separate document will be generated with the `output_format`
+                    format and the all the files will be included in a `.zip`
+                    archive.<br>The flag is ignored if there is only one data
+                    item, so to generate a `.zip` archive multiple data items
+                    are required. By default, the flag value is `true`.
+                  default: true
+                page_break:
+                  type: boolean
+                  description: >-
+                    Flag indicating whether to add a page break in the document
+                    after each data row. The default value is `true`.<br>The
+                    flag only applies if `single_file` is `true`.
+                  default: true
+                merge_with:
+                  type: string
+                  format: uri
+                  description: >-
+                    URL of a PDF file to be merged at the end of the generated
+                    document. The PDF document will be merged only if
+                    `output_format` is `.pdf`.<br>If the URL is incorrect, does
+                    not exist, or points to a document that is not a PDF, then
+                    the parameter will be ignored.<br>If the flag `single_file`
+                    is `false`, then the PDF document is merged at the end of
+                    each generated document.<br>
+                  example: ''
+              required:
+                - template_id
+          application/json:
+            schema:
+              type: object
+              properties:
+                template_id:
+                  type: string
+                  description: ID of the template to use for generating the document.
+                  example: ''
+                data:
+                  oneOf:
+                    - type: array
+                      items:
+                        type: object
+                    - type: object
+                  description: >-
+                    Data that will be used to generate documents based on the
+                    template.<br>The expected format is an array of JSON objects
+                    or a single JSON object.<br>A document will be generated for
+                    each object by replacing the tags from the template with the
+                    object's values.<br>Either the `data` or `file` parameter
+                    may be provided in the request.
+                  example: {}
+                file:
+                  type: string
+                  format: binary
+                  description: >-
+                    Data file in the `.xlsx`, `.xls`, `.ods`, `.csv` or `.tsv`
+                    format.<br>A document will be generated for each row in the
+                    file by replacing the tags from the template with the row's
+                    values.<br>Either the `data` or `file` parameter may be
+                    provided in the request.
+                  example: ''
+                sheet:
+                  type: string
+                  description: >-
+                    If a spreadsheet `file` is uploaded, this parameter
+                    represents the name of the sheet to be used to extract the
+                    data from.<br>If the `sheet` value is not specified, then
+                    the first sheet in the spreadsheet will be used.
+                  example: ''
+                name:
+                  type: string
+                  description: >-
+                    The document’s name. If not provided, it will be initialized
+                    with template’s name.<br>This is a logical name for
+                    identifying the document and is different from the
+                    `output_name` which specifies the filename of the generated
+                    document. 
+                  example: ''
+                output_name:
+                  type: string
+                  description: >-
+                    The filename without extension of the generated document. If
+                    not provided, it will be initialized based on the document’s
+                    name.<br>For example, if `output_name`=`invoices` and
+                    `output_format`=`.pdf` then the filename of the generated
+                    document will be `invoices.pdf`.
+                  example: ''
+                output_format:
+                  type: string
+                  enum:
+                    - .docx
+                    - .pdf
+                    - .doc
+                    - .odt
+                    - .txt
+                    - .html
+                    - .png
+                  description: >-
+                    Output format of the generated document. If no format is
+                    specified, then the default format is `.docx`.<br>The
+                    supported formats are `.docx`, `.pdf`, `.doc`, `.odt`,
+                    `.txt`, `.html` and `.png`.<br>If the format is `.png`, then
+                    only the first page is exported. This is useful for
+                    generating document thumbnails for example.
+                  default: .docx
+                output_quality:
+                  type: integer
+                  description: >-
+                    Specifies quality of the generated document if the
+                    `output_format` is `.pdf` or `.png`. A higher value results
+                    in higher quality and file size.<br>The lower the value, the
+                    less good is the image compression quality and the bigger is
+                    the file size. The minimum value is `1`.<br>The higher the
+                    value, the better is the image compression quality and the
+                    smaller is the file size. The maximum value is `100`.
+                  minimum: 1
+                  maximum: 100
+                  default: 100
+                single_file:
+                  type: boolean
+                  description: >-
+                    If the flag is `true`, then all the generated documents will
+                    be combined in a single file with the `output_format`
+                    format.<br>If the flag is `false`, then for each data item a
+                    separate document will be generated with the `output_format`
+                    format and the all the files will be included in a `.zip`
+                    archive.<br>The flag is ignored if there is only one data
+                    item, so to generate a `.zip` archive multiple data items
+                    are required. By default, the flag value is `true`.
+                  default: true
+                page_break:
+                  type: boolean
+                  description: >-
+                    Flag indicating whether to add a page break in the document
+                    after each data row. The default value is `true`.<br>The
+                    flag only applies if `single_file` is `true`.
+                  default: true
+                merge_with:
+                  type: string
+                  format: uri
+                  description: >-
+                    URL of a PDF file to be merged at the end of the generated
+                    document. The PDF document will be merged only if
+                    `output_format` is `.pdf`.<br>If the URL is incorrect, does
+                    not exist, or points to a document that is not a PDF, then
+                    the parameter will be ignored.<br>If the flag `single_file`
+                    is `false`, then the PDF document is merged at the end of
+                    each generated document.<br>
+                  example: ''
+              required:
+                - template_id
+      responses:
+        '201':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Document'
+            application/octet-stream:
+              schema:
+                $ref: '#/components/schemas/Document'
+        '401':
+          description: Unauthorized
+      tags:
+        - Document
+      security:
+        - API Key: []
+    get:
+      operationId: queryDocuments
+      summary: Get all documents from a template
+      description: |-
+        Get all the documents generated from template `template_id`.<br><br>
+        The `template_id` needs to be passed as a query parameter.<br><br>
+        Results are ordered by the `created` time in descending order.
+      parameters:
+        - name: template_id
+          required: true
+          in: query
+          description: ID of the template that was used to generate the documents.
+          schema:
+            type: string
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Document'
+        '401':
+          description: Unauthorized
+      tags:
+        - Document
+      security:
+        - API Key: []
+  '/v1/document/{id}':
+    get:
+      operationId: getDocument
+      summary: Get document
+      description: Get a document by `id`.
+      parameters:
+        - name: id
+          required: true
+          in: path
+          description: ID of the document.
+          schema:
+            type: string
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Document'
+        '401':
+          description: Unauthorized
+        '404':
+          description: Document not found
+      tags:
+        - Document
+      security:
+        - API Key: []
+    put:
+      operationId: updateDocument
+      summary: Update document
+      description: Update a document by `id`.
+      parameters:
+        - name: id
+          required: true
+          in: path
+          description: ID of the document.
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  description: The document’s name.
+                  example: ''
+              required:
+                - name
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  description: The document’s name.
+                  example: ''
+              required:
+                - name
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Document'
+        '401':
+          description: Unauthorized
+        '404':
+          description: Document not found
+      tags:
+        - Document
+      security:
+        - API Key: []
+    delete:
+      operationId: deleteDocument
+      summary: Delete document
+      description: Delete a document by `id`.
+      parameters:
+        - name: id
+          required: true
+          in: path
+          description: ID of the document.
+          schema:
+            type: string
+      responses:
+        '204':
+          description: Document successfully deleted
+        '401':
+          description: Unauthorized
+        '404':
+          description: Document not found
+      tags:
+        - Document
+      security:
+        - API Key: []
+info:
+  title: DocuGenerate API Reference
+  description: "<a href=\"https://app.docugenerate.com/signup\" target=\"_blank\">Sign Up</a> for a new account and get \n\t\t\tyour unique API Key from the Developers tab in the <a href=\"https://app.docugenerate.com/settings\" target=\"_blank\">Settings</a> page.<br><br>\n\t\t\tTo authenticate, you'll need to pass the API Key in the Authorization header when making HTTP requests:<br><br>\n\t\t\t&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`Authorization: <API Key>`<br><br>\n\t\t\tGet started in 2 simple steps:<br>\n\t\t\t<ol>\n\t\t\t\t<li>Call `POST https://api.docugenerate.com/v1/template` to create a document template with tags in places where you want to have dynamic text.</li>\n\t\t\t\t<li>Call `POST https://api.docugenerate.com/v1/document` to generate documents by replacing all the tags in the template with the values from the data input.</li>\n\t\t\t</ol>"
+  version: 1.5.0
+  contact:
+    name: DocuGenerate
+    url: 'https://www.docugenerate.com'
+    email: support@docugenerate.com
+tags:
+  - name: Template
+    description: ''
+  - name: Document
+    description: ''
+servers: []
+components:
+  securitySchemes:
+    API Key:
+      type: apiKey
+      in: header
+      name: Authorization
+  schemas:
+    Delimiters:
+      type: object
+      properties:
+        left:
+          type: string
+          description: Left delimiter for the tags.
+          example: '['
+        right:
+          type: string
+          description: Right delimiter for the tags.
+          example: ']'
+      required:
+        - left
+        - right
+    Tags:
+      type: object
+      properties:
+        valid:
+          description: >-
+            List of the valid tags extracted from the template. The values can
+            either be simple strings or objects.<br>
+
+            In the case of more complex structures like lists or tables, they
+            are represented as objects containing a single key-value pair.<br>
+
+            Take the following table defined in a template as an
+            example:<br><br>
+
+            `[#Items][Name][Quantity][/]`<br><br>
+
+            In this instance, the tag representation is an object that
+            corresponds to the structure of the table: <br><br>
+
+            `[{"Items": ["Name", "Quantity"]}]`.
+          example:
+            - Invoice No
+            - Company Name
+            - Street Address
+            - City
+            - State
+            - Zip Code
+            - Invoice Date
+            - Due Date
+            - Sub Total
+            - Total
+          default: []
+          type: array
+          items:
+            type: object
+        invalid:
+          description: |-
+            List of the invalid tags extracted from the template.
+            For example, unclosed tags will appear as invalid.
+          example: []
+          default: []
+          type: array
+          items:
+            type: string
+      required:
+        - valid
+        - invalid
+    Template:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Unique identifier for the template.
+          example: CctvL5PkbEifvnkDh6L0
+        created:
+          type: number
+          description: >-
+            Time at which the template was created. Measured in milliseconds
+            since the Unix epoch.
+          example: 1711172339868
+        name:
+          type: string
+          description: The template’s name.
+          example: Business Invoice
+        page_count:
+          type: number
+          description: The template’s number of pages.
+          example: 1
+        delimiters:
+          description: >-
+            Delimiters used to detect the tags. For example, if the tags defined
+            in the template are
+
+            [Name], [Address], etc., then the left delimiter is '[' and the
+            right delimiter is ']'.
+          allOf:
+            - $ref: '#/components/schemas/Delimiters'
+        tags:
+          description: >-
+            Tags extracted from the template, grouped by valid and invalid.
+
+            If the template contains at least one invalid tag, then it cannot be
+            used to generate documents.
+          allOf:
+            - $ref: '#/components/schemas/Tags'
+        filename:
+          type: string
+          description: The filename of the uploaded template file.
+          example: Business Invoice.docx
+        format:
+          type: string
+          description: The format of the uploaded template.
+          example: .docx
+        template_uri:
+          type: string
+          description: Download link of the uploaded template file.
+          example: >-
+            https://firebasestorage.googleapis.com/v0/b/docugenerate.appspot.com/o/templates%2FCctvL5PkbEifvnkDh6L0%2FBusiness%20Invoice.docx?alt=media&token=584743fd-e9b9-42c2-8d38-72283854a5de
+        preview_uri:
+          type: string
+          description: Download link of the template converted to .pdf format.
+          example: >-
+            https://firebasestorage.googleapis.com/v0/b/docugenerate.appspot.com/o/templates%2FCctvL5PkbEifvnkDh6L0%2FBusiness%20Invoice.pdf?alt=media&token=e690217d-c432-41d8-9d64-2110f76574f2
+        image_uri:
+          type: string
+          description: >-
+            Download link of an image in .png format of the template's first
+            page.
+          example: >-
+            https://firebasestorage.googleapis.com/v0/b/docugenerate.appspot.com/o/templates%2FCctvL5PkbEifvnkDh6L0%2FBusiness%20Invoice.png?alt=media&token=174add45-2518-4bb5-a07c-c3f36623bc12
+        enhanced_syntax:
+          type: boolean
+          description: >-
+            Flag to determine if nested properties of objects and logical &
+            mathematical operators can be used for this template.
+          example: false
+          default: false
+      required:
+        - id
+        - created
+        - name
+        - page_count
+        - delimiters
+        - tags
+        - filename
+        - format
+        - template_uri
+        - preview_uri
+        - image_uri
+        - enhanced_syntax
+    Document:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Unique identifier for the document.
+          example: dWaTxGd6FxT6RvqcAltC
+        template_id:
+          type: string
+          description: The id of the template used to generate the document.
+          example: CctvL5PkbEifvnkDh6L0
+        created:
+          type: number
+          description: >-
+            Time at which the document was created. Measured in milliseconds
+            since the Unix epoch.
+          example: 1711172421222
+        name:
+          type: string
+          description: The document’s name.
+          example: Invoice N°65-090-7669
+        data_length:
+          type: number
+          description: Length of the data object used to generate the document.
+          example: 1
+        filename:
+          type: string
+          description: The filename of the generated document.
+          example: Invoice N°65-090-7669.pdf
+        format:
+          type: string
+          description: The format of the generated document.
+          example: .pdf
+        document_uri:
+          type: string
+          description: Download link of the generated document.
+          example: >-
+            https://firebasestorage.googleapis.com/v0/b/docugenerate.appspot.com/o/documents%2FdWaTxGd6FxT6RvqcAltC%2FInvoice%20N%C2%B065-090-7669.pdf?alt=media&token=38d5908d-99ad-4ad5-8e08-ba4415beed73
+      required:
+        - id
+        - template_id
+        - created
+        - name
+        - data_length
+        - filename
+        - format
+        - document_uri

@@ -1,0 +1,1294 @@
+openapi: 3.0.3
+info:
+  version: 1.0.0
+  title: Cat as a service (CATAAS)
+  description: >-
+    Cat as a service (CATAAS) is a REST API to spread peace and love (or not)
+    thanks to cats.
+servers:
+  - url: 'https://cataas.com'
+tags:
+  - name: Cats
+    description: Cataas API
+  - name: API
+    description: Public API
+  - name: Security
+    description: Security
+  - name: Admin
+    description: Admin API
+components:
+  securitySchemes:
+    jwt:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  schemas:
+    AdminCat:
+      required:
+        - file
+        - tags
+        - validated
+      type: object
+      properties:
+        _id:
+          type: string
+        validated:
+          type: boolean
+        file:
+          type: string
+        mimetype:
+          type: string
+        size:
+          type: number
+        tags:
+          type: array
+          items:
+            type: string
+          default: []
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+    Cat:
+      required:
+        - file
+        - tags
+      type: object
+      properties:
+        _id:
+          type: string
+        mimetype:
+          type: string
+        size:
+          type: number
+        tags:
+          type: array
+          items:
+            type: string
+          default: []
+    EditCat:
+      required:
+        - tags
+      type: object
+      properties:
+        tags:
+          type: array
+          items:
+            type: string
+          default: []
+    Error:
+      type: object
+      properties:
+        message:
+          type: string
+        code:
+          type: number
+    SignIn:
+      required:
+        - name
+        - password
+      type: object
+      properties:
+        username:
+          type: string
+        password:
+          type: string
+    SignUp:
+      required:
+        - name
+        - password
+        - mail
+        - secret
+      type: object
+      properties:
+        username:
+          type: string
+        password:
+          type: string
+        email:
+          type: string
+        secret:
+          type: string
+    Token:
+      type: object
+      properties:
+        token:
+          type: string
+paths:
+  /admin/cats:
+    get:
+      operationId: 'admin:cats:browse'
+      security:
+        - jwt: []
+      tags:
+        - Admin
+      description: Browse cats
+      parameters:
+        - name: limit
+          in: query
+          schema:
+            type: integer
+        - name: skip
+          in: query
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: List of cats
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  required:
+                    - file
+                    - tags
+                    - validated
+                  type: object
+                  properties:
+                    _id:
+                      type: string
+                    validated:
+                      type: boolean
+                    file:
+                      type: string
+                    mimetype:
+                      type: string
+                    size:
+                      type: number
+                    tags:
+                      type: array
+                      items:
+                        type: string
+                      default: []
+                    createdAt:
+                      type: string
+                      format: date-time
+                    updatedAt:
+                      type: string
+                      format: date-time
+  '/admin/cats/{id}/validate':
+    put:
+      operationId: 'admin:cats:validate'
+      security:
+        - jwt: []
+      tags:
+        - Admin
+      description: Activate cat
+      parameters:
+        - name: id
+          in: path
+          schema:
+            type: string
+          required: true
+      responses:
+        '200':
+          description: Cat activated
+        '404':
+          description: Cat not found
+  '/admin/cats/{id}':
+    patch:
+      operationId: 'admin:cats:edit'
+      security:
+        - jwt: []
+      tags:
+        - Admin
+      description: Activate cat
+      parameters:
+        - name: id
+          in: path
+          schema:
+            type: string
+          required: true
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                tags:
+                  type: string
+      responses:
+        '200':
+          description: Cat updated
+        '404':
+          description: Cat not found
+    delete:
+      operationId: 'admin:cats:delete'
+      security:
+        - jwt: []
+      tags:
+        - Admin
+      description: Delete cat
+      parameters:
+        - name: id
+          in: path
+          schema:
+            type: string
+          required: true
+      responses:
+        '203':
+          description: Cat deleted
+        '404':
+          description: Cat not found
+  /cat:
+    get:
+      operationId: 'cat:random'
+      tags:
+        - Cats
+      description: Get a random cat
+      parameters:
+        - name: type
+          in: query
+          schema:
+            type: string
+            enum:
+              - square
+              - medium
+              - small
+              - xsmall
+        - name: filter
+          in: query
+          schema:
+            type: string
+            enum:
+              - mono
+              - negate
+              - custom
+        - name: fit
+          in: query
+          schema:
+            type: string
+            enum:
+              - cover
+              - contain
+              - fill
+              - inside
+              - outside
+        - name: position
+          in: query
+          schema:
+            type: string
+            default: center
+            enum:
+              - top
+              - right top
+              - right
+              - right bottom
+              - bottom
+              - left bottom
+              - left
+              - left top
+              - center
+        - name: width
+          in: query
+          schema:
+            type: integer
+        - name: height
+          in: query
+          schema:
+            type: integer
+        - name: blur
+          in: query
+          schema:
+            type: integer
+        - name: r
+          in: query
+          schema:
+            type: integer
+          description: Red
+        - name: g
+          in: query
+          schema:
+            type: integer
+          description: Green
+        - name: b
+          in: query
+          schema:
+            type: integer
+          description: Blue
+        - name: brightness
+          in: query
+          schema:
+            type: number
+            format: float
+          description: Brightness multiplier
+        - name: saturation
+          in: query
+          schema:
+            type: number
+            format: float
+          description: Saturation multiplier
+        - name: hue
+          in: query
+          schema:
+            type: integer
+          description: Hue rotation in degrees
+        - name: lightness
+          in: query
+          schema:
+            type: integer
+          description: Lightness addend
+        - name: html
+          in: query
+          schema:
+            type: boolean
+        - name: json
+          in: query
+          schema:
+            type: boolean
+      responses:
+        '200':
+          description: Cat returned
+          content:
+            image/*:
+              schema:
+                type: string
+                format: binary
+            application/json:
+              schema:
+                required:
+                  - file
+                  - tags
+                type: object
+                properties:
+                  _id:
+                    type: string
+                  mimetype:
+                    type: string
+                  size:
+                    type: number
+                  tags:
+                    type: array
+                    items:
+                      type: string
+                    default: []
+  '/cat/{id}':
+    get:
+      operationId: 'cat:get'
+      tags:
+        - Cats
+      description: Get cat by id
+      parameters:
+        - name: id
+          in: path
+          schema:
+            type: string
+          required: true
+        - name: type
+          in: query
+          schema:
+            type: string
+            enum:
+              - square
+              - medium
+              - small
+              - xsmall
+        - name: filter
+          in: query
+          schema:
+            type: string
+            enum:
+              - mono
+              - negate
+              - custom
+        - name: fit
+          in: query
+          schema:
+            type: string
+            enum:
+              - cover
+              - contain
+              - fill
+              - inside
+              - outside
+        - name: position
+          in: query
+          schema:
+            type: string
+            default: center
+            enum:
+              - top
+              - right top
+              - right
+              - right bottom
+              - bottom
+              - left bottom
+              - left
+              - left top
+              - center
+        - name: width
+          in: query
+          schema:
+            type: integer
+        - name: height
+          in: query
+          schema:
+            type: integer
+        - name: blur
+          in: query
+          schema:
+            type: integer
+        - name: r
+          in: query
+          schema:
+            type: integer
+          description: Red
+        - name: g
+          in: query
+          schema:
+            type: integer
+          description: Green
+        - name: b
+          in: query
+          schema:
+            type: integer
+          description: Blue
+        - name: brightness
+          in: query
+          schema:
+            type: number
+            format: float
+          description: Brightness multiplier
+        - name: saturation
+          in: query
+          schema:
+            type: number
+            format: float
+          description: Saturation multiplier
+        - name: hue
+          in: query
+          schema:
+            type: integer
+          description: Hue rotation in degrees
+        - name: lightness
+          in: query
+          schema:
+            type: integer
+          description: Lightness addend
+        - name: html
+          in: query
+          schema:
+            type: boolean
+        - name: json
+          in: query
+          schema:
+            type: boolean
+      responses:
+        '200':
+          description: Cat returned
+          content:
+            image/*:
+              schema:
+                type: string
+                format: binary
+            application/json:
+              schema:
+                required:
+                  - file
+                  - tags
+                type: object
+                properties:
+                  _id:
+                    type: string
+                  mimetype:
+                    type: string
+                  size:
+                    type: number
+                  tags:
+                    type: array
+                    items:
+                      type: string
+                    default: []
+        '404':
+          description: Cat not found
+  '/cat/{tag}':
+    get:
+      operationId: 'cat:random:tag'
+      tags:
+        - Cats
+      description: Get random cat by tag
+      parameters:
+        - name: tag
+          in: path
+          schema:
+            type: string
+          required: true
+        - name: type
+          in: query
+          schema:
+            type: string
+            enum:
+              - square
+              - medium
+              - small
+              - xsmall
+        - name: filter
+          in: query
+          schema:
+            type: string
+            enum:
+              - mono
+              - negate
+              - custom
+        - name: fit
+          in: query
+          schema:
+            type: string
+            enum:
+              - cover
+              - contain
+              - fill
+              - inside
+              - outside
+        - name: position
+          in: query
+          schema:
+            type: string
+            default: center
+            enum:
+              - top
+              - right top
+              - right
+              - right bottom
+              - bottom
+              - left bottom
+              - left
+              - left top
+              - center
+        - name: width
+          in: query
+          schema:
+            type: integer
+        - name: height
+          in: query
+          schema:
+            type: integer
+        - name: blur
+          in: query
+          schema:
+            type: integer
+        - name: r
+          in: query
+          schema:
+            type: integer
+          description: Red
+        - name: g
+          in: query
+          schema:
+            type: integer
+          description: Green
+        - name: b
+          in: query
+          schema:
+            type: integer
+          description: Blue
+        - name: brightness
+          in: query
+          schema:
+            type: number
+            format: float
+          description: Brightness multiplier
+        - name: saturation
+          in: query
+          schema:
+            type: number
+            format: float
+          description: Saturation multiplier
+        - name: hue
+          in: query
+          schema:
+            type: integer
+          description: Hue rotation in degrees
+        - name: lightness
+          in: query
+          schema:
+            type: integer
+          description: Lightness addend
+        - name: html
+          in: query
+          schema:
+            type: boolean
+        - name: json
+          in: query
+          schema:
+            type: boolean
+      responses:
+        '200':
+          description: Cat returned
+          content:
+            image/*:
+              schema:
+                type: string
+                format: binary
+            application/json:
+              schema:
+                required:
+                  - file
+                  - tags
+                type: object
+                properties:
+                  _id:
+                    type: string
+                  mimetype:
+                    type: string
+                  size:
+                    type: number
+                  tags:
+                    type: array
+                    items:
+                      type: string
+                    default: []
+  '/cat/says/{text}':
+    get:
+      operationId: 'cat:random:text'
+      tags:
+        - Cats
+      description: Get random cat saying text
+      parameters:
+        - name: text
+          in: path
+          schema:
+            type: string
+          required: true
+        - name: font
+          in: query
+          schema:
+            type: string
+            default: Impact
+            enum:
+              - Andale Mono
+              - Impact
+              - Arial
+              - Arial Black
+              - Comic Sans MS
+              - Courier New
+              - Georgia
+              - Times New Roman
+              - Verdana
+              - Webdings
+        - name: fontSize
+          in: query
+          schema:
+            type: integer
+            default: 30
+        - name: fontColor
+          in: query
+          schema:
+            type: string
+            default: '#000'
+        - name: fontBackground
+          in: query
+          schema:
+            type: string
+            default: none
+        - name: type
+          in: query
+          schema:
+            type: string
+            enum:
+              - square
+              - medium
+              - small
+              - xsmall
+        - name: filter
+          in: query
+          schema:
+            type: string
+            enum:
+              - mono
+              - negate
+              - custom
+        - name: fit
+          in: query
+          schema:
+            type: string
+            enum:
+              - cover
+              - contain
+              - fill
+              - inside
+              - outside
+        - name: position
+          in: query
+          schema:
+            type: string
+            default: center
+            enum:
+              - top
+              - right top
+              - right
+              - right bottom
+              - bottom
+              - left bottom
+              - left
+              - left top
+              - center
+        - name: width
+          in: query
+          schema:
+            type: integer
+        - name: height
+          in: query
+          schema:
+            type: integer
+        - name: blur
+          in: query
+          schema:
+            type: integer
+        - name: r
+          in: query
+          schema:
+            type: integer
+          description: Red
+        - name: g
+          in: query
+          schema:
+            type: integer
+          description: Green
+        - name: b
+          in: query
+          schema:
+            type: integer
+          description: Blue
+        - name: brightness
+          in: query
+          schema:
+            type: number
+            format: float
+          description: Brightness multiplier
+        - name: saturation
+          in: query
+          schema:
+            type: number
+            format: float
+          description: Saturation multiplier
+        - name: hue
+          in: query
+          schema:
+            type: integer
+          description: Hue rotation in degrees
+        - name: lightness
+          in: query
+          schema:
+            type: integer
+          description: Lightness addend
+        - name: html
+          in: query
+          schema:
+            type: boolean
+        - name: json
+          in: query
+          schema:
+            type: boolean
+      responses:
+        '200':
+          description: Cat returned
+          content:
+            image/*:
+              schema:
+                type: string
+                format: binary
+            application/json:
+              schema:
+                required:
+                  - file
+                  - tags
+                type: object
+                properties:
+                  _id:
+                    type: string
+                  mimetype:
+                    type: string
+                  size:
+                    type: number
+                  tags:
+                    type: array
+                    items:
+                      type: string
+                    default: []
+  '/cat/{id}/says/{text}':
+    get:
+      operationId: 'cat:get:text'
+      tags:
+        - Cats
+      description: Get cat by id saying text
+      parameters:
+        - name: id
+          in: path
+          schema:
+            type: string
+          required: true
+        - name: text
+          in: path
+          schema:
+            type: string
+          required: true
+        - name: font
+          in: query
+          schema:
+            type: string
+            default: Impact
+            enum:
+              - Andale Mono
+              - Impact
+              - Arial
+              - Arial Black
+              - Comic Sans MS
+              - Courier New
+              - Georgia
+              - Times New Roman
+              - Verdana
+              - Webdings
+        - name: fontSize
+          in: query
+          schema:
+            type: integer
+            default: 30
+        - name: fontColor
+          in: query
+          schema:
+            type: string
+            default: '#000'
+        - name: fontBackground
+          in: query
+          schema:
+            type: string
+            default: none
+        - name: type
+          in: query
+          schema:
+            type: string
+            enum:
+              - square
+              - medium
+              - small
+              - xsmall
+        - name: filter
+          in: query
+          schema:
+            type: string
+            enum:
+              - mono
+              - negate
+              - custom
+        - name: fit
+          in: query
+          schema:
+            type: string
+            enum:
+              - cover
+              - contain
+              - fill
+              - inside
+              - outside
+        - name: position
+          in: query
+          schema:
+            type: string
+            default: center
+            enum:
+              - top
+              - right top
+              - right
+              - right bottom
+              - bottom
+              - left bottom
+              - left
+              - left top
+              - center
+        - name: width
+          in: query
+          schema:
+            type: integer
+        - name: height
+          in: query
+          schema:
+            type: integer
+        - name: blur
+          in: query
+          schema:
+            type: integer
+        - name: r
+          in: query
+          schema:
+            type: integer
+          description: Red
+        - name: g
+          in: query
+          schema:
+            type: integer
+          description: Green
+        - name: b
+          in: query
+          schema:
+            type: integer
+          description: Blue
+        - name: brightness
+          in: query
+          schema:
+            type: number
+            format: float
+          description: Brightness multiplier
+        - name: saturation
+          in: query
+          schema:
+            type: number
+            format: float
+          description: Saturation multiplier
+        - name: hue
+          in: query
+          schema:
+            type: integer
+          description: Hue rotation in degrees
+        - name: lightness
+          in: query
+          schema:
+            type: integer
+          description: Lightness addend
+        - name: html
+          in: query
+          schema:
+            type: boolean
+        - name: json
+          in: query
+          schema:
+            type: boolean
+      responses:
+        '200':
+          description: Cat returned
+          content:
+            image/*:
+              schema:
+                type: string
+                format: binary
+            application/json:
+              schema:
+                required:
+                  - file
+                  - tags
+                type: object
+                properties:
+                  _id:
+                    type: string
+                  mimetype:
+                    type: string
+                  size:
+                    type: number
+                  tags:
+                    type: array
+                    items:
+                      type: string
+                    default: []
+        '404':
+          description: Cat not found
+  '/cat/{tag}/says/{text}':
+    get:
+      operationId: 'cat:random:tag:text'
+      tags:
+        - Cats
+      description: Get random cat by tag saying text
+      parameters:
+        - name: tag
+          in: path
+          schema:
+            type: string
+          required: true
+        - name: text
+          in: path
+          schema:
+            type: string
+          required: true
+        - name: font
+          in: query
+          schema:
+            type: string
+            default: Impact
+            enum:
+              - Andale Mono
+              - Impact
+              - Arial
+              - Arial Black
+              - Comic Sans MS
+              - Courier New
+              - Georgia
+              - Times New Roman
+              - Verdana
+              - Webdings
+        - name: fontSize
+          in: query
+          schema:
+            type: integer
+            default: 30
+        - name: fontColor
+          in: query
+          schema:
+            type: string
+            default: '#000'
+        - name: fontBackground
+          in: query
+          schema:
+            type: string
+            default: none
+        - name: type
+          in: query
+          schema:
+            type: string
+            enum:
+              - square
+              - medium
+              - small
+              - xsmall
+        - name: filter
+          in: query
+          schema:
+            type: string
+            enum:
+              - mono
+              - negate
+              - custom
+        - name: fit
+          in: query
+          schema:
+            type: string
+            enum:
+              - cover
+              - contain
+              - fill
+              - inside
+              - outside
+        - name: position
+          in: query
+          schema:
+            type: string
+            default: center
+            enum:
+              - top
+              - right top
+              - right
+              - right bottom
+              - bottom
+              - left bottom
+              - left
+              - left top
+              - center
+        - name: width
+          in: query
+          schema:
+            type: integer
+        - name: height
+          in: query
+          schema:
+            type: integer
+        - name: blur
+          in: query
+          schema:
+            type: integer
+        - name: r
+          in: query
+          schema:
+            type: integer
+          description: Red
+        - name: g
+          in: query
+          schema:
+            type: integer
+          description: Green
+        - name: b
+          in: query
+          schema:
+            type: integer
+          description: Blue
+        - name: brightness
+          in: query
+          schema:
+            type: number
+            format: float
+          description: Brightness multiplier
+        - name: saturation
+          in: query
+          schema:
+            type: number
+            format: float
+          description: Saturation multiplier
+        - name: hue
+          in: query
+          schema:
+            type: integer
+          description: Hue rotation in degrees
+        - name: lightness
+          in: query
+          schema:
+            type: integer
+          description: Lightness addend
+        - name: html
+          in: query
+          schema:
+            type: boolean
+        - name: json
+          in: query
+          schema:
+            type: boolean
+      responses:
+        '200':
+          description: Cat returned
+          content:
+            image/*:
+              schema:
+                type: string
+                format: binary
+            application/json:
+              schema:
+                required:
+                  - file
+                  - tags
+                type: object
+                properties:
+                  _id:
+                    type: string
+                  mimetype:
+                    type: string
+                  size:
+                    type: number
+                  tags:
+                    type: array
+                    items:
+                      type: string
+                    default: []
+  /api/cats:
+    get:
+      operationId: 'api:cats'
+      tags:
+        - API
+      description: Will return all cats
+      parameters:
+        - name: limit
+          in: query
+          schema:
+            type: number
+            default: 10
+        - name: skip
+          in: query
+          schema:
+            type: number
+            default: 0
+        - name: tags
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: List of cats
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  required:
+                    - file
+                    - tags
+                  type: object
+                  properties:
+                    _id:
+                      type: string
+                    mimetype:
+                      type: string
+                    size:
+                      type: number
+                    tags:
+                      type: array
+                      items:
+                        type: string
+                      default: []
+  /api/tags:
+    get:
+      operationId: 'api:tags'
+      tags:
+        - API
+      description: Will return all tags
+      responses:
+        '200':
+          description: List of tags
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: string
+  /api/count:
+    get:
+      operationId: 'api:count'
+      tags:
+        - API
+      description: Count how many cat
+      responses:
+        '200':
+          description: List of tags
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  count:
+                    type: number
+  /security/sign-in:
+    post:
+      operationId: 'api:security:sign-in'
+      tags:
+        - Security
+      requestBody:
+        content:
+          application/json:
+            schema:
+              required:
+                - name
+                - password
+              type: object
+              properties:
+                username:
+                  type: string
+                password:
+                  type: string
+      responses:
+        '200':
+          description: Authenticated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  token:
+                    type: string
+        '401':
+          description: Unauthorized
+  /security/sign-up:
+    post:
+      operationId: 'api:security:sign-up'
+      tags:
+        - Security
+      requestBody:
+        content:
+          application/json:
+            schema:
+              required:
+                - name
+                - password
+                - mail
+                - secret
+              type: object
+              properties:
+                username:
+                  type: string
+                password:
+                  type: string
+                email:
+                  type: string
+                secret:
+                  type: string
+      responses:
+        '201':
+          description: Registered
+        '400':
+          description: Bad request
