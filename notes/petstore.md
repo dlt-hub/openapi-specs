@@ -56,7 +56,8 @@ Customer:
 
 ## Primary keys
 
->[!NOTE] Some responses schemas like addresses don't have ID fields
+>[!NOTE]
+> Some responses schemas like addresses don't have ID fields
 
 Type for primary key is `Int64` and in the response we can simply extract it by `id` field
 
