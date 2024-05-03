@@ -13,3 +13,4 @@ Links maintained here:
 | Airtable        | [Link](https://github.com/TheF1rstPancake/AirtableOpenAPICustomBlock/blob/master/frontend/airtable_to_openapi.js) |
 | Aladtec         | [Link](https://developer.aladtec.com/downloads/json_api_v3_openapi_spec.yml)                                      |
 | Petstore        | [Link](https://petstore3.swagger.io/)                                                                             |
+| Catfacts        | [Link](https://catfact.ninja/)                                                                             |
