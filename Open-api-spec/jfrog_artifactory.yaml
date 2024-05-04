@@ -1,0 +1,356 @@
+swagger: '2.0'
+info:
+  description: The sections below provide a listing of useful REST resources exposed by Artifactory.
+  version: '2.0'
+  title: Artifactory
+host: artifactory.com
+basePath: /artifactory
+tags:
+  - name: repositories
+    description: Get info on existing repositories 
+  - name: artifacts
+    description: Get info on existing artifacts/packages
+  - name: builds
+    description: ''
+schemes:
+  - https
+  - http
+paths:
+  '/api/v2/security/permissions'
+    get:
+      tags:
+        - builds
+      summary: Get Permission Targets
+      description: Get the permission targets list for repository and build permission targets. Requires an admin user or a user with Manage permission on permission target
+      produces:
+        - application/json
+      parameters:
+        - name: Authorization
+          in: header
+          description: 'Bearer <token>'
+          required: true
+          type: string
+  '/api/v2/security/permissions/{permissionTargetName}'
+    
+  '/{repoKey}/{filePath}':
+    get:
+      tags:
+        - artifacts
+      summary: Get Artifact
+      description: Retrieves an artifact from the specified destination. Requires a user with 'read' permission (can be anonymous)
+      produces:
+        - application/json
+      parameters:
+        - name: repoKey
+          in: path
+          description: Name of Repo
+          required: true
+          type: string
+        - name: filePath
+          in: path
+          description: Path to artifact folder
+          required: true
+          type: string
+      responses:
+        '200':
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/ArtifactFolders'
+    put:
+      tags:
+        - artifacts
+      summary: Deploy Artifact
+      description: Deploy an artifact to the specified destination. Requires a user with 'deploy' permissions (can be anonymous)
+      produces:
+        - application/json
+      parameters:
+        - name: repoKey
+          in: path
+          description: Name of repo
+          required: true
+          type: string
+        - name: filePath
+          in: path
+          description: Path to artifact
+          required: true
+          type: string
+      responses:
+        '200':
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/ArtifactFolders'
+  /api/search/artifact:
+    get:
+      tags:
+        - artifacts
+      summary: Search Artifact
+      description: Artifact search by part of file name. Searches return file info URIs. Can limit search to specific repositories (local or caches).
+      produces:
+        - application/json
+      parameters:
+        - name: name
+          in: query
+          description: Name of artifact
+          required: true
+          type: string
+        - name: repos
+          in: query
+          description: Repo names comma separated
+          required: false
+          type: string
+      responses:
+        '200':
+          description: OK
+          schema:
+            type: object
+            properties:
+              results:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    uri:
+                      type: string
+  '/api/storage/{repoKey}/{folderPath}':
+    get:
+      tags:
+        - artifacts
+      summary: Get Folder Details
+      description: 'For virtual use, the virtual repository returns the unified children. Supported by local, local-cached and virtual repositories. Requires a privileged user (can be anonymous)'
+      produces:
+        - application/json
+      parameters:
+        - name: repoKey
+          in: path
+          description: Name of Repo
+          required: true
+          type: string
+        - name: folderPath
+          in: path
+          description: Path to artifact folder
+          required: true
+          type: string
+        - in: query
+          name: lastModified
+          required: false
+          enum:
+            - true
+          allowEmptyValue: true
+      responses:
+        '200':
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/ArtifactFolders'
+  '/api/storage/{repoKey}/{filePath}':
+    get:
+      tags:
+        - artifacts
+      summary: Get File Details
+      description: 'For virtual use the virtual repository returns the resolved file. Supported by local, local-cached and virtual repositories. Requires a privileged user (can be anonymous)'
+      produces:
+        - application/json
+      parameters:
+        - name: repoKey
+          in: path
+          description: Name of Repo
+          required: true
+          type: string
+        - name: filePath
+          in: path
+          description: Path to artifact including file extension
+          required: true
+          type: string
+      responses:
+        '200':
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/Artifacts'
+  '/api/storage/{repoKey}/{itemPath}':
+    get:
+      tags:
+        - artifacts
+      summary: Get Last Modified File
+      description: 'Retrieve the last modified item at the given path. If the given path is a folder, the latest last modified item is searched for recursively. Supported by local and local-cached repositories. Requires a valid user with deploy permissions'
+      operationId: ''
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - in: path
+          type: string
+          name: repoKey
+          description: Name of repo
+          required: true
+        - in: path
+          type: string
+          name: itemPath
+          description: Path to folder of items
+          required: true
+        - in: query
+          type: string
+          name: lastModified
+          required: false
+          enum:
+            - true
+          allowEmptyValue: true
+      responses:
+        '200':
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/ArtifactsLastModified'
+        '405':
+          description: Invalid input
+      security:
+        - petstore_auth:
+            - 'write:pets'
+            - 'read:pets'
+  /api/repositories:
+    get:
+      tags:
+        - repositories
+      summary: Get list of repos
+      description: Multiple status values can be provided with comma separated strings
+      operationId: findRepository
+      produces:
+        - application/json
+      parameters:
+        - name: type
+          in: query
+          description: repository types
+          required: false
+          type: string
+          items:
+            type: string
+            enum:
+              - local
+              - remote
+              - virtual
+            default: all
+          collectionFormat: multi
+        - name: packageType
+          in: query
+          description: package types
+          required: false
+          type: string
+          items:
+            type: string
+            enum:
+              - maven
+              - gradle
+              - ivy
+              - generic
+      responses:
+        '200':
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/Repositories'
+        '401':
+          description: 'Bad props auth token: jkweidofjslkdfsd'
+definitions:
+  Artifacts:
+    type: object
+    properties:
+      repo:
+        type: string
+        example: libs-release
+      path:
+        type: string
+        example: /com/homedepot/ci/CI-Python/v1.244.0/unittest/unittest.tar
+      created:
+        type: string
+      createdBy:
+        type: string
+      lastModified:
+        type: string
+      modifiedBy:
+        type: string
+      lastUpdated:
+        type: string
+      downloadUri:
+        type: string
+      mimeType:
+        type: string
+      size:
+        type: string
+      checksums:
+        type: object
+        properties:
+          sha1:
+            type: string
+          md5:
+            type: string
+          sha256:
+            type: string
+      originalChecksums:
+        type: object
+        properties:
+          sha256:
+            type: string
+      uri:
+        type: string
+  ArtifactsLastModified:
+    type: object
+    properties:
+      uri:
+        type: string
+      lastModified:
+        type: string
+  ArtifactFolders:
+    type: object
+    properties:
+      repo:
+        type: string
+        example: libs-release
+      path:
+        type: string
+        example: /com/homedepot/ci/CI-Python
+      created:
+        type: string
+      createdBy:
+        type: string
+      lastModified:
+        type: string
+      modifiedBy:
+        type: string
+      lastUpdated:
+        type: string
+      children:
+        type: array
+        items:
+          type: object
+          properties:
+            uri:
+              type: string
+            folder:
+              type: boolean
+      uri:
+        type: string
+  Repositories:
+    type: object
+    required:
+      - name
+      - photoUrls
+    properties:
+      key:
+        type: string
+        example: libs-release-local
+      description:
+        type: string
+      type:
+        type: string
+        example: LOCAL
+      url:
+        type: string
+      packageType:
+        type: string
+        example: Maven
+externalDocs:
+  description: Find out more about Artifactory REST API
+  url: 'https://www.jfrog.com/confluence/display/RTF/Artifactory+REST+API'

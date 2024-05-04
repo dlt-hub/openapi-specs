@@ -1,0 +1,2920 @@
+openapi: 3.0.3
+info:
+  title: Coinbase International Exchange REST Specification
+  version: "1.0"
+servers:
+- url: 'https://api.international.coinbase.com'
+paths:
+  /api/v1/assets:
+    get:
+      tags:
+      - Assets
+      summary: List assets
+      operationId: getAssets
+      description: Returns a list of all supported assets.
+      responses:
+        '200':
+          description: Asset list
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Asset_v1'
+  /api/v1/assets/{asset}:
+    get:
+      tags:
+      - Assets
+      summary: Get asset details
+      operationId: getAsset
+      description: Retrieves information for a specific asset.
+      parameters:
+      - name: asset
+        in: path
+        description: Identifies the asset by name (e.g., `BTC`), UUID (e.g., `291efb0f-2396-4d41-ad03-db3b2311cb2c`), or asset ID (e.g., `1482439423963469`)
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Asset found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Asset_v1'
+        '400':
+          description: Invalid attribute
+  /api/v1/assets/{asset}/networks:
+    get:
+      tags:
+      - Assets
+      summary: Get supported networks per asset
+      operationId: getAssetNetworks
+      description: Returns a list of supported networks and network information for a specific asset.
+      parameters:
+      - name: asset
+        in: path
+        description: Identifies the asset by name (e.g., `BTC`), UUID (e.g., `291efb0f-2396-4d41-ad03-db3b2311cb2c`), or asset ID (e.g., `1482439423963469`)
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Asset found
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/AssetNetwork_v1'
+        '400':
+          description: Invalid attribute
+  /api/v1/instruments:
+    get:
+      tags:
+      - Instruments
+      summary: List instruments
+      operationId: getInstruments
+      description: Returns all of the instruments available for trading.
+      responses:
+        '200':
+          description: Instrument list
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Instrument_v1'
+  /api/v1/instruments/{instrument}:
+    get:
+      tags:
+      - Instruments
+      summary: Get instrument details
+      operationId: getInstrument
+      description: Retrieves market information for a specific instrument.
+      parameters:
+      - name: instrument
+        in: path
+        description: Identifies the instrument by name (e.g., `BTC-USDC`), UUID (e.g., `ce55a827-f04a-45c0-9d9b-8bbdb9b48065`), or instrument ID (e.g., `7149252043835013`)
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Instrument
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Instrument_v1'
+        '400':
+          description: Invalid attribute
+  /api/v1/instruments/{instrument}/quote:
+    get:
+      tags:
+      - Instruments
+      summary: Get quote per instrument
+      operationId: getInstrumentQuote
+      description: Retrieves the current quote for a specific instrument.
+      parameters:
+      - name: instrument
+        in: path
+        description: Identifies the instrument by name (e.g., `BTC-USDC`), UUID (e.g., `ce55a827-f04a-45c0-9d9b-8bbdb9b48065`), or instrument ID (e.g., `7149252043835013`)
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Instrument list
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InstrumentQuote_v1'
+        '400':
+          description: Invalid attribute
+  /api/v1/instruments/volumes/daily:
+    get:
+      tags:
+        - Instruments
+      summary: Get daily trading volumes
+      operationId: getInstrumentVolumesDaily
+      description: Retrieves the trading volumes for each instrument separated by day.
+      parameters:
+        - name: instruments
+          in: query
+          description: Identifies the instruments by name in a comma separated list (e.g., `BTC-PERP,ETH-PERP`)
+          required: true
+          schema:
+            type: string
+        - name: result_limit
+          in: query
+          description: The number of results to return (defaults to 60 with a max supported value of 100)
+          required: false
+          schema:
+            type: integer
+            example: 30
+        - name: result_offset
+          in: query
+          description: The number of results from the beginning to skip past
+          required: false
+          schema:
+            type: integer
+            example: 5
+        - name: time_from
+          in: query
+          description: The first date to include data from in ISO 8601 timestamp format (e.g. `2024-03-01T00:00:00Z`)
+          required: false
+          schema:
+            type: string
+        - name: show_other
+          in: query
+          description: Return an `OTHER` bucket in the instrument list containing the volume of all instruments filtered out by the `instruments` query parameter
+          required: false
+          schema:
+            type: boolean
+      responses:
+        '200':
+          description: Instrument list
+          content:
+            application/json:
+              schema:
+                properties:
+                  pagination:
+                    $ref: '#/components/schemas/PaginationBase_v1'
+                  results:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/InstrumentDailyVolume_v1'
+        '400':
+          description: Invalid attribute
+  /api/v1/instruments/{instrument}/candles:
+    get:
+      tags:
+        - Instruments
+      summary: Get aggregated candles data per instrument
+      operationId: getInstrumentCandles
+      description: Retrieves a list of aggregated candles data for a given instrument, granularity and time range
+      parameters:
+        - name: instrument
+          in: path
+          description: Identifies the instrument by name (e.g., `BTC-PERP`)
+          required: true
+          schema:
+            type: string
+        - name: granularity
+          in: query
+          description: The aggregation period of the candles data. End timestamp in ISO 8601 timestamp format (e.g. 2024-03-01T00:00:00Z).
+          required: true
+          type: string
+          enum: [ "ONE_DAY", "SIX_HOUR", "TWO_HOUR", "ONE_HOUR", "THIRTY_MINUTE", "FIFTEEN_MINUTE", "FIVE_MINUTE", "ONE_MINUTE" ]
+        - name: start
+          in: query
+          description: Start timestamp in ISO 8601 timestamp format (e.g. `2024-03-01T00:00:00Z`)
+          required: true
+          schema:
+            type: string
+        - name: end
+          in: query
+          description: End timestamp in ISO 8601 timestamp format (e.g. `2024-03-01T00:00:00Z`)
+          required: false
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Instrument list
+          content:
+            application/json:
+              schema:
+                properties:
+                  aggregations:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/InstrumentCandlesAggregation_v1'
+        '400':
+          description: Invalid attribute
+  /api/v1/instruments/{instrument}/funding:
+    get:
+      tags:
+      - Instruments
+      summary: Get historical funding rates
+      operationId: getInstrumentFunding
+      description: Retrieves the historical funding rates for a specific instrument.
+      parameters:
+      - name: instrument
+        in: path
+        description: Identifies the instrument by name (e.g., `BTC-PERP`), UUID (e.g., `ce55a827-f04a-45c0-9d9b-8bbdb9b48065`), or instrument ID (e.g., `7149252043835013`)
+        required: true
+        schema:
+          type: string
+      - name: result_limit
+        in: query
+        description: The number of results to return (defaults to 25 with a max supported value of 100)
+        required: false
+        schema:
+          type: integer
+          example: 30
+      - name: result_offset
+        in: query
+        description: The number of results from the beginning to skip past
+        required: false
+        schema:
+          type: integer
+          example: 50
+      responses:
+        '200':
+          description: Funding Rates list
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InstrumentFunding_v1'
+        '400':
+          description: Invalid attribute
+  /api/v1/orders:
+    post:
+      tags:
+      - Orders
+      summary: Create order
+      operationId: createOrder
+      description: Creates a new order.
+      parameters:
+      - $ref: "#/components/parameters/auth_client_id"
+      - $ref: "#/components/parameters/auth_timestamp"
+      - $ref: "#/components/parameters/auth_passphrase"
+      - $ref: "#/components/parameters/auth_signature"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+              - client_order_id
+              - side
+              - size
+              - tif
+              - type
+              - instrument
+              properties:
+                client_order_id:
+                  description: "A unique identifier assigned by the client. Must meet one of the following constraints:\n - 18 characters long using all ASCII characters\n - 20 characters long using alphanumeric characters and dash (-)\n - 31 characters long using hexadecimal characters (0-9, a-f, lowercase and no preceding 0s)\n - A UUID using standard hyphenation and all lowercase (e.g., 36a9d3ee-32b7-460e-979a-121735af4824)"
+                  type: string
+                side:
+                  $ref: "#/components/schemas/OrderSide"
+                size:
+                  description: The amount in base asset units
+                  type: string
+                tif:
+                  allOf:
+                  - $ref: "#/components/schemas/TimeInForce"
+                  - description: The time in force applied to an order. A Good Till Cancel (GTC) or Good Till Time (GTT) can last up to 30 days while an Immediate Or Cancel (IOC) attempts to fill as much of the order as possible and/or cancels immediately when no resting orders meet or improve the order's price limit. Required for all order types except market orders.
+                instrument:
+                  description: The name, ID, or UUID of the instrument the order wants to transact
+                  type: string
+                type:
+                  allOf:
+                  - $ref: "#/components/schemas/OrderType"
+                  - description: The type of order being submitted
+                price:
+                  description: The max or min price limit in quote asset units to buy or sell at (respectively). Only used for limit and stop limit order types.
+                  type: string
+                stop_price:
+                  description: The market price that activates a stop order
+                  type: string
+                stop_limit_price:
+                    description: The limit price at which the TP/SL stop leg order will be placed. Only used for TP/SL order type.
+                    type: string
+                expire_time:
+                  description: The expiration time required for orders with the time in force set to GTT. Must not go beyond 30 days of the current time. Uses ISO-8601 format (e.g., 2023-03-16T23:59:53Z).
+                  type: string
+                  format: date-time
+                portfolio:
+                  description: The ID or UUID of the portfolio the order belongs to (uses default portfolio if not defined)
+                  type: string
+                user:
+                  description: The ID or UUID of the user the order belongs to (only used and required for brokers)
+                  type: string
+                stp_mode:
+                  allOf:
+                  - $ref: "#/components/schemas/SelfTradePreventionMode"
+                  - description: Specifies the behavior for self match handling. None disables the functionality, new cancels the newest order, and both cancels both orders.
+                post_only:
+                  description: Only submit the order if it will rest on the order book
+                  type: boolean
+      responses:
+        '200':
+          description: Order submitted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrderResult_v1'
+        '400':
+          description: Invalid attribute
+      security:
+      - signature: []
+    get:
+      tags:
+      - Orders
+      summary: List open orders
+      operationId: getOrders
+      description: Returns a list of active orders resting on the order book matching the requested criteria. Does not return any rejected, cancelled, or fully filled orders as they are not active.
+      parameters:
+      - $ref: "#/components/parameters/auth_client_id"
+      - $ref: "#/components/parameters/auth_timestamp"
+      - $ref: "#/components/parameters/auth_passphrase"
+      - $ref: "#/components/parameters/auth_signature"
+      - name: portfolio
+        in: query
+        required: false
+        description: Identifies the portfolio by UUID (e.g., `892e8c7c-e979-4cad-b61b-55a197932cf1`) or portfolio ID (e.g., `5189861793641175`)
+        schema:
+          type: string
+      - name: instrument
+        in: query
+        required: false
+        description: Identifies the instrument by name (e.g., `BTC-USDC`), UUID (e.g., `ce55a827-f04a-45c0-9d9b-8bbdb9b48065`), or instrument ID (e.g., `7149252043835013`)
+        schema:
+          type: string
+      - name: instrument_type
+        in: query
+        required: false
+        description: "Identifies the instruments by type . Allowed values: SPOT, PERPETUAL_FUTURE"
+        schema:
+          type: string
+      - name: client_order_id
+        in: query
+        required: false
+        description: The client order ID that was used when the order was created
+        schema:
+          type: string
+      - name: event_type
+        in: query
+        required: false
+        description: "The most recent type of event that happened to the order. Allowed values: NEW, TRADE, REPLACED"
+        schema:
+          $ref: "#/components/schemas/OrderEventType"
+      - name: instrument_type
+        in: query
+        required: false
+        description: Filter results by instrument type.
+        type: string
+        enum: ["SPOT", "PERPETUAL_FUTURE"]
+      - $ref: "#/components/parameters/ref_datetime"
+      - $ref: "#/components/parameters/result_limit"
+      - $ref: "#/components/parameters/result_offset"
+      responses:
+        '200':
+          description: Order matches found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  pagination:
+                    $ref: '#/components/schemas/Pagination_v1'
+                  results:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/OrderResult_v1'
+        '400':
+          description: Invalid attribute
+      security:
+      - signature: []
+    delete:
+      tags:
+      - Orders
+      summary: Cancel orders
+      operationId: cancelOrders
+      description: Cancels all orders matching the requested criteria.
+      parameters:
+      - $ref: "#/components/parameters/auth_client_id"
+      - $ref: "#/components/parameters/auth_timestamp"
+      - $ref: "#/components/parameters/auth_passphrase"
+      - $ref: "#/components/parameters/auth_signature"
+      - name: portfolio
+        in: query
+        required: true
+        description: Identifies the portfolio by UUID (e.g., `892e8c7c-e979-4cad-b61b-55a197932cf1`) or portfolio ID (e.g., `5189861793641175`)
+        schema:
+          type: string
+      - name: instrument
+        in: query
+        required: false
+        description: Identifies the instrument by name (e.g., `BTC-USDC`), UUID (e.g., `ce55a827-f04a-45c0-9d9b-8bbdb9b48065`), or instrument ID (e.g., `7149252043835013`)
+        schema:
+          type: string
+      - name: side
+        in: query
+        required: false
+        description: Identifies the side by name (e.g., `BUY`, `SELL`)
+      - name: instrument_type
+        in: query
+        required: false
+        description: "Identifies the instruments by type . Allowed values: SPOT, PERPETUAL_FUTURE"
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Order submitted
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/OrderResult_v1'
+        '400':
+          description: Invalid attribute
+      security:
+      - signature: []
+  /api/v1/orders/{id}:
+    put:
+      tags:
+      - Orders
+      summary: Modify open order
+      operationId: modifyOrder
+      description: Modifies an open order.
+      parameters:
+      - $ref: "#/components/parameters/auth_client_id"
+      - $ref: "#/components/parameters/auth_timestamp"
+      - $ref: "#/components/parameters/auth_passphrase"
+      - $ref: "#/components/parameters/auth_signature"
+      - name: id
+        in: path
+        required: true
+        description: The exchange order ID or Client Order ID of the order being modified
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+              - client_order_id
+              - portfolio
+              properties:
+                client_order_id:
+                  description: "A unique identifier assigned by the client to the modified order. Must meet one of the following constraints:\n - 18 characters long using all ASCII characters\n - 20 characters long using alphanumeric characters and dash (-)\n - 31 characters long using hexadecimal characters (0-9, a-f, lowercase and no preceding 0s)\n - A UUID using standard hyphenation and all lowercase (e.g., 36a9d3ee-32b7-460e-979a-121735af4824)"
+                  type: string
+                  format: uuid
+                portfolio:
+                  description: Identifies the portfolio by UUID (e.g., `892e8c7c-e979-4cad-b61b-55a197932cf1`) or portfolio ID (e.g., `5189861793641175`); must match the original order referenced in the ID of the path
+                  type: string
+                  format: uuid
+                price:
+                  description: The max or min price limit in quote asset units to buy or sell at (respectively). Only used for limit and stop limit order types.
+                  type: string
+                stop_price:
+                  description: The market price that activates a stop order
+                  type: string
+                size:
+                  description: The amount in base asset units
+                  type: string
+      responses:
+        '200':
+          description: Order modified
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrderResult_v1'
+        '400':
+          description: Invalid attribute
+      security:
+      - signature: []
+    get:
+      tags:
+      - Orders
+      summary: Get order details
+      operationId: getOrder
+      description: Retrieves a single order. The order retrieved can be either active or inactive.
+      parameters:
+      - $ref: "#/components/parameters/auth_client_id"
+      - $ref: "#/components/parameters/auth_timestamp"
+      - $ref: "#/components/parameters/auth_passphrase"
+      - $ref: "#/components/parameters/auth_signature"
+      - name: id
+        in: path
+        description: The exchange order ID of the order (not the client order ID)
+        required: true
+        schema:
+          type: string
+      - name: portfolio
+        in: query
+        required: true
+        description: Identifies the portfolio by UUID (e.g., `892e8c7c-e979-4cad-b61b-55a197932cf1`) or portfolio ID (e.g., `5189861793641175`)
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Order found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrderResult_v1'
+        '400':
+          description: Invalid attribute
+      security:
+      - signature: []
+    delete:
+      tags:
+      - Orders
+      summary: Cancel order
+      operationId: cancelOrder
+      description: Cancels a single open order.
+      parameters:
+      - $ref: "#/components/parameters/auth_client_id"
+      - $ref: "#/components/parameters/auth_timestamp"
+      - $ref: "#/components/parameters/auth_passphrase"
+      - $ref: "#/components/parameters/auth_signature"
+      - name: id
+        in: path
+        description: The exchange order ID or Client Order ID of the order
+        required: true
+        schema:
+          type: string
+      - name: portfolio
+        in: query
+        required: true
+        description: Identifies the portfolio by UUID (e.g., `892e8c7c-e979-4cad-b61b-55a197932cf1`) or portfolio ID (e.g., `5189861793641175`)
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Order canceled
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrderResult_v1'
+        '400':
+          description: Invalid attribute
+      security:
+      - signature: []
+  /api/v1/portfolios:
+    get:
+      tags:
+      - Portfolios
+      summary: List all user portfolios
+      operationId: getPortfolios
+      description: Returns all of the user's portfolios.
+      parameters:
+      - $ref: "#/components/parameters/auth_client_id"
+      - $ref: "#/components/parameters/auth_timestamp"
+      - $ref: "#/components/parameters/auth_passphrase"
+      - $ref: "#/components/parameters/auth_signature"
+      responses:
+        '200':
+          description: Portfolio list
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Portfolio_v1'
+        '400':
+          description: Invalid attribute
+      security:
+      - signature: []
+    post:
+      tags:
+      - Portfolios
+      summary: Create portfolio
+      operationId: createPortfolio
+      description: Create a new portfolio. Request will fail if no name is provided or if user already has max number of portfolios. Max number of portfolios is 20.
+      parameters:
+      - $ref: "#/components/parameters/auth_client_id"
+      - $ref: "#/components/parameters/auth_timestamp"
+      - $ref: "#/components/parameters/auth_passphrase"
+      - $ref: "#/components/parameters/auth_signature"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+              - name
+              properties:
+                name:
+                  description: The name of the portfolio
+                  type: string
+      responses:
+        '200':
+          description: New portfolio created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Portfolio_v1'
+        '400':
+          description: Invalid attribute
+      security:
+      - signature: []
+  /api/v1/portfolios/{portfolio}:
+    get:
+      tags:
+      - Portfolios
+      summary: Get user portfolio
+      operationId: getPortfolio
+      description: Returns the user's specified portfolio.
+      parameters:
+      - $ref: "#/components/parameters/auth_client_id"
+      - $ref: "#/components/parameters/auth_timestamp"
+      - $ref: "#/components/parameters/auth_passphrase"
+      - $ref: "#/components/parameters/auth_signature"
+      - name: portfolio
+        in: path
+        description: Identifies the portfolio by UUID (e.g., `892e8c7c-e979-4cad-b61b-55a197932cf1`) or portfolio ID (e.g., `5189861793641175`)
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Portfolio
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Portfolio_v1'
+        '400':
+          description: Invalid attribute
+      security:
+      - signature: []
+    put:
+      tags:
+      - Portfolios
+      summary: Update portfolio
+      operationId: updatePortfolio
+      description: Update existing user portfolio.
+      parameters:
+      - $ref: "#/components/parameters/auth_client_id"
+      - $ref: "#/components/parameters/auth_timestamp"
+      - $ref: "#/components/parameters/auth_passphrase"
+      - $ref: "#/components/parameters/auth_signature"
+      - name: portfolio
+        in: path
+        description: Identifies the portfolio by UUID (e.g., `892e8c7c-e979-4cad-b61b-55a197932cf1`) or portfolio ID (e.g., `5189861793641175`)
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+              - name
+              properties:
+                name:
+                  description: A unique name for the portfolio
+                  type: string
+      responses:
+        '200':
+          description: Portfolio
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Portfolio_v1'
+        '400':
+          description: Invalid attribute
+      security:
+      - signature: []
+  /api/v1/portfolios/{portfolio}/detail:
+    get:
+      tags:
+      - Portfolios
+      summary: Get portfolio details
+      operationId: getPortfolioDetail
+      description: Retrieves the summary, positions, and balances of a portfolio.
+      parameters:
+      - $ref: "#/components/parameters/auth_client_id"
+      - $ref: "#/components/parameters/auth_timestamp"
+      - $ref: "#/components/parameters/auth_passphrase"
+      - $ref: "#/components/parameters/auth_signature"
+      - name: portfolio
+        in: path
+        description: Identifies the portfolio by UUID (e.g., `892e8c7c-e979-4cad-b61b-55a197932cf1`) or portfolio ID (e.g., `5189861793641175`)
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Portfolio information
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PortfolioDetail_v1'
+        '400':
+          description: Invalid attribute
+      security:
+      - signature: []
+  /api/v1/portfolios/{portfolio}/summary:
+    get:
+      tags:
+      - Portfolios
+      summary: Get portfolio summary
+      operationId: getPortfolioSummary
+      description: Retrieves the high level overview of a portfolio.
+      parameters:
+      - $ref: "#/components/parameters/auth_client_id"
+      - $ref: "#/components/parameters/auth_timestamp"
+      - $ref: "#/components/parameters/auth_passphrase"
+      - $ref: "#/components/parameters/auth_signature"
+      - name: portfolio
+        in: path
+        description: Identifies the portfolio by UUID (e.g., `892e8c7c-e979-4cad-b61b-55a197932cf1`) or portfolio ID (e.g., `5189861793641175`)
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Portfolio information
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PortfolioSummary_v1'
+        '400':
+          description: Invalid attribute
+      security:
+      - signature: []
+  /api/v1/portfolios/{portfolio}/balances:
+    get:
+      tags:
+      - Portfolios
+      summary: List portfolio balances
+      operationId: getPortfolioBalances
+      description: Returns all of the balances for a given portfolio.
+      parameters:
+      - $ref: "#/components/parameters/auth_client_id"
+      - $ref: "#/components/parameters/auth_timestamp"
+      - $ref: "#/components/parameters/auth_passphrase"
+      - $ref: "#/components/parameters/auth_signature"
+      - name: portfolio
+        in: path
+        description: Identifies the portfolio by UUID (e.g., `892e8c7c-e979-4cad-b61b-55a197932cf1`) or portfolio ID (e.g., `5189861793641175`)
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Balance information
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/PortfolioBalance_v1'
+        '400':
+          description: Invalid attribute
+      security:
+      - signature: []
+  /api/v1/portfolios/{portfolio}/balances/{asset}:
+    get:
+      tags:
+      - Portfolios
+      summary: Get balance for portfolio/asset
+      operationId: getPortfolioBalance
+      description: Retrieves the balance for a given portfolio and asset.
+      parameters:
+      - $ref: "#/components/parameters/auth_client_id"
+      - $ref: "#/components/parameters/auth_timestamp"
+      - $ref: "#/components/parameters/auth_passphrase"
+      - $ref: "#/components/parameters/auth_signature"
+      - name: portfolio
+        in: path
+        description: Identifies the portfolio by UUID (e.g., `892e8c7c-e979-4cad-b61b-55a197932cf1`) or portfolio ID (e.g., `5189861793641175`)
+        required: true
+        schema:
+          type: string
+      - name: asset
+        in: path
+        description: Identifies the asset by name (e.g., `BTC`), UUID (e.g., `291efb0f-2396-4d41-ad03-db3b2311cb2c`), or asset ID (e.g., `1482439423963469`)
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Balance information
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PortfolioBalance_v1'
+        '400':
+          description: Invalid attribute
+      security:
+      - signature: []
+  /api/v1/portfolios/{portfolio}/positions:
+    get:
+      tags:
+      - Portfolios
+      summary: List portfolio positions
+      operationId: getPortfolioPositions
+      description: Returns all of the positions for a given portfolio.
+      parameters:
+      - $ref: "#/components/parameters/auth_client_id"
+      - $ref: "#/components/parameters/auth_timestamp"
+      - $ref: "#/components/parameters/auth_passphrase"
+      - $ref: "#/components/parameters/auth_signature"
+      - name: portfolio
+        in: path
+        description: Identifies the portfolio by UUID (e.g., `892e8c7c-e979-4cad-b61b-55a197932cf1`) or portfolio ID (e.g., `5189861793641175`)
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Position information
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/PortfolioPosition_v1'
+        '400':
+          description: Invalid attribute
+      security:
+      - signature: []
+  /api/v1/portfolios/{portfolio}/positions/{instrument}:
+    get:
+      tags:
+      - Portfolios
+      summary: Get position for portfolio/instrument
+      operationId: getPortfolioPosition
+      description: Retrieves the position for a given portfolio and symbol.
+      parameters:
+      - $ref: "#/components/parameters/auth_client_id"
+      - $ref: "#/components/parameters/auth_timestamp"
+      - $ref: "#/components/parameters/auth_passphrase"
+      - $ref: "#/components/parameters/auth_signature"
+      - name: portfolio
+        in: path
+        description: Identifies the portfolio by UUID (e.g., `892e8c7c-e979-4cad-b61b-55a197932cf1`) or portfolio ID (e.g., `5189861793641175`)
+        required: true
+        schema:
+          type: string
+      - name: instrument
+        in: path
+        description: Identifies the instrument by name (e.g., `BTC-USDC`), UUID (e.g., `ce55a827-f04a-45c0-9d9b-8bbdb9b48065`), or instrument ID (e.g., `7149252043835013`)
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Position information
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PortfolioPosition_v1'
+        '400':
+          description: Invalid attribute
+      security:
+      - signature: []
+  /api/v1/portfolios/fills:
+    get:
+      tags:
+      - Portfolios
+      summary: List fills by portfolios
+      operationId: getMultiPortfolioFills
+      description: Returns fills for specified portfolios or fills for all portfolios if none are provided.
+      parameters:
+      - $ref: "#/components/parameters/auth_client_id"
+      - $ref: "#/components/parameters/auth_timestamp"
+      - $ref: "#/components/parameters/auth_passphrase"
+      - $ref: "#/components/parameters/auth_signature"
+      - name: portfolios
+        in: query
+        description: The UUID of the portfolio that has filled orders. Can multiple values in the query
+        required: false
+        schema:
+          type: string
+          example: 17ac272b-18af-4d12-91de-d0182d559a3c
+      - name: order_id
+        in: query
+        description: A specific order for which to fetch fills identified by order ID
+        required: false
+        schema:
+          type: string
+          example: 43877033468085758
+      - name: client_order_id
+        in: query
+        description: Fetch fills for all orders with the given client order ID
+        required: false
+        schema:
+          type: string
+          example: ABC123
+      - $ref: "#/components/parameters/ref_datetime"
+      - $ref: "#/components/parameters/result_limit"
+      - $ref: "#/components/parameters/result_offset"
+      - $ref: "#/components/parameters/time_from"
+      responses:
+        '200':
+          description: Fill information
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  pagination:
+                    $ref: '#/components/schemas/Pagination_v1'
+                  results:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/PortfolioFill_v1'
+        '400':
+          description: Invalid attribute
+      security:
+      - signature: []
+  /api/v1/portfolios/{portfolio}/fills:
+    get:
+      tags:
+      - Portfolios
+      summary: List portfolio fills
+      operationId: getPortfolioFills
+      description: Returns all of the fills for a given portfolio.
+      parameters:
+      - $ref: "#/components/parameters/auth_client_id"
+      - $ref: "#/components/parameters/auth_timestamp"
+      - $ref: "#/components/parameters/auth_passphrase"
+      - $ref: "#/components/parameters/auth_signature"
+      - name: portfolio
+        in: path
+        description: Identifies the portfolio by UUID (e.g., `892e8c7c-e979-4cad-b61b-55a197932cf1`) or portfolio ID (e.g., `5189861793641175`)
+        required: true
+        schema:
+          type: string
+      - name: order_id
+        in: query
+        description: A specific order for which to fetch fills identified by order ID
+        required: false
+        schema:
+          type: string
+          example: 43877033468085758
+      - name: client_order_id
+        in: query
+        description: Fetch fills for all orders with the given client order ID
+        required: false
+        schema:
+          type: string
+          example: ABC123
+      - $ref: "#/components/parameters/ref_datetime"
+      - $ref: "#/components/parameters/result_limit"
+      - $ref: "#/components/parameters/result_offset"
+      - $ref: "#/components/parameters/time_from"
+      responses:
+        '200':
+          description: Fill information
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  pagination:
+                    $ref: '#/components/schemas/Pagination_v1'
+                  results:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/PortfolioFill_v1'
+        '400':
+          description: Invalid attribute
+      security:
+      - signature: []
+  /api/v1/portfolios/{portfolio}/cross-collateral-enabled:
+    post:
+      tags:
+      - Portfolios
+      summary: Enable/Disable portfolio cross collateral
+      operationId: crossCollateralEnabled
+      description: Enable or disable the cross collateral feature for the portfolio, which allows the portfolio to use non-USDC assets as collateral for margin trading.
+      parameters:
+        - $ref: "#/components/parameters/auth_client_id"
+        - $ref: "#/components/parameters/auth_timestamp"
+        - $ref: "#/components/parameters/auth_passphrase"
+        - $ref: "#/components/parameters/auth_signature"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - enabled
+              properties:
+                enabled:
+                  description: Whether cross collateral is enabled for the portfolio
+                  type: boolean
+      responses:
+        '200':
+          description: Cross collateral setting updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Portfolio_v1'
+        '400':
+          description: Cross collateral setting update failed
+        '403':
+          description: Invalid permission
+  /api/v1/portfolios/{portfolio}/auto-margin-enabled:
+    post:
+      tags:
+        - Portfolios
+      summary: Enable/Disable portfolio auto margin mode
+      operationId: autoMarginEnabled
+      description: Enable or disable the auto margin feature, which lets the portfolio automatically post margin amounts required to exceed the high leverage position restrictions.
+      parameters:
+        - $ref: "#/components/parameters/auth_client_id"
+        - $ref: "#/components/parameters/auth_timestamp"
+        - $ref: "#/components/parameters/auth_passphrase"
+        - $ref: "#/components/parameters/auth_signature"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - enabled
+              properties:
+                enabled:
+                  description: Whether auto margin is enabled for the portfolio
+                  type: boolean
+      responses:
+        '200':
+          description: Auto margin setting updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Portfolio_v1'
+        '400':
+          description: Auto margin setting update failed
+        '403':
+          description: Invalid permission
+  /api/v1/portfolios/margin:
+    post:
+      tags:
+      - Portfolios
+      summary: Set portfolio margin override
+      operationId: setPortfolioMarginOverride
+      description: Specify the margin override value for a portfolio to either increase notional requirements or opt-in to higher leverage.
+      parameters:
+      - $ref: "#/components/parameters/auth_client_id"
+      - $ref: "#/components/parameters/auth_timestamp"
+      - $ref: "#/components/parameters/auth_passphrase"
+      - $ref: "#/components/parameters/auth_signature"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+              - portfolio_id
+              - margin_override
+              properties:
+                portfolio_id:
+                  description: Identifies the portfolio by UUID (e.g., `892e8c7c-e979-4cad-b61b-55a197932cf1`) or portfolio ID (e.g., `5189861793641175`)
+                  type: string
+                margin_override:
+                  description: The margin override value for the portfolio. Specified as a decimal value representing notional requirement (e.g., 0.1 = 10% notional requirement, 0.25 = 25% notional requirement)
+                  type: string
+      responses:
+        '200':
+          description: Portfolio margin override set
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PortfolioUpdateMarginOverride_v1'
+        '400':
+          description: Invalid attribute
+        '403':
+          description: Invalid permission
+  /api/v1/portfolios/transfer:
+    post:
+      tags:
+      - Portfolios
+      summary: Transfer funds between portfolios
+      operationId: createPortfolioAssetTransfer
+      description: Transfer assets from one portfolio to another.
+      parameters:
+      - $ref: "#/components/parameters/auth_client_id"
+      - $ref: "#/components/parameters/auth_timestamp"
+      - $ref: "#/components/parameters/auth_passphrase"
+      - $ref: "#/components/parameters/auth_signature"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+              - from
+              - to
+              - asset
+              - amount
+              properties:
+                from:
+                  description: Identifies the portfolio by UUID (e.g., `892e8c7c-e979-4cad-b61b-55a197932cf1`) or portfolio ID (e.g., `5189861793641175`) to transfer funds from
+                  type: string
+                to:
+                  description: Identifies the portfolio by UUID (e.g., `892e8c7c-e979-4cad-b61b-55a197932cf1`) or portfolio ID (e.g., `5189861793641175`) to transfer funds to
+                  type: string
+                asset:
+                  description: Identifies the asset by name (e.g., `BTC`), UUID (e.g., `291efb0f-2396-4d41-ad03-db3b2311cb2c`), or asset ID (e.g., `1482439423963469`)
+                  type: string
+                amount:
+                  description: The amount of the asset being transferred
+                  type: string
+      responses:
+        '200':
+          description: Transfer processed
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    description: true if the transfer was successful
+                    type: boolean
+                    example: true
+        '400':
+          description: Invalid attribute
+        '403':
+          description: Invalid permission
+      security:
+      - signature: []
+  /api/v1/portfolios/transfer-position:
+    post:
+      tags:
+        - Portfolios
+      summary: Transfer positions between portfolios
+      operationId: createPortfolioPositionTransfer
+      description: Transfer an existing position from one portfolio to another. The position transfer must fulfill the same portfolio-level margin requirements as submitting a new order on the opposite side for the sender's portfolio and a new order on the same side  for the recipient's portfolio. Additionally, organization-level requirements must be satisfied when evaluating the outcome of the position transfer.
+      parameters:
+        - $ref: "#/components/parameters/auth_client_id"
+        - $ref: "#/components/parameters/auth_timestamp"
+        - $ref: "#/components/parameters/auth_passphrase"
+        - $ref: "#/components/parameters/auth_signature"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - from
+                - to
+                - instrument
+                - quantity
+                - side
+              properties:
+                from:
+                  description: Identifies the portfolio by UUID (e.g., `892e8c7c-e979-4cad-b61b-55a197932cf1`) or portfolio ID (e.g., `5189861793641175`) to transfer positions from
+                  type: string
+                to:
+                  description: Identifies the portfolio by UUID (e.g., `892e8c7c-e979-4cad-b61b-55a197932cf1`) or portfolio ID (e.g., `5189861793641175`) to transfer positions to
+                  type: string
+                instrument:
+                  description: Identifies the instrument by name (e.g., `BTC-PERP`), UUID (e.g., `291efb0f-2396-4d41-ad03-db3b2311cb2c`), or instrument ID (e.g., `1482439423963469`)
+                  type: string
+                quantity:
+                  description: The full or partial quantity of the position being transferred
+                  type: string
+                side:
+                  description: The side of the position being transferred, BUY or SELL
+                  type: string
+      responses:
+        '200':
+          description: Transfer processed
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    description: true if the transfer was successful
+                    type: boolean
+                    example: true
+        '400':
+          description: Invalid attribute
+        '403':
+          description: Invalid permission
+      security:
+        - signature: [ ]
+  /api/v1/portfolios/fee-rates:
+    get:
+      tags:
+      - Portfolios
+      summary: List portfolio fee rates
+      operationId: getPortfoliosFeeRates
+      description: Retrieves the Perpetual Future and Spot fee rate tiers for the user.
+      responses:
+        '200':
+          description: Fee rate tiers list
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/PortfolioFeeRate_v1'
+        '400':
+          description: Invalid attribute
+      security:
+      - signature: []
+  /api/v1/transfers:
+    get:
+      tags:
+      - Transfers
+      summary: List matching transfers
+      operationId: getTransfers
+      parameters:
+      - $ref: "#/components/parameters/auth_client_id"
+      - $ref: "#/components/parameters/auth_timestamp"
+      - $ref: "#/components/parameters/auth_passphrase"
+      - $ref: "#/components/parameters/auth_signature"
+      - name: portfolio [DEPRECATED]
+        in: query
+        description: Identifies a portfolio by UUID (e.g., `892e8c7c-e979-4cad-b61b-55a197932cf1`) or portfolio ID (e.g., `5189861793641175`). If a portfolio identifier is provided under this param, it will be added to the list of values under `portfolios`
+        schema:
+          type: string
+      - name: portfolios
+        in: query
+        description: Identifies the portfolios by UUID (e.g., `892e8c7c-e979-4cad-b61b-55a197932cf1`) or portfolio ID (e.g., `5189861793641175`). Can provide single or multiple portfolios to filter by or fetches transfers for all portfolios if none are provided.
+        schema:
+          type: string
+      - name: time_from
+        in: query
+        description: Only find transfers updated after this time. Uses ISO-8601 format (e.g., 2023-03-16T23:59:53Z)
+        schema:
+          type: string
+          format: date-time
+          example: 2023-03-16T23:59:53Z
+      - name: time_to
+        in: query
+        description: Only find transfers updated before this time. Uses ISO-8601 format (e.g., 2023-03-16T23:59:53Z)
+        schema:
+          type: string
+          format: date-time
+          example: 2023-03-16T23:59:53Z
+      - $ref: "#/components/parameters/result_limit"
+      - $ref: "#/components/parameters/result_offset"
+      - name: status
+        in: query
+        description: The current status of transfer
+        schema:
+          $ref: "#/components/schemas/TransferStatus"
+      - name: type
+        in: query
+        description: The type of transfer (defaults to ALL if not defined)
+        schema:
+          $ref: "#/components/schemas/TransferType"
+      responses:
+        '200':
+          description: Matching transfers
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  pagination:
+                    $ref: '#/components/schemas/PaginationBase_v1'
+                  results:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Transfer_v1'
+        '400':
+          description: Invalid attribute
+      security:
+      - signature: []
+  /api/v1/transfers/{transfer_uuid}:
+    get:
+      tags:
+      - Transfers
+      summary: Get transfer
+      operationId: getTransfer
+      parameters:
+      - $ref: "#/components/parameters/auth_client_id"
+      - $ref: "#/components/parameters/auth_timestamp"
+      - $ref: "#/components/parameters/auth_passphrase"
+      - $ref: "#/components/parameters/auth_signature"
+      - name: transfer_uuid
+        in: path
+        description: The UUID of the transfer request
+        required: true
+        schema:
+          type: string
+          format: uuid
+      responses:
+        '200':
+          description: Matching transfer
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Transfer_v1'
+        '400':
+          description: Invalid attribute
+      security:
+      - signature: []
+  /api/v1/transfers/withdraw:
+    post:
+      tags:
+      - Transfers
+      summary: Withdraw to crypto address
+      operationId: withdraw
+      parameters:
+      - $ref: "#/components/parameters/auth_client_id"
+      - $ref: "#/components/parameters/auth_timestamp"
+      - $ref: "#/components/parameters/auth_passphrase"
+      - $ref: "#/components/parameters/auth_signature"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+              - portfolio
+              - asset
+              - amount
+              - add_network_fee_to_total
+              - network_arn_id
+              - address
+              properties:
+                portfolio:
+                  description: Identifies the portfolio by UUID (e.g., `892e8c7c-e979-4cad-b61b-55a197932cf1`) or portfolio ID (e.g., `5189861793641175`)
+                  type: string
+                asset:
+                  description: Identifies the asset by name (e.g., `BTC`), UUID (e.g., `291efb0f-2396-4d41-ad03-db3b2311cb2c`), or asset ID (e.g., `1482439423963469`)
+                  type: string
+                amount:
+                  description: The amount of the asset being transferred
+                  type: string
+                add_network_fee_to_total:
+                  description: if true, deducts network fee from the portfolio, otherwise deduct fee from the withdrawal
+                  type: boolean
+                network_arn_id:
+                  description: Identifies the blockchain network (e.g., `networks/ethereum-mainnet/assets/313ef8a9-ae5a-5f2f-8a56-572c0e2a4d5a`)
+                  type: string
+                  example: networks/ethereum-mainnet/assets/313ef8a9-ae5a-5f2f-8a56-572c0e2a4d5a
+                address:
+                  description: Crypto address being validated against
+                  type: string
+                  example: 0x999e7e2dbce48fb973dff84926c4d24abe59d33c
+                nonce:
+                  description: a unique integer representing the withdrawal request
+                  type: integer
+                  example: 30
+      responses:
+        '200':
+          description: Withdrawal Successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreateCryptoWithdrawalResult_V1'
+        '400':
+          description: Withdrawal Failed
+      security:
+      - signature: []
+  /api/v1/transfers/address:
+    post:
+      tags:
+      - Transfers
+      summary: Create crypto address
+      operationId: createAddress
+      parameters:
+      - $ref: "#/components/parameters/auth_client_id"
+      - $ref: "#/components/parameters/auth_timestamp"
+      - $ref: "#/components/parameters/auth_passphrase"
+      - $ref: "#/components/parameters/auth_signature"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+              - portfolio
+              - asset
+              - network_arn_id
+              properties:
+                portfolio:
+                  description: Identifies the portfolio by UUID (e.g., `892e8c7c-e979-4cad-b61b-55a197932cf1`) or portfolio ID (e.g., `5189861793641175`)
+                  type: string
+                asset:
+                  description: Identifies the asset by name (e.g., `BTC`), UUID (e.g., `291efb0f-2396-4d41-ad03-db3b2311cb2c`), or asset ID (e.g., `1482439423963469`)
+                  type: string
+                network_arn_id:
+                  description: Identifies the blockchain network (e.g., `networks/ethereum-mainnet/assets/313ef8a9-ae5a-5f2f-8a56-572c0e2a4d5a`)
+                  type: string
+                  example: networks/ethereum-mainnet/assets/313ef8a9-ae5a-5f2f-8a56-572c0e2a4d5a
+      responses:
+        '200':
+          description: Address created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AddressResponse_v1'
+        '400':
+          description: Invalid attribute
+      security:
+      - signature: []
+  /api/v1/transfers/create-counterparty-id:
+    post:
+      tags:
+      - Transfers
+      summary: Create counterparty Id
+      operationId: createCounterpartyId
+      parameters:
+      - $ref: "#/components/parameters/auth_client_id"
+      - $ref: "#/components/parameters/auth_timestamp"
+      - $ref: "#/components/parameters/auth_passphrase"
+      - $ref: "#/components/parameters/auth_signature"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+              - portfolio
+              properties:
+                portfolio:
+                  description: Identifies the portfolio by UUID (e.g., `892e8c7c-e979-4cad-b61b-55a197932cf1`) or portfolio ID (e.g., `5189861793641175`)
+                  type: string
+      responses:
+        '200':
+          description: Counterparty Id created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreateCounterpartyIdResponse_v1'
+        '400':
+          description: Invalid attribute
+      security:
+      - signature: []
+  /api/v1/transfers/validate-counterparty-id:
+    post:
+      tags:
+      - Transfers
+      summary: Validate counterparty Id
+      operationId: validateCounterpartyId
+      parameters:
+      - $ref: "#/components/parameters/auth_client_id"
+      - $ref: "#/components/parameters/auth_timestamp"
+      - $ref: "#/components/parameters/auth_passphrase"
+      - $ref: "#/components/parameters/auth_signature"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+              - counterparty_id
+              properties:
+                counterparty_id:
+                  description: Counterparty Id to be validated
+                  type: string
+                  example: CBTQDGENHE
+      responses:
+        '200':
+          description: Return whether the counterparty Id is valid to withdraw to
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidateCounterpartyIdResponse_v1'
+        '400':
+          description: Invalid attribute
+      security:
+      - signature: []
+  /api/v1/transfers/withdraw/counterparty:
+    post:
+      tags:
+      - Transfers
+      summary: Withdraw to counterparty Id
+      operationId: counterpartyWithdraw
+      parameters:
+      - $ref: "#/components/parameters/auth_client_id"
+      - $ref: "#/components/parameters/auth_timestamp"
+      - $ref: "#/components/parameters/auth_passphrase"
+      - $ref: "#/components/parameters/auth_signature"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+              - portfolio
+              - counterparty_id
+              - asset
+              - amount
+              - nonce
+              properties:
+                portfolio:
+                  description: Identifies the portfolio to withdraw from by UUID (e.g., `892e8c7c-e979-4cad-b61b-55a197932cf1`) or portfolio ID (e.g., `5189861793641175`)
+                  type: string
+                counterparty_id:
+                  description: Counterparty Id to withdraw to
+                  type: string
+                  example: CBTQDGENHE
+                asset:
+                  description: Identifies the asset by name (e.g., `BTC`), UUID (e.g., `291efb0f-2396-4d41-ad03-db3b2311cb2c`), or asset ID (e.g., `1482439423963469`)
+                  type: string
+                amount:
+                  description: The amount of the asset being transferred
+                  type: string
+                nonce:
+                  description: A unique positive integer representing the withdrawal request
+                  type: integer
+                  example: 30
+      responses:
+        '200':
+          description: Counterparty withdrawal initiated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreateCounterpartyWithdrawResult_v1'
+        '400':
+          description: Counterparty withdrawal Failed
+      security:
+      - signature: []
+  /api/v1/transfers/fee-estimate:
+    post:
+      tags:
+        - false # Hide from Swagger UI. UI specific endpoint.
+      summary: Get fee estimate
+      operationId: fee-estimate
+      parameters:
+        - $ref: "#/components/parameters/auth_client_id"
+        - $ref: "#/components/parameters/auth_timestamp"
+        - $ref: "#/components/parameters/auth_passphrase"
+        - $ref: "#/components/parameters/auth_signature"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - asset
+                - network_arn
+              properties:
+                asset:
+                  description: Identifies the asset by name (e.g., `BTC`), UUID (e.g., `291efb0f-2396-4d41-ad03-db3b2311cb2c`), or asset ID (e.g., `1482439423963469`)
+                  type: string
+                network_arn:
+                  description: Identifies the blockchain network (e.g., `networks/ethereum-mainnet`)
+                  type: string
+                  example: networks/ethereum-mainnet
+      responses:
+        '200':
+          description: Complete
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FeeEstimateResponse'
+        '400':
+          description: Invalid attribute
+      security:
+        - signature: [ ]
+  /api/v1/transfers/address/validate:
+    post:
+      tags:
+        - false # Hide from Swagger UI. UI specific endpoint.
+      summary: Validate network address
+      operationId: validate-address
+      parameters:
+        - $ref: "#/components/parameters/auth_client_id"
+        - $ref: "#/components/parameters/auth_timestamp"
+        - $ref: "#/components/parameters/auth_passphrase"
+        - $ref: "#/components/parameters/auth_signature"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - address
+                - asset
+                - network_arn_id
+              properties:
+                address:
+                  description: Crypto address being validated against
+                  type: string
+                  example: 0x999e7e2dbce48fb973dff84926c4d24abe59d33c
+                asset:
+                  description: Identifies the asset by name (e.g., `BTC`), UUID (e.g., `291efb0f-2396-4d41-ad03-db3b2311cb2c`), or asset ID (e.g., `1482439423963469`)
+                  type: string
+                network_arn_id:
+                  description: Identifies the blockchain network (e.g., `networks/ethereum-mainnet`)
+                  type: string
+                  example: networks/ethereum-mainnet
+      responses:
+        '200':
+          description: Complete
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AddressValidationResponse'
+        '400':
+          description: Invalid attribute
+      security:
+        - signature: [ ]
+  /api/v1/fee-rate-tiers:
+    get:
+      tags:
+      - Fee Rates
+      summary: List fee rate tiers
+      operationId: getFeeRateTiers
+      description: Return all the fee rate tiers.
+      responses:
+        '200':
+          description: Fee rate tiers list
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/FeeRateTier_v1'
+components:
+  schemas:
+    PaginationBase_v1:
+      type: object
+      properties:
+        result_limit:
+          description: The number of results to return (defaults to 25 with a max supported value of 100)
+          type: integer
+          example: 30
+        result_offset:
+          description: The number of results from the beginning to skip past
+          type: integer
+          example: 50
+    Pagination_v1:
+      allOf:
+      - $ref: "#/components/schemas/PaginationBase_v1"
+      type: object
+      properties:
+        ref_datetime:
+          description: The datetime from which to search (results are returned from `ref_datetime` in chronological order starting with the most recent). Uses ISO-8601 format (e.g., 2023-03-16T23:59:53Z)
+          type: string
+          format: date-time
+          example: 2023-03-16T23:59:53Z
+    Asset_v1:
+      type: object
+      properties:
+        asset_id:
+          description: A unique identifier to represent the asset specifically on the exchange
+          type: string
+          example: 3351829018369611
+        asset_uuid:
+          description: A UUID to represent the asset (portable across other Coinbase systems)
+          type: string
+          format: uuid
+          example: 592a8039-db3e-45ed-b752-ffd1983eead2
+        asset_name:
+          description: The name of the asset
+          type: string
+          example: BTC
+        status:
+          $ref: "#/components/schemas/AssetStatus"
+        collateral_weight:
+          description: The haircut value applied to the asset when used as collateral
+          type: number
+          format: double
+          example: 0.90
+        supported_networks_enabled:
+          type: boolean
+          example: true
+        min_borrow_qty:
+          type: string
+          example: 10
+        max_borrow_qty:
+          type: string
+          example: 1000000
+        loan_collateral_requirement_multiplier:
+          type: number
+          format: double
+          example: 1.2
+        # account_collateral_limit:
+        #   type: string
+        #   example: 1000
+        ecosystem_collateral_limit_breached:
+          type: boolean
+          example: false
+    AssetNetwork_v1:
+      type: object
+      properties:
+        asset_id:
+          description: A unique identifier to represent the asset
+          type: string
+          example: 3379757734632303
+        asset_uuid:
+          description: A UUID to represent the asset
+          type: string
+          format: uuid
+          example: 592a8039-db3e-45ed-b752-ffd1983eead2
+        asset_name:
+          description: The name of the asset
+          type: string
+          example: ETH
+        network_arn_id:
+          description: A unique identifier representing the combination of the network and asset
+          type: string
+          example: networks/ethereum-mainnet/assets/313ef8a9-ae5a-5f2f-8a56-572c0e2a4d5a
+        min_withdrawal_amt:
+          description: The minimum amount of the asset that can be withdrawn from the network
+          type: string
+          example: 0.001
+        max_withdrawal_amt:
+          description: The maximum amount of the asset that can be withdrawn from the network
+          type: string
+          example: 355.575
+        network_confirms:
+          description: The number of confirmations required on the network for a transaction
+          type: integer
+          example: 5
+        processing_time:
+          description: Number of seconds estimated to process a transaction on the network
+          type: integer
+          example: 3600
+        is_default:
+          description: Indicates whether this is the default network for the asset
+          type: boolean
+        network_name:
+          description: The common name of the network
+          type: string
+          example: ethereum
+        display_name:
+          description: The human readable name of the network
+          type: string
+          example: Ethereum
+    Instrument_v1:
+      type: object
+      properties:
+        instrument_id:
+          description: A unique integer identifier to represent the instrument
+          type: string
+          example: 22653087021498353
+        instrument_uuid:
+          description: A UUID to represent the instrument
+          type: string
+          format: uuid
+          example: 97645486-8058-4d98-aa1e-5ab2685d09c8
+        symbol:
+          description: A human readable representation of the instrument
+          type: string
+          example: BTC-USDC
+        type:
+          $ref: "#/components/schemas/InstrumentType"
+        base_asset_id:
+          description: The identifier of the base asset
+          type: string
+          example: 2919822098049565
+        base_asset_uuid:
+          description: A UUID to represent the base asset
+          type: string
+          format: uuid
+          example: 592a8039-db3e-45ed-b752-ffd1983eead2
+        base_asset_name:
+          description: The name of the base asset
+          type: string
+          example: BTC
+        quote_asset_id:
+          description: The identifier of the quote asset
+          type: string
+          example: 45922259775510765
+        quote_asset_uuid:
+          description: A UUID to represent the quote asset
+          type: string
+          format: uuid
+          example: a96dc949-7650-4a70-8227-955366a22297
+        quote_asset_name:
+          description: The name of the quote asset
+          type: string
+          example: USDC
+        base_increment:
+          description: The minimum allowed quantity change of the base asset
+          type: string
+          example: 0.000001
+        quote_increment:
+          description: The minimum allowed price change of the quote asset
+          type: string
+          example: 0.01
+        price_band_percent:
+          description: The max percentage from BBO permitted for order placement
+          type: number
+          format: double
+          example: 0.02
+        market_order_percent:
+          description: The percentage from BBO used to price bound market orders
+          type: number
+          format: double
+          example: 0.015
+        qty_24hr:
+          description: The qty traded over the last 24hr period
+          type: string
+          example: 4318.12
+        notional_24hr:
+          description: The notional amount in USDC traded over the last 24hr period
+          type: string
+          example: 86362400
+        avg_daily_qty:
+          description: The 30 day average daily traded qty updated daily
+          type: string
+          example: 5741.531
+        avg_daily_notional:
+          description: The 30 day average daily traded notional amount in USDC updated daily
+          type: string
+          example: 109430620
+        previous_day_qty:
+          description: The traded qty in the previous day (It gets disseminated daily around 12am UTC.)
+          type: string
+          example: 5741.531
+        open_interest:
+          description: The total number of active positions held by traders
+          type: string
+          example: 100
+        position_limit_qty:
+          description: The max qty allowed for a position
+          type: string
+        position_limit_adq_pct:
+          description: The max percentage of ADQ allowed for a position
+          type: number
+          format: double
+          example: 0.03
+        replacement_cost:
+          description: The replacement cost used in the margin calculations
+          type: string
+          example: 421.31
+        base_imf:
+          description: The margin requirement corresponding to maximum allowed leverage when trading on margin
+          type: number
+          format: double
+          example: 0.1
+        default_imf:
+          description: The margin requirement needed to exceed the high leverage position restrictions
+          type: number
+          format: double
+          example: 0.2
+        min_notional_value:
+          description: The smallest notional amount in USDC allowed to place an order
+          type: string
+          example: 10.00
+        funding_interval:
+          description: The amount of time in nanoseconds between funding intervals
+          type: string
+          example: 36000000000
+        trading_state:
+          $ref: "#/components/schemas/InstrumentTradingState"
+        quote:
+          $ref: '#/components/schemas/InstrumentQuote_v1'
+    InstrumentQuote_v1:
+      type: object
+      properties:
+        best_bid_price:
+          description: The highest buy order price resting on the book
+          type: string
+          example: 20000.50
+        best_bid_size:
+          description: The total amount available at the best bid price
+          type: string
+          example: 3.541424
+        best_ask_price:
+          description: The lowest sell order price resting on the book
+          type: string
+          example: 20001.75
+        best_ask_size:
+          description: The total amount available at the best ask price
+          type: string
+          example: 2.8754
+        trade_price:
+          description: The price of the most recent trade
+          type: string
+          example: 20000.63
+        trade_qty:
+          description: The size of the most recent trade
+          type: string
+          example: 0.73
+        index_price:
+          description: For perpetual futures only, the index price used for the funding process
+          type: string
+          example: 20001.45
+        mark_price:
+          description: The current mark price value used in risk and margin calculations
+          type: string
+          example: 20000.63
+        settlement_price:
+          description: The most recent settlement price value
+          type: string
+          example: 20000.23
+        limit_up:
+          description: The max price the book allows buy orders to trade
+          type: string
+          example: 21056.35
+        limit_down:
+          description: The min price the book allows sell orders to trade
+          type: string
+          example: 19531.50
+        predicted_funding:
+          description: The predicted funding rate based on the current state of a rolling calculation
+          type: string
+          example: 0.1543
+        timestamp:
+          description: The timestamp of the last quote update
+          type: string
+          format: date-time
+    InstrumentDailyVolume_v1:
+      type: object
+      properties:
+        timestamp:
+          description: The date of the aggregated volume data
+          type: string
+          example: "2024-04-23T00:00:00Z"
+        instruments:
+          description: List of instruments with their respective daily volumes
+          type: array
+          items:
+            $ref: '#/components/schemas/InstrumentDailyVolumeEntry_v1'
+        totals:
+          $ref: '#/components/schemas/InstrumentDailyVolumeTotals_v1'
+    InstrumentDailyVolumeEntry_v1:
+      type: object
+      properties:
+        symbol:
+          description: The instrument symbol
+          type: string
+          example: "BTC-PERP"
+        volume:
+          description: Daily volume for that instrument denominated in base asset quantity
+          type: string
+          example: "2180.5428999997785"
+        notional:
+          description: Daily notional volume for that instrument
+          type: string
+          example: "145087054.13650635"
+    InstrumentDailyVolumeTotals_v1:
+      type: object
+      properties:
+        total_instruments_volume:
+          description: Daily volume for all instruments denominated in base asset quantity
+          type: string
+          example: "255682824.87039998"
+        total_instruments_notional:
+          description: Daily notional volume for all instruments
+          type: string
+          example: "2180.5428999997785"
+        total_exchange_volume:
+          description: Daily volume for all instruments denominated in base asset quantity
+          type: string
+          example: "255682824.87039998"
+        total_exchange_notional:
+          description: Daily notional volume for all instruments
+          type: string
+          example: "2180.5428999997785"
+    InstrumentCandlesAggregation_v1:
+      type: object
+      properties:
+        start:
+          description: The start time of the aggregation
+          type: string
+          example: "2024-04-23T00:00:00Z"
+        open:
+          description: The opening price at the start of the aggregation time period
+          type: string
+          example: "62884.4"
+        high:
+          description: The maximum price in the aggregation time period
+          type: string
+          example: "64710.6"
+        low:
+          description: The minimum price in the aggregation time period
+          type: string
+          example: "62884.4"
+        close:
+          description: The closing price at the end of the aggregation time period
+          type: string
+          example: "63508.4"
+        volume:
+          description: The total trading volume during the aggregation time period
+          type: string
+          example: "3253.9983"
+    InstrumentFunding_v1:
+      type: object
+      properties:
+        instrument_id:
+          description: The unique identifier of the instrument for which the funding rate applies
+          type: string
+          example: 14thr7ft-1-0
+        funding_rate:
+          description: The final funding rate based on the state of the rolling calculation at the `event_time`.
+          type: string
+          example: 0.1543
+        mark_price:
+          description: The current mark price value used in risk and margin calculations
+          type: string
+          example: 20000.63
+        event_time:
+          description: The time that the final funding rate was determined. Uses ISO-8601 format (e.g., 2023-03-16T23:59:53Z)
+          type: string
+          format: date-time
+          example: 2023-03-16T23:59:53Z
+    Portfolio_v1:
+      type: object
+      properties:
+        portfolio_id:
+          description: A unique identifier for the portfolio
+          type: string
+          example: 14thr7ft-1-0
+        portfolio_uuid:
+          description: A UUID for the portfolio
+          type: string
+          format: uuid
+          example: 3d50e347-6a59-4965-a4cd-b25934d84126
+        name:
+          description: A human readable name for the portfolio
+          type: string
+          example: Investment Account
+        user_uuid:
+          description: A user UUID for brokers that attribute a single user per portfolio
+          type: string
+          format: uuid
+          example: f67de785-60a7-45ea-b87a-07e83eae7c12
+        maker_fee_rate:
+          description: The fee rate charged for order making liquidity
+          type: string
+          example: 0.02
+        taker_fee_rate:
+          description: The fee rate charged for orders taking liquidity
+          type: string
+          example: 0.04
+        trading_lock:
+          description: Indicates if the portfolio has been locked from trading
+          type: boolean
+        borrow_disabled:
+          description: Indicates whether or not the portfolio can borrow
+          type: boolean
+        is_lsp:
+          description: Indicates if the portfolio is setup to take liquidation assignments
+          type: boolean
+        is_default:
+          description: Indicates if the portfolio is the account default portfolio
+          type: boolean
+        cross_collateral_enabled:
+          description: Indicates if the cross collateral is enabled for the portfolio
+          type: boolean
+    PortfolioSummary_v1:
+      type: object
+      properties:
+        collateral:
+          description: The total collateral value in USDC for the portfolio
+          type: string
+          example: 14750.53
+        unrealized_pnl:
+          description: The profit or loss of all open positions (resets to 0 after settlement)
+          type: string
+          example: 2953.01
+        unrealized_pnl_percent:
+          description: The profit or loss percentage of all open positions (resets to 0 after settlement)
+          type: string
+          example: 0
+        position_notional:
+          description: The position value in USDC of all positions
+          type: string
+          example: 1050.32
+        open_position_notional:
+          description: The notional value of all open orders and positions
+          type: string
+          example: 3010.02
+        pending_fees:
+          description: Accrued fees that haven't been paid yet
+          type: string
+          example: 120.31
+        borrow:
+          description: Total borrow amount in USDC (nets the USDC balance, position PNL, held USDC, accrued interest and rolling debt)
+          type: string
+          example: 4111.32
+        accrued_interest:
+          description: Interest charged for borrowed USDC balances
+          type: string
+          example: 10.02
+        rolling_debt:
+          description: Amount of settled transactions that haven't been paid
+          type: string
+          example: 311.02
+        balance:
+          description: The net balance available in the portfolio (collateral + unrealized_pnl - pending_fees - accrued_interest - rolling_debt)
+          type: string
+          example: 15751.60
+        buying_power:
+          description: The amount of buying power available in the portfolio (balance - (open_position_notional * portfolio_initial_margin))
+          type: string
+          example: 14964.02
+        portfolio_initial_margin:
+          description: The weighted average of all the position's initial margin utilization
+          type: number
+          format: double
+          example: 0.05
+        portfolio_current_margin:
+          description: The current margin level of the portfolio
+          type: number
+          format: double
+          example: 0.05
+        portfolio_maintenance_margin:
+          description: The maintenance margin of the portfolio
+          type: number
+          format: double
+          example: 0.033
+        portfolio_close_out_margin:
+          description: The close out margin of the portfolio
+          type: number
+          format: double
+          example: 0.01665
+        in_liquidation:
+          description: Indicates whether the portfolio is in process of liquidation
+          type: boolean
+        portfolio_initial_margin_notional:
+          description: The notional initial margin of the portfolio
+          type: number
+          format: double
+          example: 1571.5345
+        portfolio_current_margin_notional:
+          description: The notional current margin level of the portfolio
+          type: number
+          format: double
+          example: 1571.5345
+        portfolio_maintenance_margin_notional:
+          description: The notional maintenance margin of the portfolio
+          type: number
+          format: double
+          example: 1023.3081
+        portfolio_close_out_margin_notional:
+          description: The notional close out margin of the portfolio
+          type: number
+          format: double
+          example: 482.6651
+        margin_override:
+          description: The margin override value for the portfolio, indicating notional requirement to hold futures positions
+          type: number
+          format: double
+          example: 0.20
+        lock_up_initial_margin:
+          description: The effective margin requirement value for the portfolio `(max(portfolio_initial_margin, margin_override))`
+          type: number
+          format: double
+          example: 0.30
+        loan_collateral_requirement:
+          type: string
+          example: 0
+    PortfolioBalance_v1:
+      type: object
+      properties:
+        asset_id:
+          description: The unique identifier of the asset
+          type: string
+          example: 14thr7fc-1-1
+        asset_name:
+          description: Name of the asset
+          type: string
+          example: BTC
+        asset_uuid:
+          description: The UUID of the asset
+          type: string
+          format: uuid
+          example: d92669ba-8a04-46d8-9b28-a2bbaeee3b9a
+        quantity:
+          description: The total amount of the asset in the portfolio
+          type: string
+          example: 1.75
+        hold:
+          description: The amount of the balance held from trading activity
+          type: string
+          example: 0.50
+        hold_available_for_collateral:
+          description: The amount of the held balance eligible for collateral
+          type: string
+          example: 0.50
+        transfer_hold:
+          description: The amount of the balance held from a pending transfer
+          type: string
+          example: 0.25
+        collateral_value:
+          description: The collateral value provided by this asset balance
+          type: string
+          example: 0.90
+        max_withdraw_amount:
+          description: The maximum amount of this asset that can be withdrawn at this time given margin requirement constraints
+          type: string
+          example: 0.90
+        loan:
+          description: The amount of this asset that has been borrowed
+          type: string
+          example: 1.0
+        loan_collateral_requirement:
+          description: The notional collateral requirement to hold the loan
+          type: string
+          example: 0
+        pledged_collateral_quantity:
+          description: The amount of the asset pledged as collateral
+          type: string
+          example: 0.50
+    PortfolioPosition_v1:
+      type: object
+      properties:
+        id:
+          description: The unique identifier of the position
+          type: string
+          example: 1tvrktwe-1-457
+        symbol:
+          description: Name of the instrument the position is in
+          type: string
+          example: BTC-PERP
+        instrument_id:
+          description: The unique identifier of the instrument the position is in
+          type: string
+          example: 14thr7ft-1-0
+        instrument_uuid:
+          description: The UUID of the instrument the position is in
+          type: string
+          format: uuid
+          example: 8ca6c040-48df-426b-bb4e-74413909da26
+        vwap:
+          description: The price of your position based on the last settlement period. During each settlement period (5 minute interval), the VWAP is set to equal the mark_price.
+          type: string
+          example: 31011.75
+        net_size:
+          description: The size of the position with positive values reflecting a long position and negative values reflecting a short position
+          type: string
+          example: 1.75
+        buy_order_size:
+          description: Cumulative size of all the open buy orders
+          type: string
+          example: 2.65
+        sell_order_size:
+          description: Cumulative size of all the open sell orders
+          type: string
+          example: 1.2
+        im_contribution:
+          description: The amount this position contributes to the initial margin
+          type: number
+          format: double
+          example: 0.07
+        unrealized_pnl:
+          description: The profit or loss of this position (resets to 0 after settlement)
+          type: string
+          example: 2953.01
+        mark_price:
+          description: The current mark price value for the instrument of this position used in risk and margin calculations
+          type: string
+          example: 20000.63
+        entry_vwap:
+          description: Volume weighted entry price of the position (not reset to the last funding price)
+          type: string
+          example: 34021.45
+    PortfolioDetail_v1:
+      type: object
+      properties:
+        summary:
+          $ref: '#/components/schemas/PortfolioSummary_v1'
+        balances:
+          type: array
+          items:
+            $ref: '#/components/schemas/PortfolioBalance_v1'
+        positions:
+          type: array
+          items:
+            $ref: '#/components/schemas/PortfolioPosition_v1'
+    PortfolioFill_v1:
+      type: object
+      properties:
+        portfolio_id:
+          description: The unique identifier of the portfolio the fill was executed under
+          type: string
+          example: t4umaqa-1-1
+        portfolio_uuid:
+          description: The UUID of the portfolio the fill was executed under
+          type: string
+          example: 018ab3b1-d38a-750e-8a1d-8b7815ea8bfb
+        portfolio_name:
+          description: The name of the portfolio the fill was executed under
+          type: string
+          example: portfolio1
+        fill_id:
+          description: A unique identifier for the fill event
+          type: string
+          example: 14thr7g8-1-1
+        exec_id:
+          description: A unique fill_id represented in numeric format
+          type: string
+          example: 224040873497739742
+        order_id:
+          description: The original order id
+          type: string
+          example: 14thr7eg-1-1
+        instrument_id:
+          description: The unique identifier of the instrument the fill is in
+          type: string
+          example: 14thr7dw-1-0
+        instrument_uuid:
+          description: The UUID of the instrument the fill is in
+          type: string
+          format: uuid
+          example: c3f2130a-1e47-4f33-9a88-beffc11fdd50
+        symbol:
+          description: Name of the instrument the fill is in
+          type: string
+          example: BTC-PERP
+        match_id:
+          description: A unique identifier for the match event that is used on both sides of the trade
+          type: string
+          example: 14thr75g-0-0
+        fill_price:
+          description: The price that this fill traded at
+          type: string
+          example: 31011.75
+        fill_qty:
+          description: The amount traded in this fill event
+          type: string
+          example: 0.2
+        client_id:
+          description: The API key of the client that submitted the order
+          type: string
+          example: 4V5LrMqiJPU44hpQ
+        client_order_id:
+          description: The client specific order ID sent on the order
+          type: string
+          example: ABC123
+        order_qty:
+          description: The quantity specified on the order
+          type: string
+          example: 1.2
+        limit_price:
+          description: The limit price specified on the order (specific to limit orders)
+          type: string
+          example: 31012.00
+        total_filled:
+          description: The total amount filled on the order so far
+          type: string
+          example: 0.1
+        filled_vwap:
+          description: The weighted average price of the total amount filled on the order so far
+          type: string
+          example: 31011.1
+        expire_time:
+          description: The expiration time for orders with the time in force set to GTT. Uses ISO-8601 format (e.g., 2023-03-16T23:59:53Z).
+          type: string
+          format: date-time
+          example: 2023-03-16T23:59:53Z
+        stop_price:
+          description: The trigger price for a stop order (specific to stop orders)
+          type: string
+          example: 31010.5
+        side:
+          $ref: "#/components/schemas/OrderSide"
+        tif:
+          $ref: "#/components/schemas/TimeInForce"
+        stp_mode:
+          $ref: "#/components/schemas/SelfTradePreventionMode"
+        flags:
+          description: Additional order flags
+          type: string
+        fee:
+          description: The fee charged on the fill
+          type: string
+          example: 75.53
+        fee_asset:
+          description: The asset type the fee was charged in
+          type: string
+          example: USDC
+        order_status:
+          $ref: "#/components/schemas/OrderStatus"
+        event_time:
+          description: The time that the fill event occurred. Uses ISO-8601 format (e.g., 2023-03-16T23:59:53Z)
+          type: string
+          format: date-time
+          example: 2023-03-16T23:59:53Z
+    PortfolioUpdateMarginOverride_v1:
+      type: object
+      properties:
+        portfolio_id:
+          description: The unique identifier of the portfolio the fill was executed under
+          type: string
+          format: string
+          example: t4umaqa-1-1
+        margin_override:
+          description: The margin override value for the portfolio, indicating notional requirement to hold futures positions
+          type: number
+          format: double
+          example: 0.20
+    OrderResult_v1:
+      type: object
+      properties:
+        order_id:
+          description: A unique identifier assigned by the exchange
+          type: string
+          example: 43877033468085758
+        client_order_id:
+          description: A unique identifier assigned by the client
+          type: string
+          example: ABC123
+        side:
+          $ref: "#/components/schemas/OrderSide"
+        instrument_id:
+          description: The unique identifier of the instrument the order wants to transact in
+          type: string
+          example: 2562519737567269
+        instrument_uuid:
+          description: The UUID of the instrument the order wants to transact in
+          type: string
+          format: uuid
+          example: 359f66d8-4235-47c3-9733-0fbfe2cfaa0a
+        symbol:
+          description: The name of the instrument the order wants to transact in
+          type: string
+          example: BTC-PERP
+        portfolio_id:
+          description: The unique identifier of the portfolio the order was submitted under
+          type: string
+          format: string
+          example: 1724343681801273
+        portfolio_uuid:
+          description: The UUID of the portfolio the order was submitted under
+          type: string
+          format: uuid
+          example: b80ec69b-1229-4bcf-a6a8-c506ffd74c20
+        type:
+          $ref: "#/components/schemas/OrderType"
+        price:
+          description: The max or min price limit in quote asset units to buy or sell at (respectively). Only used for limit and stop limit order types.
+          type: string
+          example: 20215.53
+        stop_price:
+          description: The market price that activates a stop order
+          type: string
+          example: 20015.53
+        stop_limit_price:
+          description: The limit price at which the TP/SL stop leg order will be placed. Only used for TP/SL order type.
+          type: string
+          example: 20015.53
+        size:
+          description: The amount in base asset units
+          type: string
+          example: 1.5423
+        tif:
+          $ref: "#/components/schemas/TimeInForce"
+        expire_time:
+          description: The expiration time for orders with the time in force set to GTT. Uses ISO-8601 format (e.g., 2023-03-16T23:59:53Z).
+          type: string
+          format: date-time
+          example: 2023-03-16T23:59:53Z
+        stp_mode:
+          $ref: "#/components/schemas/SelfTradePreventionMode"
+        event_type:
+          $ref: "#/components/schemas/OrderEventType"
+        event_time:
+          type: string
+          format: date-time
+          example: 2023-03-16T23:59:53Z
+        submit_time:
+          type: string
+          format: date-time
+          example: 2023-03-16T23:59:53Z
+        order_status:
+          $ref: "#/components/schemas/OrderStatus"
+        leaves_qty:
+          description: The amount of the order remaining open on the exchange
+          type: string
+        exec_qty:
+          description: The traded quantity on the order
+          type: string
+        avg_price:
+          description: The average price that the order has traded at so far
+          type: string
+        fee:
+          description: The exchange fee affiliated with the trade (only for trade events)
+          type: string
+    AddressResponse_v1:
+      type: object
+      properties:
+        address:
+          description: The crypto address generated from the request
+          type: string
+          example: 1KpPmua1jzSxMMZ5iPGizyetpCPkZHNKTd
+        network_arn_id:
+          description: A unique identifier representing the combination of the network and asset
+          type: string
+          example: networks/ethereum-mainnet/assets/313ef8a9-ae5a-5f2f-8a56-572c0e2a4d5a
+        destination_tag:
+          description: An identifier used to determine the account a crypto transfer should be credited to. Not present for all asset types.
+          type: string
+    CreateCryptoWithdrawalResult_V1:
+      type: object
+      properties:
+        idem:
+          description: Idempotent UUID representing the successful withdraw
+          type: string
+          example: 253b30a5-9b03-4cd2-9c76-d0f32b2bd733
+    FeeEstimateResponse:
+      type: object
+      properties:
+        estimated_fee:
+          type: object
+          properties:
+            value:
+              type: string
+              example: 0.0
+            currency:
+              type: string
+              example: USDC
+          description: Total Estimated Fee
+        estimated_fee_before_subsidy:
+          type: object
+          properties:
+            value:
+              type: string
+              example: 0.078908
+            currency:
+              type: string
+              example: USDC
+          description: Estimated fee before subsidies (ie. before free USDC transfers)
+        expiresAt:
+          description: Time when estimated fee is no longer valid for.
+          type: string
+          example: 2023-08-10T17:25:22Z
+    AddressValidationResponse:
+      type: object
+      properties:
+        is_valid:
+          description: Returns whether or not the crypto address on that specific network is valid
+          type: boolean
+    Transfer_v1:
+      type: object
+      properties:
+        transfer_uuid:
+          description: A unique identifier for the transfer
+          type: string
+          format: uuid
+          example: 7975e6ab-57ed-4751-b359-13f63f4da793
+        transfer_type:
+          $ref: "#/components/schemas/TransferType"
+        amount:
+          description: The amount of the asset being transferred
+          type: string
+          example: 5100.50
+        asset:
+          description: The asset being transferred
+          type: string
+          example: USDC
+        status:
+          $ref: "#/components/schemas/TransferStatus"
+        network_name:
+          description: The common name of the network on which the transfer occurred
+          type: string
+          example: ethereum
+        created_at:
+          description: The time the transfer was created
+          type: string
+          format: date-time
+          example: 2023-01-29T14:32:28Z
+        updated_at:
+          description: The time of the most recent status change of the transfer
+          type: string
+          format: date-time
+          example: 2023-01-29T14:32:28Z
+        from_portfolio:
+          description: portfolio identifiers of the transfer source
+          type: object
+          properties:
+            id:
+              type: string
+              example: 14thr7ft-1-0
+            uuid:
+              type: string
+              format: uuid
+              example: 7975e6ab-57ed-4751-b359-13f63f4da793
+            name:
+              type: string
+              example: portfolio1
+        to_portfolio:
+          description: portfolio identifiers of the transfer target
+          type: object
+          properties:
+            id:
+              type: string
+              example: 14thr7ft-1-0
+            uuid:
+              type: string
+              format: uuid
+              example: 7975e6ab-57ed-4751-b359-13f63f4da793
+            name:
+              type: string
+              example: portfolio1
+        from_address:
+          description: blockchain address of transfer source
+          type: string
+          example: 0x29d2D586e222D0610b04e71974699589379F13b5
+        to_address:
+          description: blockchain address of transfer target
+          type: string
+          example: 0x29d2D586e222D0610b04e71974699589379F13b5
+        from_cb_account:
+          description: Coinbase account Id of transfer source
+          type: string
+          example: 64ac90a106d1db7863f9ab7d
+        to_cb_account:
+          description: Coinbase account Id of transfer target
+          type: string
+          example: 64ac90a106d1db7863f9ab7d
+        from_counterparty_id:
+          description: Coinbase counterparty Id of transfer source if it is a counterparty transfer
+          type: string
+          example: CBTQDGENHE
+        to_counterparty_id:
+          description: Coinbase counterparty Id of transfer target if it is a counterparty transfer
+          type: string
+          example: CBA6POFJW7
+        instrument_id:
+          description: The unique identifier of the instrument associated with the funding event
+          type: string
+          example: 2562519737567269
+        position_id:
+          description: id of the position used to calculate the funding payment
+          type: string
+          example: 14thr7ft-1-0
+    CreateCounterpartyIdResponse_v1:
+      type: object
+      properties:
+        portfolio_uuid:
+          description: UUID for the portfolio
+          type: string
+          format: uuid
+          example: 3d50e347-6a59-4965-a4cd-b25934d84126
+        counterparty_id:
+          description: Counterparty Id for the portfolio
+          type: string
+          example: CBTQDGENHE
+    ValidateCounterpartyIdResponse_v1:
+      type: object
+      properties:
+        counterparty_id:
+          description: Counterparty Id
+          type: string
+          example: CBTQDGENHE
+        valid:
+          description: Whether the counterparty Id is valid to withdraw to
+          type: boolean
+          example: true
+    CreateCounterpartyWithdrawResult_v1:
+      type: object
+      properties:
+        idem:
+          description: Idempotent UUID representing the successful withdraw
+          type: string
+          example: 253b30a5-9b03-4cd2-9c76-d0f32b2bd733
+        portfolio_uuid:
+          description: UUID for the portfolio where the withdraw was initiated
+          type: string
+          format: uuid
+          example: 3d50e347-6a59-4965-a4cd-b25934d84126
+        source_counterparty_id:
+          description: Counterparty Id of the source portfolio
+          type: string
+          example: CBTQDGENHE
+        target_counterparty_id:
+          description: Counterparty Id of the target portfolio
+          type: string
+          example: CBA6POFJW7
+        asset:
+          description: The asset being transferred
+          type: string
+          example: USDC
+        amount:
+          description: The amount of the asset being transferred
+          type: string
+          example: 5100.50
+    FeeRateTier_v1:
+      type: object
+      properties:
+        fee_tier_type:
+          $ref: "#/components/schemas/FeeTierType"
+        instrument_type:
+          $ref: "#/components/schemas/InstrumentType"
+        fee_tier_id:
+          description: Fee tier id
+          type: string
+          example: 1
+        fee_tier_name:
+          description: Name for the fee rate tier
+          type: string
+          example: Public Tier 1
+        maker_fee_rate:
+          description: The fee rate charged for order making liquidity
+          type: string
+          example: 0.02
+        taker_fee_rate:
+          description: The fee rate charged for orders taking liquidity
+          type: string
+          example: 0.04
+        rebate_rate:
+          description: The rebate rate for maker fees
+          type: string
+          example: 0.01
+        min_balance:
+          description: The minimum USDC balance required to qualify for the fee tier
+          type: string
+          example: 1000.00
+        min_volume:
+          description: The minimum 30 days volume required to qualify for the fee tier. For liquidity program tiers, this is the percentage of volume
+          type: string
+          example: 1000.00
+        require_balance_and_volume:
+          description: Whether the fee tier requires both a minimum balance and volume to qualify
+          type: boolean
+    PortfolioFeeRate_v1:
+      type: object
+      properties:
+        instrument_type:
+          $ref: "#/components/schemas/InstrumentType"
+        fee_tier_id:
+          description: Fee tier id
+          type: string
+          example: 1
+        is_vip_tier:
+          description: Whether the fee tier is a VIP tier
+          type: boolean
+        fee_tier_name:
+          description: Name for the fee rate tier
+          type: string
+          example: Public Tier 1
+        maker_fee_rate:
+          description: The fee rate charged for order making liquidity
+          type: string
+          example: 0.02
+        taker_fee_rate:
+          description: The fee rate charged for orders taking liquidity
+          type: string
+          example: 0.04
+        rebate_rate:
+          description: The rebate rate for maker fees
+          type: string
+          example: 0.01
+        is_override:
+          description: Whether maker/taker fee rates are manually overridden
+          type: boolean
+        trailing_30day_volume:
+          description: Sum of trading volume from last rolling 30 days
+          type: string
+          example: 1000.00
+        trailing_24hr_usdc_balance:
+          description: Average of all hourly USDC balance snapshots from the last rolling 24 hours
+          type: string
+          example: 1000.00
+    AssetStatus:
+      description: An asset level status that would affect all markets with the asset
+      type: string
+      enum: ["ACTIVE", "DISABLED"]
+      example: ACTIVE
+    InstrumentType:
+      description: The type of instrument
+      type: string
+      enum: ["SPOT", "PERP"]
+      example: PERP
+    InstrumentTradingState:
+      description: An market level status affecting all trading within the market
+      type: string
+      enum: ["TRADING", "PAUSED", "HALT"]
+      example: TRADING
+    OrderSide:
+      description: The side of the transaction
+      type: string
+      enum: ["BUY", "SELL"]
+      example: BUY
+    OrderStatus:
+      description: The type of the order
+      type: string
+      enum: ["WORKING", "DONE"]
+      example: WORKING
+    OrderType:
+      description: The type of the order
+      type: string
+      enum: ["LIMIT", "MARKET", "STOP_LIMIT", "STOP", "TAKE_PROFIT_STOP_LOSS"]
+      example: LIMIT
+    OrderEventType:
+      description: The most recent type of event that happened to the order
+      type: string
+      enum: ["NEW", "TRADE", "CANCELED", "REPLACED", "PENDING_CANCEL", "REJECTED", "PENDING_NEW", "EXPIRED", "PENDING_REPLACE", "STOP_TRIGGERED"]
+      example: TRADE
+    TimeInForce:
+      description: The time in force applied to an order. A Good Till Cancel (GTC) can last up to 30 days while an Immediate Or Cancel (IOC) attempts to fill as much of the order as possible and/or cancels immediately when no resting orders meet or improve the order's price limit.
+      type: string
+      enum: ["GTC", "IOC", "GTT"]
+      example: GTC
+    SelfTradePreventionMode:
+      description: Specifies the behavior for self match handling. None disables the functionality, new cancels the newest order, and both cancels both
+      type: string
+      enum: ["NONE", "AGGRESSING", "RESTING", "BOTH", "DECREMENT_AND_CANCEL"]
+      example: AGGRESSING
+    TransferType:
+      description: The type of transfer
+      type: string
+      enum: ["DEPOSIT", "WITHDRAW", "REBATE", "STIPEND", "INTERNAL", "FUNDING", "ALL"]
+      example: DEPOSIT
+    TransferStatus:
+      description: The current status of the transfer
+      type: string
+      enum: ["PROCESSED", "NEW", "FAILED", "STARTED"]
+      example: PROCESSED
+    FeeTierType:
+      description: The type of fee tier
+      type: string
+      enum: ["REGULAR", "LIQUIDITY_PROGRAM"]
+      example: LIQUIDITY_PROGRAM
+  parameters:
+    time_from:
+      name: time_from
+      in: query
+      description: The minimum `event_time` for results. Uses ISO-8601 format (e.g., 2023-03-16T23:59:53Z)
+      schema:
+        type: string
+        format: date-time
+        example: 2023-03-16T23:59:53Z
+    ref_datetime:
+      name: ref_datetime
+      in: query
+      description: The maximum `event_time` for results. Can be used in pagination to keep result set static. Uses ISO-8601 format (e.g., 2023-03-16T23:59:53Z)
+      # description: The datetime from which to search (results are returned from `ref_datetime` in chronological order starting with the most recent). Uses ISO-8601 format (e.g., 2023-03-16T23:59:53Z)
+      required: false
+      schema:
+        type: string
+        format: date-time
+        example: 2023-03-16T23:59:53Z
+    result_limit:
+      name: result_limit
+      in: query
+      description: The number of results to return (defaults to 25 with a max supported value of 100)
+      required: false
+      schema:
+        type: integer
+        example: 30
+    result_offset:
+      name: result_offset
+      in: query
+      description: The number of results from the beginning to skip past
+      required: false
+      schema:
+        type: integer
+        example: 50
+    auth_client_id:
+      name: CB-ACCESS-KEY
+      in: header
+      required: true
+      description: The Client ID that owns the API Key for the request
+      schema:
+        type: string
+    auth_timestamp:
+      name: CB-ACCESS-TIMESTAMP
+      in: header
+      required: true
+      description: The timestamp of when the request is being made
+      schema:
+        type: string
+    auth_passphrase:
+      name: CB-ACCESS-PASSPHRASE
+      in: header
+      required: true
+      description: The pass phrase affiliated with the API Key
+      schema:
+        type: string
+    auth_signature:
+      name: CB-ACCESS-SIGN
+      in: header
+      required: true
+      description: A HMAC SHA-256 signature using the API Key secret on the string TIMESTAMP, METHOD, REQUEST_PATH, BODY
+      schema:
+        type: string
+  securitySchemes:
+    signature:
+      type: apiKey
+      in: header
+      name: CB-ACCESS-API-KEY
+      description: "An API key based authentication that uses an HMAC signature. The following fields must get passed in the header for endpoints requiring authentication:\n CB-ACCESS-KEY: The Client ID that owns the API Key for the request\n CB-ACCESS-TIMESTAMP: The unix timestamp (i.e. epoch time) of when the request is being made in seconds (e.g., 1680909821) \n CB-ACCESS-PASSPHRASE: The pass phrase affiliated with the API Key\n CB-ACCESS-SIGN: A base64 encoded HMAC SHA-256 signature using the API Key secret on the concatenated string TIMESTAMP+METHOD+REQUEST_PATH+BODY (e.g., HMAC SHA-256 on 1680909821GET/api/v1/portfolios using the API Key secret).\n Note: ensure the API Key secret is not base64 encoded when creating the HMAC SHA-256 signature. Only the resulting signature should be base64 encoded."

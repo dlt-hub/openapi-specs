@@ -1,0 +1,55 @@
+---
+name: MailerLite
+description: Email Marketing & Automation made easy for Small Businesses, Professional
+  Bloggers and Authors. Sign up and start email marketing with free plan and all features
+  included (signup forms and landing pages too), unlimited emails & 24/7 customer
+  support. W...
+image: http://kinlane-productions.s3.amazonaws.com/screen-capture-api/842-mailerlite.jpg
+tags:
+- crm
+- email marketing
+- emails
+- have api
+- webhook implementations
+created: '2019-12-21'
+modified: '2019-12-21'
+url: https://raw.githubusercontent.com/api-evangelist/mailerlite/master/apis.json
+specificationVersion: '0.14'
+apis:
+- name: MailerLite
+  description: 
+  image: http://kinlane-productions.s3.amazonaws.com/screen-capture-api/842-mailerlite.jpg
+  humanURL: https://developers.mailerlite.com
+  baseURL: ''
+  tags: []
+  properties:
+  - type: x-openapi
+    url: https://raw.githubusercontent.com/api-evangelist/mailerlite/master/mailerlite-openapi.json
+include: []
+x-common:
+- type: APIs.json
+  url: https://raw.githubusercontent.com/api-evangelist/1forge/master/apis.json
+- type: Crunchbase
+  url: http://www.crunchbase.com/company/mailerlite
+- type: Crunchbase
+  url: https://crunchbase.com/organization/mailerlite
+- type: Developers
+  url: https://docs.mailerlite.com/
+- type: Developers
+  url: https://developers.mailerlite.com/docs
+- type: Email
+  url: info@mailerlite.com
+- type: Github
+  url: https://github.com/mailerlite
+- type: Pricing
+  url: https://www.mailerlite.com/pricing
+- type: Pricing
+  url: https://www.mailerlite.com/pricing
+- type: Twitter
+  url: https://twitter.com/mailerlite
+- type: Webhooks
+  url: https://developers.mailerlite.com/docs/webhooks
+- type: Website
+  url: https://developers.mailerlite.com
+- type: Website
+  url: https://www.mailerlite.com/

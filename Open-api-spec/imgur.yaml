@@ -1,0 +1,497 @@
+openapi: 3.0.0
+servers:
+  - url: https://api.imgur.com
+info:
+  title: Imgur API
+  description: >-
+    Imgur's API exposes the entire Imgur infrastructure via a standardized programmatic interface.
+    Using Imgur's API, you can do just about anything you can do on imgur.com, while using your programming language of choice.
+  version: 0.4.0
+tags:
+  - name: account
+    description: Account-dependent endpoints.
+  - name: auth
+    description: Authentication and authorization.
+  - name: image
+    description: Account-agnostic endpoints about image.
+paths:
+  /oauth/token:
+    post:
+      tags:
+        - auth
+      summary: Generate a new access token from given refresh token.
+      operationId: generate_access_token
+      requestBody:
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              properties:
+                client_id:
+                  type: string
+                client_secret:
+                  type: string
+                grant_type:
+                  type: string
+                  enum:
+                    - refresh_token
+                refresh_token:
+                  type: string
+              required:
+                - client_id
+                - client_secret
+                - grant_type
+                - refresh_token
+      responses:
+        '200':
+          description: Successful operation.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AccessToken'
+  /3/account/{userName}:
+    get:
+      tags:
+        - account
+      security:
+        - oauth2: []
+      summary: Get information about an account.
+      operationId: getAccount
+      parameters:
+        - $ref: '#/components/parameters/userName'
+      responses:
+        '200':
+          description: Successful operation.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AccountResponse'
+  /3/account/{userName}/images:
+    get:
+      tags:
+        - account
+      security:
+        - oauth2: []
+      summary: Get images of an account.
+      operationId: getAccountImages
+      parameters:
+        - $ref: '#/components/parameters/userName'
+      responses:
+        '200':
+          description: Successful operation.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AccountImagesResponse'
+  /3/account/{userName}/images/count:
+    get:
+      tags:
+        - account
+      security:
+        - oauth2: []
+      summary: Get images count of an account.
+      operationId: getAccountImagesCount
+      parameters:
+        - $ref: '#/components/parameters/userName'
+      responses:
+        '200':
+          description: Successful operation.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BasicInt32Response'
+  /3/account/{userName}/images/{imageHash}:
+    get:
+      tags:
+        - account
+      security:
+        - oauth2: []
+      summary: Get an image of an account.
+      operationId: getAccountImage
+      parameters:
+        - $ref: '#/components/parameters/imageHash'
+        - $ref: '#/components/parameters/userName'
+      responses:
+        '200':
+          description: Successful operation.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ImageResponse'
+  /3/image:
+    post:
+      tags:
+        -  image
+      security:
+        - clientId: []
+        - oauth2: []
+      summary: Upload an image.
+      operationId: uploadImage
+      requestBody:
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              properties:
+                album:
+                  type: string
+                description:
+                  type: string
+                image:
+                  type: string
+                  format: base64
+                name:
+                  type: string
+                title:
+                  type: string
+              required:
+                - image
+      responses:
+        '200':
+          description: Successful operation.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ImageResponse'
+  /3/image/{imageHash}:
+    get:
+      tags:
+        - image
+      security:
+        - clientId: []
+        - oauth2: []
+      summary: Get information about an image.
+      operationId: getImage
+      parameters:
+        - $ref: '#/components/parameters/imageHash'
+      responses:
+        '200':
+          description: Successful operation.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ImageResponse'
+    post:
+      tags:
+        - image
+      security:
+        - clientId: []
+        - oauth2: []
+      summary: Update an image.
+      operationId: updateImage
+      parameters:
+        - $ref: '#/components/parameters/imageHash'
+      requestBody:
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              properties:
+                description:
+                  type: string
+                title:
+                  type: string
+      responses:
+        '200':
+          description: Successful operation.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BasicBooleanResponse'
+    delete:
+      tags:
+        - image
+      security:
+        - clientId: []
+        - oauth2: []
+      summary: Delete an image.
+      operationId: deleteImage
+      parameters:
+        - $ref: '#/components/parameters/imageHash'
+      responses:
+        '200':
+          description: Successful operation.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BasicBooleanResponse'
+  /3/image/{imageHash}/favorite:
+    post:
+      tags:
+        - image
+      security:
+        - oauth2: []
+      summary: Favorite an image.
+      operationId: favoriteImage
+      parameters:
+        - $ref: '#/components/parameters/imageHash'
+      responses:
+        '200':
+          description: Successful operation.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BasicStringResponse'
+components:
+  securitySchemes:
+    clientId:
+      type: apiKey
+      in: header
+      name: Authorization
+    oauth2:
+      type: oauth2
+      flows:
+        implicit:
+          authorizationUrl: https://api.imgur.com/oauth2/authorize
+          refreshUrl: https://api.imgur.com/oauth/token
+          scopes: {}
+  parameters:
+    imageHash:
+      name: imageHash
+      in: path
+      required: true
+      schema:
+        type: string
+    userName:
+      name: userName
+      in: path
+      required: true
+      schema:
+        type: string
+  schemas:
+    AccessToken:
+      type: object
+      required:
+        - access_token
+        - account_id
+        - account_username
+        - expires_in
+        - refresh_token
+        - token_type
+      properties:
+        access_token:
+          type: string
+        account_id:
+          type: integer
+          format: int32
+        account_username:
+          type: string
+        expires_in:
+          type: integer
+          format: int32
+        refresh_token:
+          type: string
+        scope:
+          type: string
+        token_type:
+          type: string
+    Account:
+      type: object
+      required:
+        - created
+        - id
+        - pro_expiration
+        - reputation_name
+        - reputation
+        - url
+        - user_follow
+      properties:
+        avatar:
+          type: string
+        bio:
+          type: string
+        created:
+          type: integer
+          format: int32
+        id:
+          type: integer
+          format: int32
+        pro_expiration:
+          type: boolean
+        reputation_name:
+          type: string
+        reputation:
+          type: integer
+          format: int32
+        url:
+          type: string
+        user_follow:
+          type: object
+          required:
+            - status
+          properties:
+            status:
+              type: boolean
+    AccountResponse:
+      type: object
+      required:
+        - data
+        - status
+        - success
+      properties:
+        data:
+          $ref: '#/components/schemas/Account'
+        status:
+          type: integer
+          format: int32
+        success:
+          type: boolean
+    AccountImagesResponse:
+      type: object
+      required:
+        - data
+        - status
+        - success
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/Image'
+        status:
+          type: integer
+          format: int32
+        success:
+          type: boolean
+    BasicBooleanResponse:
+      type: object
+      required:
+        - data
+        - status
+        - success
+      properties:
+        data:
+          type: boolean
+        status:
+          type: integer
+          format: int32
+        success:
+          type: boolean
+    BasicInt32Response:
+      type: object
+      required:
+        - data
+        - status
+        - success
+      properties:
+        data:
+          type: integer
+          format: int32
+        status:
+          type: integer
+          format: int32
+        success:
+          type: boolean
+    BasicStringResponse:
+      type: object
+      required:
+        - data
+        - status
+        - success
+      properties:
+        data:
+          type: string
+        status:
+          type: integer
+          format: int32
+        success:
+          type: boolean
+    Image:
+      type: object
+      required:
+        - ad_type
+        - ad_url
+        - animated
+        - bandwidth
+        - datetime
+        - favorite
+        - height
+        - id
+        - in_gallery
+        - in_most_viral
+        - is_ad
+        - link
+        - size
+        - tags
+        - type
+        - views
+        - width
+      properties:
+        account_id:
+          type: integer
+          format: int32
+        account_url:
+          type: string
+        ad_type:
+          type: integer
+          format: int32
+        ad_url:
+          type: string
+        animated:
+          type: boolean
+        bandwidth:
+          type: integer
+          format: int32
+        deletehash:
+          type: string
+        datetime:
+          type: integer
+          format: int32
+        description:
+          type: string
+        favorite:
+          type: boolean
+        height:
+          type: integer
+          format: int32
+        id:
+          type: string
+        in_gallery:
+          type: boolean
+        in_most_viral:
+          type: boolean
+        is_ad:
+          type: boolean
+        link:
+          type: string
+        name:
+          type: string
+        nsfw:
+          type: boolean
+        section:
+          type: string
+        size:
+          type: integer
+          format: int32
+        tags:
+          type: array
+          items:
+            type: string
+        title:
+          type: string
+        type:
+          type: string
+        views:
+          type: integer
+          format: int32
+        vote:
+          type: string
+        width:
+          type: integer
+          format: int32
+    ImageResponse:
+      type: object
+      required:
+        - data
+        - status
+        - success
+      properties:
+        data:
+          $ref: '#/components/schemas/Image'
+        status:
+          type: integer
+          format: int32
+        success:
+          type: boolean
+externalDocs:
+  description: Find out more about Imgur API.
+  url: https://apidocs.imgur.com/

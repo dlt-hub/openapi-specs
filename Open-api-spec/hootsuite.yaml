@@ -1,0 +1,5096 @@
+---
+swagger: '2.0'
+info:
+  description: |
+    [![Run in Postman](https://run.pstmn.io/button.svg)](https://app.getpostman.com/run-collection/eeda0fcdf55ea26bd0ec#?env%5BHootsuite%5D=W3sidHlwZSI6InRleHQiLCJlbmFibGVkIjp0cnVlLCJrZXkiOiJ1cmwiLCJ2YWx1ZSI6Imh0dHBzOi8vcGxhdGZvcm0uaG9vdHN1aXRlLmNvbSJ9LHsidHlwZSI6InRleHQiLCJlbmFibGVkIjp0cnVlLCJrZXkiOiJhdXRob3JpemF0aW9uX3VybCIsInZhbHVlIjoiaHR0cHM6Ly9wbGF0Zm9ybS5ob290c3VpdGUuY29tL29hdXRoMi9hdXRoIn0seyJ0eXBlIjoidGV4dCIsImVuYWJsZWQiOnRydWUsImtleSI6InRva2VuX3VybCIsInZhbHVlIjoiaHR0cHM6Ly9wbGF0Zm9ybS5ob290c3VpdGUuY29tL29hdXRoMi90b2tlbiJ9LHsidHlwZSI6InRleHQiLCJlbmFibGVkIjp0cnVlLCJrZXkiOiJjbGllbnRfaWQiLCJ2YWx1ZSI6IiJ9LHsidHlwZSI6InRleHQiLCJlbmFibGVkIjp0cnVlLCJrZXkiOiJjbGllbnRfc2VjcmV0IiwidmFsdWUiOiIifV0=)
+    # Introduction
+    The Hootsuite API is built on REST principles and uses JSON as a data interchange format.
+    ### Base URL
+    All URLs referenced in this document use the following base: https://platform.hootsuite.com. The Hootsuite API is served over HTTPS to ensure data privacy.
+    ### Request Format
+    The Hootsuite API supports the following HTTP verbs:
+    | Verb       | Description  |
+    |--------|------|
+    | GET    | GET requests retrieve resources. GET requests with query parameters should be [URL encoded](https://en.wikipedia.org/wiki/Percent-encoding).  |
+    | POST   | POST requests create or update resources. POST requests can partially update a resource by passing a subset of the fields that should be updated. To remove a single field set it to null. POST requests should always set content-type and character encoding to: application/json;charset=utf-8. |
+    | DELETE | DELETE requests delete resources. Delete requests return a 200 OK with an empty data envelope if the request was successful.|
+    ### Response Format
+    All responses are returned in JSON. The response is wrapped in a top level data envelope which is an object or array depending on whether a single item or a collection is returned. If a single item is returned the data field will be an object. If a collection is returned the field will be an array.
+    If the response was unsuccessful an errors array will be returned. Responses that partially fail will return both a data and errors object.
+    A single item response:
+    ```
+    {
+      "data": {},
+      "errors": [{},{},{}]
+    }
+    ```
+    A collection response:
+    ```
+    {
+      "data": [{},{},{}],
+      "errors": [{},{},{}]
+      "metadata": {}
+    }
+    ```
+    ### HTTP Response Codes
+    The Hootsuite API uses HTTP status codes to indicate the status of your request.
+    |Code |Description |
+    |---|---|
+    |200 OK|Resource was successfully created, updated, deleted or retrieved.|
+    |400 Bad Request|Invalid request, possibly due to missing parameters|
+    |401 Unauthorized|Missing or invalid authentication|
+    |403 Forbidden|Access denied|
+    |404 Not Found|Requested resource does not exist|
+    |429 Too Many Requests|Rate Limit Exceeded. Please contact dev.support@hootsuite.com for assistance|
+    |500 Server Error|Unexpected error occurred on the server|
+    ### API Error Handling
+    Error responses are returned with the following fields. Note, the schema for OAuth2 error responses are different and comply with the RFC. Please refer to the Authorization endpoint documentation for details.
+    |Field|Description|
+    |---|---|
+    |code|Unique number indicating type of error|
+    |message|Description of error|
+    |id|Unique id for tracing purposes|
+    |resource|(optional) type and id are used to point to the field(s) that caused the error|
+    ```
+    {
+      "errors": [
+        {
+          "code" : 1234,
+          "message": "Could not create message for social profile",
+          "id" : "f7d32670-4e6a-48c0-a2a7-87803536a712",
+          "resource": {
+            "type":"socialProfile",
+            "id":"7534653235"
+          }
+        }
+      ]
+    }
+    ```
+    ### Error Codes
+    Here is a list of error codes and descriptions returned by our APIs:
+    |Code|Description|
+    |---|---|
+    |1000|Missing or duplicate access token|
+    |1001|Invalid access token|
+    |1002|Invalid API key|
+    |1003|Account plan limit exceeded|
+    |1004|API plan limit exceeded|
+    |1005|Token could not be retrieved|
+    |1006|Token removal failed|
+    |1007|The client could not be authenticated due to missing or invalid client credentials|
+    |1008|Resource Owner authentication failed|
+    |1009|Invalid grant_type|
+    |1010|Invalid OAuth request|
+    |1011|Duplicate OAuth parameters|
+    |1012|Invalid authorization code|
+    |1013|Must be confidential client|
+    |1014|Unauthorized JWT user|
+    |1015|Client registration could not be deleted|
+    |1016|Client info could not be retrieved|
+    |1017|Client info could not be updated|
+    |1018|Client could not be registered|
+    |1019|A registration type must be selected|
+    |1020|Client key could not be deleted|
+    |1021|The id_token values could not be retrieved|
+    |1022|id_token could not be registered|
+    |1023|id_token could not be removed therefore user logout could not be executed|
+    |1024|Token could not be revoked|
+    |1025|Token could not be registered|
+    |1026|Non-valid parameter list for this operation|
+    |1027|Missing authorization code|
+    |1028|Authorization code could not be validated|
+    |1029|id_token could not be validated|
+    |1030|The client is not authorized to execute a status check|
+    |1031|Invalid oauth parameters|
+    |1032|Token could not be validated|
+    |1033|The requested scope is not valid|
+    |1034|The session is not valid|
+    |1035|Missing oauth_token parameter|
+    |1036|oauth_token invalid or expired|
+    |1037|The required scope to access this endpoint was not granted by the user|
+    |1038|token_type_hint is not supported|
+    |1039|Client not authorized to revoke token|
+    |1040|oauth_consumer_key invalid or expired|
+    |1041|The token may not have been revoked due to an unknown error|
+    |1042|Missing oauth_signature|
+    |1043|Too many requests|
+    |1044|Invalid oauth_signature_method|
+    |1100|Invalid JSON schema|
+    |1201|Not authorized to make changes to organization|
+    |2000|Invalid member password|
+    |2001|Invalid member email|
+    |2002|Invalid member name (please enter name between 2 and 100 chars in length)|
+    |2003|Invalid member default timezone|
+    |2004|Invalid initials|
+    |2005|Missing member name|
+    |2006|Missing member email|
+    |2007|Missing member password|
+    |2008|No more available seats in organization|
+    |2303|Invalid organization ID|
+    |2304|Invalid member ID|
+    |2305|Missing member ID|
+    |2306|Missing social profile ID|
+    |3002|Team name has to be between 2-200 characters|
+    |3003|Unable to find an organization with that ID|
+    |3004|Missing team ID|
+    |3005|Invalid team ID|
+    |3006|Team name has to be unique in the organization|
+    |3008|Member is not seated in the organization|
+    |3010|Email is already in use|
+    |3020|Invalid cursor format|
+    |3021|Invalid social network type|
+    |3301|Payment member can’t be removed from the organization|
+    |4000|Schema validation failed|
+    |4001|Resource not found|
+    |4002|Insufficient permissions to view organization members|
+    |4003|Insufficient permissions to view member permissions|
+    |4004|Insufficient permissions to view member organizations|
+    |4005|Insufficient permissions to view team members|
+    |4006|Insufficient permissions to view team|
+    |4007|Insufficient permissions to create team|
+    |4008|Insufficient permissions to view team social profile|
+    |4009|Insufficient organization permissions|
+    |4010|Insufficient permissions to view organization teams|
+    |4303|Member does not exist in organization|
+    |5000|An unknown error occurred|
+    |5001|HTTP method not permitted|
+    |5002|Unsupported operation|
+    |9000|An internal error occurred|
+    |40001|Social profile isn’t owned by organization (required for posting messages with tags)|
+    |40003|You have attempted to delete a message that cannot be deleted in its current state|
+    |40004|Only attachments from http://static.ow.ly or http://ow.ly/i/ are currently allowed|
+    |40005|Insufficient permission to create new message tags|
+    |40019|Message state filter not supported|
+    |40020|Specified date range is too large|
+    |40021|Uploaded media is not yet ready to be used (further processing required)|
+    |40022|Invalid boolean for includeUnscheduledReviewMsgs flag|
+    |40023|Twitter only allows 1 network per message|
+    |40024|Posting to Facebook Groups is no longer supported|
+    |40025|Scheduled message limit reached|
+
+  version: '1.0'
+  title: Hootsuite REST API
+  contact:
+    email: dev.support@hootsuite.com
+  license:
+    name: Hootsuite Developer Terms and API License Agreement
+    url: https://hootsuite.com/legal/dev-api-terms
+host: platform.hootsuite.com
+basePath: "/"
+tags:
+- name: Authentication
+  description: Hootsuite uses OAuth2 to authenticate end users. Members authenticated with the Hootsuite API are subject to the same permissions configured as when using the Hootsuite Web Dashboard. Learn more about managing permissions at the [Hootsuite Help Center](https://help.hootsuite.com/hc/en-us/articles/204598170-About-organizations-teams-and-permissions).
+- name: Me
+  description: The Me API returns information about the user that has authenticated with the API.
+- name: Media
+- name: Members
+- name: Messages
+- name: Comments
+- name: Organizations
+- name: SCIM 2.0
+- name: Social Profiles
+  description: 'A social profile is a publishing channel on a social network account. The following social profile types are supported via the Hootsuite API: Twitter, Facebook, Facebook Page, Facebook Group, LinkedIn, Linkedin Group, Linkedin Company, Instagram'
+- name: Teams
+- name: Interactions
+schemes:
+- https
+
+securityDefinitions:
+  "Basic Auth":
+    type: basic
+  OAuth2:
+    type: oauth2
+    flow: accessCode
+    authorizationUrl: https://platform.hootsuite.com/oauth2/auth
+    tokenUrl: https://platform.hootsuite.com/oauth2/token
+    scopes:
+        offline: Request refresh tokens
+
+security:
+- OAuth2: []
+
+parameters:
+  bearerToken:
+    in: header
+    name: Authorization
+    description: A bearer token string used for authentication
+    required: true
+    type: string
+
+paths:
+  "/oauth2/auth":
+    get:
+      tags:
+      - Authentication
+      operationId: oauth2Authorize
+      summary: OAuth2 Authorize
+      description: "[OAuth2 Authorize](https://tools.ietf.org/html/rfc6749#section-3.1) endpoint."
+      security: []
+      consumes:
+      - application/x-www-form-urlencoded
+      produces:
+      - text/html
+      parameters:
+      - in: query
+        name: response_type
+        description: The response type requested.
+        required: true
+        type: string
+        enum:
+        - code
+      - in: query
+        name: client_id
+        required: true
+        description: Your client ID found in the Hootsuite Developer Portal.
+        type: string
+      - in: query
+        name: scope
+        required: true
+        description: The required token scopes.
+        type: string
+        enum:
+        - offline
+      - in: query
+        name: redirect_uri
+        required: true
+        description: The URI to redirect to after authentication.
+        type: string
+      - in: query
+        name: state
+        required: false
+        description:  |
+          An opaque value used by the client to maintain state between the request and callback. See [rfc6749#section-4.1.1](https://tools.ietf.org/html/rfc6749#section-4.1.1) for more context.
+
+          Note: if this param is provided, it must be at least 8 characters long.
+        type: string
+      responses:
+        '200':
+          description: Success
+  "/oauth2/token":
+    post:
+      tags:
+      - Authentication
+      operationId: oauth2Token
+      summary: OAuth2 Token
+      description: |
+        [OAuth2 Token](https://tools.ietf.org/html/rfc6749#section-3.2) endpoint. The required parameters depend on the grant type requested:
+
+        |Required Parameter|Grant Type|
+        |---|---|
+        |code|authorization_code|
+        |redirect_uri|authorization_code|
+        |member_id|member_app|
+        |organization_id|organization_app|
+        |refresh_token|refresh_token|
+
+        This endpoint requires that you pass in your client credentials using the HTTP Basic authentication scheme as per outlined in the [spec](https://tools.ietf.org/html/rfc6749#section-2.3.1).
+        Including your client credentials in the request-body is not supported.
+
+        **Note**: The specific authorization code provided for the `code` parameter must only be used successfully once. If an authorization code is used a second time, all tokens granted with the first `/oauth2/token` call will be revoked.
+
+      security:
+      - "Basic Auth": []
+      consumes:
+      - application/x-www-form-urlencoded
+      produces:
+      - application/json;charset=utf-8
+      parameters:
+      - in: header
+        name: Authorization
+        description: A base64-encoded client_id:client_secret string used for authentication.
+        required: true
+        type: string
+      - in: formData
+        name: grant_type
+        description: The OAuth2 grant_type used.
+        required: true
+        type: string
+        enum:
+        - authorization_code
+        - client_credentials
+        - member_app
+        - organization_app
+        - refresh_token
+      - in: formData
+        name: code
+        description: 'The authorization code granted by the /oauth2/auth endpoint. Required for grant type: authorization_code'
+        required: false
+        type: string
+      - in: formData
+        name: redirect_uri
+        description: 'The URI to redirect to after authentication. Required for grant type: authorization_code'
+        required: false
+        type: string
+      - in: formData
+        name: member_id
+        description: 'The member id of the user to grant a token for. Required for grant type: member_app'
+        required: false
+        type: string
+      - in: formData
+        name: organization_id
+        description: 'The organization id to grant a token for. Required for grant type: organization_app'
+        required: false
+        type: string
+      - in: formData
+        name: scope
+        description: 'The required token scopes'
+        required: false
+        type: string
+      - in: formData
+        name: refresh_token
+        description: 'The refresh token code previously granted. Required for grant type: refresh_token'
+        required: false
+        type: string
+      responses:
+        '200':
+          description: Success
+          schema:
+            "$ref": "#/definitions/OAuth2BearerToken"
+        '400':
+          description: Bad Request
+          schema:
+            "$ref": "#/definitions/OAuthError"
+        '401':
+          description: Unauthorized
+          schema:
+            "$ref": "#/definitions/OAuthError"
+  "/v1/messages":
+    post:
+      tags:
+      - Messages
+      operationId: scheduleMessage
+      summary: Schedule messages
+      description: Schedules a message to send on one or more social profiles (except Pinterest). Returns an array of uniquely identifiable messages (one per social profile requested).<br/><br/>Scheduling a message to Pinterest can not be bundled with any other social profiles.
+      consumes:
+      - application/json;charset=utf-8
+      produces:
+      - application/json;charset=utf-8
+      parameters:
+      - $ref: '#/parameters/bearerToken'
+      - in: body
+        name: body
+        required: true
+        schema:
+          "$ref": "#/definitions/Message"
+      responses:
+        '200':
+          description: Success
+          schema:
+            "$ref": "#/definitions/SocialProfileMessagesResponseEnvelope"
+        '400':
+          description: Bad Request
+          schema:
+            "$ref": "#/definitions/ErrorsResponseEnvelope"
+    get:
+      tags:
+      - Messages
+      operationId: retrieveMessages
+      summary: Retrieve outbound messages
+      description: |
+        Outbound messages are messages that are scheduled or were previously sent. This endpoint returns outbound messages sorted by increasing scheduled send time. Messages pending approval, including those created by and/or actionable by the given user, will also be returned via this API.
+
+        Messages returned can be filtered by social profile or the current state of the message. If more than 50 results are returned a cursor will be automatically created to paginate the results.
+
+        Query Parameters must be [URL encoded](https://en.wikipedia.org/wiki/Percent-encoding). For example:
+
+        ```
+        ?startTime=2020-01-01T00%3A00%3A00Z
+        &endTime=2020-01-15T17%3A55%3A01Z
+        &socialProfileIds=1234
+        &state=SCHEDULED
+        &limit=5
+        ```
+
+        To specify multiple social profiles, use the following [syntax](http://stackoverflow.com/questions/6243051/how-to-pass-an-array-within-a-query-string):
+
+        ```
+        ?socialProfileIds=1234&socialProfileIds=5678
+        ```
+      consumes:
+      - application/json;charset=utf-8
+      produces:
+      - application/json;charset=utf-8
+      parameters:
+      - $ref: '#/parameters/bearerToken'
+      - name: startTime
+        in: query
+        description: The start date range of messages to be returned. In [ISO-8601](https://en.wikipedia.org/wiki/ISO_8601) format.
+        required: true
+        type: string
+        x-example: '2020-01-01T00:00:00Z'
+      - name: endTime
+        in: query
+        description: The end date range of messages to be returned. In [ISO-8601](https://en.wikipedia.org/wiki/ISO_8601) format. Must not be later than 4 weeks from startTime.
+        required: true
+        type: string
+        x-example: '2020-01-15T17:55:01Z'
+      - name: state
+        in: query
+        description: A filter to return messages with in the matching state. Allowed values are PENDING_APPROVAL, REJECTED, SENT, SCHEDULED and SEND_FAILED_PERMANENTLY.
+        required: false
+        type: string
+        x-example: SCHEDULED
+      - name: socialProfileIds
+        in: query
+        description: A filter to return messages for certain social profiles.
+        required: false
+        type: integer
+        x-example: '115185509'
+      - name: limit
+        in: query
+        description: Maximum number of messages to be returned in the response. Defaults to 50 if not specified. Maximum allowable limit is 100.
+        required: false
+        type: integer
+      - name: cursor
+        in: query
+        description: Cursor to a specific page in the result set. Defaults to the first page.
+        required: false
+        type: string
+      - name: includeUnscheduledReviewMsgs
+        in: query
+        description: Flag to retrieve unscheduled (Send Now) review messages on top of scheduled ones retrieved from time range query.
+        required: false
+        type: boolean
+      responses:
+        '200':
+          description: 'Success'
+          schema:
+            "$ref": "#/definitions/SocialProfileMessagesResponseEnvelope"
+        '400':
+          description: Bad Request
+          schema:
+            "$ref": "#/definitions/ErrorsResponseEnvelope"
+  "/v1/messages/{messageId}":
+    get:
+      tags:
+      - Messages
+      operationId: retrieveMessage
+      summary: Retrieve message
+      description: |
+        Retrieves a message. A message is always associated with a single social profile. Messages might be unavailable for a brief time during upload to social networks.
+      consumes:
+      - application/json;charset=utf-8
+      produces:
+      - application/json;charset=utf-8
+      parameters:
+      - $ref: '#/parameters/bearerToken'
+      - name: messageId
+        in: path
+        description: The message ID.
+        required: true
+        type: string
+        x-example: 4138476039
+      responses:
+        '200':
+          description: Success
+          schema:
+            "$ref": "#/definitions/SocialProfileMessageResponseEnvelope"
+        '400':
+          description: Bad Request
+          schema:
+            "$ref": "#/definitions/ErrorsResponseEnvelope"
+    delete:
+      tags:
+      - Messages
+      operationId: deleteMessage
+      summary: Delete message
+      description: Deletes a message. A message is always associated with a single social profile.
+      consumes:
+      - application/json;charset=utf-8
+      produces:
+      - application/json;charset=utf-8
+      parameters:
+      - $ref: '#/parameters/bearerToken'
+      - name: messageId
+        in: path
+        description: The message ID.
+        required: true
+        type: string
+        x-example: 4138476039
+      responses:
+        '200':
+          description: 'Success'
+          schema:
+            "$ref": "#/definitions/EmptyDataEnvelope"
+        '400':
+          description: Bad Request
+          schema:
+            "$ref": "#/definitions/ErrorsResponseEnvelope"
+  "/v1/messages/{messageId}/approve":
+    post:
+      tags:
+      - Messages
+      operationId: approveMessage
+      summary: Approve message
+      description: Approve a message.
+      consumes:
+      - application/json;charset=utf-8
+      produces:
+      - application/json;charset=utf-8
+      parameters:
+      - $ref: '#/parameters/bearerToken'
+      - name: messageId
+        in: path
+        description: The message ID.
+        required: true
+        type: string
+        x-example: 4138476039
+      - in: body
+        name: body
+        required: true
+        schema:
+          "$ref": "#/definitions/ApproveMessageRequest"
+      responses:
+        '200':
+          description: Success
+          schema:
+            "$ref": "#/definitions/EmptyDataEnvelope"
+        '400':
+          description: Bad Request
+          schema:
+            "$ref": "#/definitions/ErrorsResponseEnvelope"
+  "/v1/messages/{messageId}/reject":
+    post:
+      tags:
+      - Messages
+      operationId: rejectMessage
+      summary: Reject message
+      description: Reject a message.
+      consumes:
+      - application/json;charset=utf-8
+      produces:
+      - application/json;charset=utf-8
+      parameters:
+      - $ref: '#/parameters/bearerToken'
+      - name: messageId
+        in: path
+        description: The message ID.
+        required: true
+        type: string
+        x-example: 4138476039
+      - in: body
+        name: body
+        required: true
+        schema:
+          "$ref": "#/definitions/RejectMessageRequest"
+      responses:
+        '200':
+          description: Success
+          schema:
+            "$ref": "#/definitions/EmptyDataEnvelope"
+        '400':
+          description: Bad Request
+          schema:
+            "$ref": "#/definitions/ErrorsResponseEnvelope"
+  "/v1/messages/{messageId}/history":
+    get:
+      tags:
+      - Messages
+      operationId: getMessageHistory
+      summary: Get message review history
+      description: Gets a message's prescreening review history.
+      consumes:
+      - application/json;charset=utf-8
+      produces:
+      - application/json;charset=utf-8
+      parameters:
+      - $ref: '#/parameters/bearerToken'
+      - name: messageId
+        in: path
+        description: The message ID.
+        required: true
+        type: string
+        x-example: 4138476039
+      responses:
+        '200':
+          description: Success
+          schema:
+            "$ref": "#/definitions/MessageReviewResponseEnvelope"
+        '400':
+          description: Bad Request
+          schema:
+            "$ref": "#/definitions/ErrorsResponseEnvelope"
+        '404':
+          description: Not Found
+          schema:
+            "$ref": "#/definitions/ErrorsResponseEnvelope"
+  "/v1/comments/{commentId}":
+    get:
+      tags:
+        - Comments
+      operationId: retrieveComment
+      summary: Retrieve comment
+      description: |
+        Retrieves a comment if it's been through the approvals workflow.
+      produces:
+        - application/json;charset=utf-8
+      parameters:
+        - $ref: '#/parameters/bearerToken'
+        - name: commentId
+          in: path
+          description: The comment ID.
+          required: true
+          type: string
+          x-example: 4138476039
+      responses:
+        '200':
+          description: Success
+          schema:
+            "$ref": "#/definitions/SocialProfileCommentResponseEnvelope"
+        '400':
+          description: Bad Request
+          schema:
+            "$ref": "#/definitions/ErrorsResponseEnvelope"
+  "/v1/comments/{commentId}/approve":
+    post:
+      tags:
+        - Comments
+      operationId: approveComment
+      summary: Approve comment
+      description: Approve a comment.
+      consumes:
+        - application/json;charset=utf-8
+      produces:
+        - application/json;charset=utf-8
+      parameters:
+        - $ref: '#/parameters/bearerToken'
+        - name: commentId
+          in: path
+          description: The comment ID.
+          required: true
+          type: string
+          x-example: 4138476039
+        - in: body
+          name: body
+          required: true
+          schema:
+            "$ref": "#/definitions/ApproveCommentRequest"
+      responses:
+        '200':
+          description: Success
+          schema:
+            "$ref": "#/definitions/EmptyDataEnvelope"
+        '400':
+          description: Bad Request
+          schema:
+            "$ref": "#/definitions/ErrorsResponseEnvelope"
+  "/v1/comments/{commentId}/reject":
+    post:
+      tags:
+        - Comments
+      operationId: rejectComment
+      summary: Reject comment
+      description: Reject a comment.
+      consumes:
+        - application/json;charset=utf-8
+      produces:
+        - application/json;charset=utf-8
+      parameters:
+        - $ref: '#/parameters/bearerToken'
+        - name: commentId
+          in: path
+          description: The comment ID.
+          required: true
+          type: string
+          x-example: 4138476039
+        - in: body
+          name: body
+          required: true
+          schema:
+            "$ref": "#/definitions/RejectCommentRequest"
+      responses:
+        '200':
+          description: Success
+          schema:
+            "$ref": "#/definitions/EmptyDataEnvelope"
+        '400':
+          description: Bad Request
+          schema:
+            "$ref": "#/definitions/ErrorsResponseEnvelope"
+  "/v1/media":
+    post:
+      tags:
+      - Media
+      operationId: createMedia
+      summary: Create media upload url
+      description: |
+        Creates an Amazon S3 upload URL that can be used to transfer media to Hootsuite which ensures the media is available when a scheduled message is sent to the social network.
+        Hootsuite will generate thumbnails and key frames and return a unique media identifier that can be passed when creating a message.
+        Subsequent uploads to an upload URL will be accepted by Amazon but immediately deleted by Hootsuite and only the first valid media file uploaded will be used.
+        The MIME type and size provided in this call must match the MIME type and size of the media uploaded.
+
+        After requesting an upload URL, make a `PUT` request to the `uploadUrl` returned, an example cURL request would look like the following, replace the fields as appropriate:
+
+        ```
+        curl --location --request PUT 'https://hootsuite-video.s3.amazonaws.com/production/12255244_01942650-3d42-42b8-a191-aa84eb45d105.mp4?AWSAccessKeyId=AKIAIM7ASX2JTE3ZFAAA&Expires=1471978770&Signature=b%2B196oEHxySdmE%2FC34ZRL6pXSAI%3D' \
+          --header 'Content-Type: video/mp4' \
+          --header 'Content-Length: 383631' \
+          --data 'SOURCE-MEDIA-LOCATION'
+        ```
+
+        Hootsuite will remove uploaded media 90 days after using the media in a message.
+      parameters:
+      - $ref: '#/parameters/bearerToken'
+      - in: body
+        name: body
+        required: true
+        schema:
+          "$ref": "#/definitions/MediaUploadUrlRequest"
+      consumes:
+      - application/json;charset=utf-8
+      produces:
+      - application/json;charset=utf-8
+      responses:
+        '200':
+          description: Success
+          schema:
+            "$ref": "#/definitions/MediaUploadUrlResponseEnvelope"
+        '400':
+          description: Bad Request
+          schema:
+            "$ref": "#/definitions/ErrorsResponseEnvelope"
+  "/v1/media/{mediaId}":
+    get:
+      tags:
+      - Media
+      operationId: getMedia
+      summary: Retrieve media upload status
+      description: Retrieves the status of a media upload to Hootsuite.
+      consumes:
+      - application/json;charset=utf-8
+      produces:
+      - application/json;charset=utf-8
+      parameters:
+      - $ref: '#/parameters/bearerToken'
+      - name: mediaId
+        in: path
+        description: The Media ID to retrieve
+        required: true
+        type: string
+        x-example: aHR0cHM6Ly9ob290c3VpdGUtdmlkZW8uczMuYW1hem9uYXdzLmNvbS9wcm9kdWN0aW9uLzEyMjU1MjQ0XzgyOTVmZjllLWFkOWYtNGNlNy1iOGE3LTgwNzI0NDAwYTBhZS5tcDQ=
+      responses:
+        '200':
+          description: Success
+          schema:
+            "$ref": "#/definitions/MediaDownloadUrlResponseEnvelope"
+        '400':
+          description: Bad Request
+          schema:
+            "$ref": "#/definitions/ErrorsResponseEnvelope"
+  "/v1/socialProfiles":
+    get:
+      tags:
+      - Social Profiles
+      operationId: getSocialProfiles
+      summary: Retrieve social profiles
+      description: Retrieves the social profiles that the authenticated user has access to.
+      consumes:
+      - application/json;charset=utf-8
+      produces:
+      - application/json;charset=utf-8
+      parameters:
+      - $ref: '#/parameters/bearerToken'
+      responses:
+        '200':
+          description: Success
+          schema:
+            "$ref": "#/definitions/SocialProfilesResponseEnvelope"
+        '400':
+          description: Bad Request
+          schema:
+            "$ref": "#/definitions/ErrorsResponseEnvelope"
+  "/v1/socialProfiles/{socialProfileId}":
+    get:
+      tags:
+      - Social Profiles
+      operationId: getSocialProfile
+      summary: Retrieve social profile
+      description: Retrieve a social profile. Requires BASIC_USAGE permission on the social profile.
+      consumes:
+      - application/json;charset=utf-8
+      produces:
+      - application/json;charset=utf-8
+      parameters:
+      - $ref: '#/parameters/bearerToken'
+      - name: socialProfileId
+        in: path
+        description: The social profile ID
+        required: true
+        type: string
+        x-example: 115185509
+      responses:
+        '200':
+          description: Success
+          schema:
+            "$ref": "#/definitions/SocialProfileResponseEnvelope"
+        '400':
+          description: Bad Request
+          schema:
+            "$ref": "#/definitions/ErrorsResponseEnvelope"
+  "/v1/socialProfiles/{socialProfileId}/teams":
+      get:
+        tags:
+        - Social Profiles
+        operationId: getSocialProfileTeams
+        summary: Retrieve social profile's teams
+        description: Retrieves a list of team IDs with access to a social profile. Requires BASIC_USAGE permission on the social profile or ORG_MANAGE_SOCIAL_PROFILE permission on the organization that owns the social profile.
+        consumes:
+        - application/json;charset=utf-8
+        produces:
+        - application/json;charset=utf-8
+        parameters:
+        - $ref: '#/parameters/bearerToken'
+        - name: socialProfileId
+          in: path
+          description: The social profile ID
+          required: true
+          type: string
+          x-example: 115185509
+        responses:
+          '200':
+            description: Success
+            schema:
+              "$ref": "#/definitions/SocialProfileTeamsResponseEnvelope"
+          '400':
+            description: Bad Request
+            schema:
+              "$ref": "#/definitions/ErrorsResponseEnvelope"
+          '401':
+            description: Unauthorized (Insufficient Permissions to View Profile)
+            schema:
+              "$ref": "#/definitions/ErrorsResponseEnvelope"
+          '404':
+            description: Not Found
+            schema:
+              "$ref": "#/definitions/ErrorsResponseEnvelope"
+  "/v1/members/{memberId}":
+    get:
+      tags:
+      - Members
+      operationId: retrieveMember
+      summary: Retrieve member
+      description: Retrieves a member
+      consumes:
+      - application/json;charset=utf-8
+      produces:
+      - application/json;charset=utf-8
+      parameters:
+      - $ref: '#/parameters/bearerToken'
+      - name: memberId
+        in: path
+        description: The Member ID
+        required: true
+        type: string
+        x-example: 15240789
+      responses:
+        '200':
+          description: Success
+          schema:
+            "$ref": "#/definitions/MemberResponseEnvelope"
+        '400':
+          description: Bad Request
+          schema:
+            "$ref": "#/definitions/ErrorsResponseEnvelope"
+  "/v1/members":
+    post:
+      tags:
+      - Members
+      operationId: createMember
+      summary: Create member
+      description: Creates a member in a Hootsuite organization.  Requires organization manage members permission.
+      consumes:
+      - application/json;charset=utf-8
+      produces:
+      - application/json;charset=utf-8
+      parameters:
+      - $ref: '#/parameters/bearerToken'
+      - in: body
+        name: body
+        required: true
+        schema:
+          "$ref": "#/definitions/CreateMemberRequest"
+      responses:
+        '200':
+          description: Success
+          schema:
+            "$ref": "#/definitions/MemberResponseEnvelope"
+        '400':
+          description: Bad Request
+          schema:
+            "$ref": "#/definitions/ErrorsResponseEnvelope"
+  "/v1/me":
+    get:
+      tags:
+      - Me
+      operationId: retrieveMe
+      summary: Retrieve authenticated member
+      description: Retrieves authenticated member.
+      consumes:
+      - application/json;charset=utf-8
+      produces:
+      - application/json;charset=utf-8
+      parameters:
+      - $ref: '#/parameters/bearerToken'
+      responses:
+        '200':
+          description: Success
+          schema:
+            "$ref": "#/definitions/MemberResponseEnvelope"
+        '400':
+          description: Bad Request
+          schema:
+            "$ref": "#/definitions/ErrorsResponseEnvelope"
+  "/v1/me/organizations":
+    get:
+      tags:
+      - Me
+      operationId: retrieveMeOrganizations
+      summary: Retrieve authenticated member's organizations
+      description: Retrieves the organizations that the authenticated member is in.
+      consumes:
+      - application/json;charset=utf-8
+      produces:
+      - application/json;charset=utf-8
+      parameters:
+      - $ref: '#/parameters/bearerToken'
+      responses:
+        '200':
+          description: Success
+          schema:
+            "$ref": "#/definitions/MemberOrganizationsResponseEnvelope"
+        '400':
+          description: Bad Request
+          schema:
+            "$ref": "#/definitions/ErrorsResponseEnvelope"
+  "/v1/me/socialProfiles":
+    get:
+      tags:
+      - Me
+      operationId: getMySocialProfiles
+      summary: Retrieve authenticated member's social profiles
+      description: Retrieves the social media profiles that the authenticated user has BASIC_USAGE permissions on.
+      consumes:
+      - application/json;charset=utf-8
+      produces:
+      - application/json;charset=utf-8
+      parameters:
+      - $ref: '#/parameters/bearerToken'
+      responses:
+        '200':
+          description: Success
+          schema:
+            "$ref": "#/definitions/OrganizationMemberSocialProfilesResponseEnvelope"
+        '400':
+          description: Bad Request
+          schema:
+            "$ref": "#/definitions/ErrorsResponseEnvelope"
+  "/v1/members/{memberId}/organizations":
+    get:
+      tags:
+      - Members
+      operationId: retrieveMemberOrganizationsById
+      summary: Retrieve member's organizations
+      description: Retrieves the organizations that the member is in.
+      consumes:
+      - application/json;charset=utf-8
+      produces:
+      - application/json;charset=utf-8
+      parameters:
+      - $ref: '#/parameters/bearerToken'
+      - name: memberId
+        in: path
+        description: The member ID
+        required: true
+        type: string
+        x-example: 15240789
+      responses:
+        '200':
+          description: Success
+          schema:
+            "$ref": "#/definitions/MemberOrganizationsResponseEnvelope"
+        '400':
+          description: Bad Request
+          schema:
+            "$ref": "#/definitions/ErrorsResponseEnvelope"
+  "/v1/organizations/{organizationId}/teams":
+    get:
+      tags:
+      - Organizations
+      operationId: getOrganizationTeams
+      summary: Retrieve organization teams
+      description: Retrieves a list of teams for a given organization.
+      consumes:
+      - application/json;charset=utf-8
+      produces:
+      - application/json;charset=utf-8
+      parameters:
+      - $ref: '#/parameters/bearerToken'
+      - name: organizationId
+        in: path
+        description: The Organization ID
+        required: true
+        type: string
+        x-example: 626731
+      responses:
+       '200':
+         description: Success
+         schema:
+           "$ref": "#/definitions/OrganizationTeamsResponseEnvelope"
+       '400':
+         description: Bad Request
+         schema:
+           "$ref": "#/definitions/ErrorsResponseEnvelope"
+       '403':
+         description: Forbidden (Insufficient permissions to view organization teams)
+         schema:
+           "$ref": "#/definitions/ErrorsResponseEnvelope"
+    post:
+      tags:
+      - Teams
+      operationId: createTeam
+      summary: Create team
+      description: Creates a team in an organization.
+      consumes:
+      - application/json;charset=utf-8
+      produces:
+      - application/json;charset=utf-8
+      parameters:
+      - $ref: '#/parameters/bearerToken'
+      - name: organizationId
+        in: path
+        description: The Organization ID
+        required: true
+        type: string
+        x-example: 626731
+      - in: body
+        name: body
+        required: true
+        schema:
+          "$ref": "#/definitions/CreateTeamRequest"
+      responses:
+        '200':
+          description: Success
+          schema:
+            "$ref": "#/definitions/TeamResponseEnvelope"
+        '400':
+          description: Bad Request
+          schema:
+            "$ref": "#/definitions/ErrorsResponseEnvelope"
+  "/v1/organizations/{organizationId}/teams/{teamId}/members/{memberId}":
+    post:
+      tags:
+      - Teams
+      operationId: addMemberToTeam
+      summary: Add member to team
+      description: Adds a member to a team.
+      consumes:
+      - application/json;charset=utf-8
+      produces:
+      - application/json;charset=utf-8
+      parameters:
+      - $ref: '#/parameters/bearerToken'
+      - name: organizationId
+        in: path
+        description: The Organization ID
+        required: true
+        type: string
+        x-example: 626731
+      - name: teamId
+        in: path
+        description: The Team ID
+        required: true
+        type: string
+        x-example: 359493
+      - name: memberId
+        in: path
+        description: The Member ID
+        required: true
+        type: string
+        x-example: 15240789
+      responses:
+        '200':
+          description: Success
+          schema:
+            "$ref": "#/definitions/EmptyDataEnvelope"
+        '400':
+          description: Bad Request
+          schema:
+            "$ref": "#/definitions/ErrorsResponseEnvelope"
+  "/v1/organizations/{organizationId}/teams/{teamId}/members":
+    get:
+      tags:
+      - Teams
+      operationId: getTeamMembers
+      summary: Retrieve team members
+      description: Retrieves the members in a team.
+      consumes:
+      - application/json;charset=utf-8
+      produces:
+      - application/json;charset=utf-8
+      parameters:
+      - $ref: '#/parameters/bearerToken'
+      - name: organizationId
+        in: path
+        description: The Organization ID
+        required: true
+        type: string
+        x-example: 626731
+      - name: teamId
+        in: path
+        description: The Team ID
+        required: true
+        type: string
+        x-example: 359493
+      responses:
+        '200':
+          description: Success
+          schema:
+            "$ref": "#/definitions/TeamMembersResponseEnvelope"
+        '400':
+          description: Bad Request
+          schema:
+            "$ref": "#/definitions/ErrorsResponseEnvelope"
+  "/v1/organizations/{organizationId}/members":
+    get:
+      tags:
+      - Organizations
+      operationId: retrieveOrganizationMembers
+      summary: Retrieve organization members
+      description: Retrieves the members in an organization
+      consumes:
+      - application/json;charset=utf-8
+      produces:
+      - application/json;charset=utf-8
+      parameters:
+      - $ref: '#/parameters/bearerToken'
+      - name: organizationId
+        in: path
+        description: The Organization ID
+        required: true
+        type: string
+        x-example: 626731
+      responses:
+        '200':
+          description: Success
+          schema:
+            "$ref": "#/definitions/OrganizationMembersResponseEnvelope"
+        '400':
+          description: Bad Request
+          schema:
+            "$ref": "#/definitions/ErrorsResponseEnvelope"
+  "/v1/organizations/{organizationId}/members/{memberId}":
+    delete:
+      tags:
+      - Organizations
+      operationId: removeMemberFromOrganization
+      summary: Remove member from organization
+      description: Removes a member from an organization.
+      consumes:
+      - application/json;charset=utf-8
+      produces:
+      - application/json;charset=utf-8
+      parameters:
+      - $ref: '#/parameters/bearerToken'
+      - name: organizationId
+        in: path
+        description: The Organization ID
+        required: true
+        type: string
+        x-example: 626731
+      - name: memberId
+        in: path
+        description: The Member ID
+        required: true
+        type: string
+        x-example: 15240789
+      responses:
+        '200':
+          description: Success
+          schema:
+            "$ref": "#/definitions/EmptyDataEnvelope"
+        '400':
+          description: Bad Request
+          schema:
+            "$ref": "#/definitions/ErrorsResponseEnvelope"
+  "/v1/organizations/{organizationId}/members/{memberId}/permissions":
+    get:
+      tags:
+      - Organizations
+      operationId: retrieveOrganizationMemberOrganizationPermissions
+      summary: Retrieve org member's organization permissions
+      description: Retrieves an organization member’s permissions for the organization.
+      consumes:
+      - application/json;charset=utf-8
+      produces:
+      - application/json;charset=utf-8
+      parameters:
+      - $ref: '#/parameters/bearerToken'
+      - name: organizationId
+        in: path
+        description: The Organization ID
+        required: true
+        type: string
+        x-example: 626731
+      - name: memberId
+        in: path
+        description: The Member ID
+        required: true
+        type: string
+        x-example: 15240789
+      responses:
+        '200':
+          description: Success
+          schema:
+            "$ref": "#/definitions/OrganizationMemberOrganizationPermissionsResponseEnvelope"
+        '400':
+          description: Bad Request
+          schema:
+            "$ref": "#/definitions/ErrorsResponseEnvelope"
+  "/v1/organizations/{organizationId}/members/{memberId}/teams":
+    get:
+      tags:
+      - Organizations
+      operationId: retrieveOrganizationMembersTeams
+      summary: Retrieve org member's teams
+      description: Retrieves the teams an organization member is in.
+      consumes:
+      - application/json;charset=utf-8
+      produces:
+      - application/json;charset=utf-8
+      parameters:
+      - $ref: '#/parameters/bearerToken'
+      - name: organizationId
+        in: path
+        description: The Organization ID
+        required: true
+        type: string
+        x-example: 626731
+      - name: memberId
+        in: path
+        description: The Member ID
+        required: true
+        type: string
+        x-example: 15240789
+      responses:
+        '200':
+          description: Success
+          schema:
+            "$ref": "#/definitions/OrganizationMemberTeamsResponseEnvelope"
+        '400':
+          description: Bad Request
+          schema:
+            "$ref": "#/definitions/ErrorsResponseEnvelope"
+  "/v1/organizations/{organizationId}/teams/{teamId}/members/{memberId}/permissions":
+    get:
+      tags:
+      - Teams
+      operationId: retrieveOrganizationMembersTeamPermissions
+      summary: Retrieve team member's permissions
+      description: Retrieves team member's team permissions.
+      consumes:
+      - application/json;charset=utf-8
+      produces:
+      - application/json;charset=utf-8
+      parameters:
+      - $ref: '#/parameters/bearerToken'
+      - name: organizationId
+        in: path
+        description: The Organization ID
+        required: true
+        type: string
+        x-example: 626731
+      - name: memberId
+        in: path
+        description: The Member ID
+        required: true
+        type: string
+        x-example: 15240789
+      - name: teamId
+        in: path
+        description: The Team ID
+        required: true
+        type: string
+        x-example: 359493
+      responses:
+        '200':
+          description: Success
+          schema:
+            "$ref": "#/definitions/OrganizationMemberTeamPermissionsResponseEnvelope"
+        '400':
+          description: Bad Request
+          schema:
+            "$ref": "#/definitions/ErrorsResponseEnvelope"
+  "/v1/organizations/{organizationId}/teams/{teamId}/socialProfiles":
+    get:
+      tags:
+      - Teams
+      operationId: retrieveOrganizationTeamsSocialProfiles
+      summary: Retrieve org team’s social profiles
+      description: Retrieves the organization's social profiles that an organization team can access.
+      consumes:
+      - application/json;charset=utf-8
+      produces:
+      - application/json;charset=utf-8
+      parameters:
+      - $ref: '#/parameters/bearerToken'
+      - name: organizationId
+        in: path
+        description: The Organization ID
+        required: true
+        type: string
+        x-example: 626731
+      - name: teamId
+        in: path
+        description: The Team ID
+        required: true
+        type: string
+        x-example: 359493
+      responses:
+        '200':
+          description: Success
+          schema:
+            "$ref": "#/definitions/OrganizationTeamSocialProfilesResponseEnvelope"
+        '400':
+          description: Bad Request
+          schema:
+            "$ref": "#/definitions/ErrorsResponseEnvelope"
+  "/v1/organizations/{organizationId}/members/{memberId}/socialProfiles":
+    get:
+      tags:
+      - Organizations
+      operationId: retrieveOrganizationMembersSocialProfiles
+      summary: Retrieve org member’s social profiles
+      description: Retrieves the organization's social profiles that an organization member can access.
+      consumes:
+      - application/json;charset=utf-8
+      produces:
+      - application/json;charset=utf-8
+      parameters:
+      - $ref: '#/parameters/bearerToken'
+      - name: organizationId
+        in: path
+        description: The Organization ID
+        required: true
+        type: string
+        x-example: 626731
+      - name: memberId
+        in: path
+        description: The Member ID
+        required: true
+        type: string
+        x-example: 15240789
+      responses:
+        '200':
+          description: Success
+          schema:
+            "$ref": "#/definitions/OrganizationMemberSocialProfilesResponseEnvelope"
+        '400':
+          description: Bad Request
+          schema:
+            "$ref": "#/definitions/ErrorsResponseEnvelope"
+  "/v1/organizations/{organizationId}/members/{memberId}/socialProfiles/{socialProfileId}/permissions":
+    get:
+      tags:
+      - Organizations
+      operationId: retrieveOrganizationSocialProfilePermissions
+      summary: Retrieve org member’s social profile permissions
+      description: Retrieves an organization member’s permissions for a social profile.
+      consumes:
+      - application/json;charset=utf-8
+      produces:
+      - application/json;charset=utf-8
+      parameters:
+      - $ref: '#/parameters/bearerToken'
+      - name: organizationId
+        in: path
+        description: The Organization ID
+        required: true
+        type: string
+        x-example: 626731
+      - name: memberId
+        in: path
+        description: The Member ID
+        required: true
+        type: string
+        x-example: 15240789
+      - name: socialProfileId
+        in: path
+        description: The Social Profile ID
+        required: true
+        type: string
+        x-example: 115185509
+      responses:
+        '200':
+          description: Success
+          schema:
+            "$ref": "#/definitions/OrganizationMemberSocialProfilePermissionsResponseEnvelope"
+        '400':
+          description: Bad Request
+          schema:
+            "$ref": "#/definitions/ErrorsResponseEnvelope"
+
+  "/v1/teams/{teamId}":
+    get:
+      tags:
+      - Teams
+      operationId: getTeam
+      summary: Retrieve team
+      description: Retrieves a team with a given team ID.
+      consumes:
+      - application/json;charset=utf-8
+      produces:
+      - application/json;charset=utf-8
+      parameters:
+      - $ref: '#/parameters/bearerToken'
+      - name: teamId
+        in: path
+        description: The Team ID
+        required: true
+        type: string
+        x-example: 359493
+      responses:
+       '200':
+         description: Success
+         schema:
+           "$ref": "#/definitions/TeamResponseEnvelope"
+       '400':
+         description: Bad Request
+         schema:
+           "$ref": "#/definitions/ErrorsResponseEnvelope"
+       '403':
+         description: Forbidden (Insufficient permissions to view team)
+         schema:
+           "$ref": "#/definitions/ErrorsResponseEnvelope"
+
+  "/scim/v2/Users":
+    post:
+      tags:
+      - SCIM 2.0
+      operationId: createScimUser
+      summary: Create User
+      description: Creates a Hootsuite user using the SCIM 2.0 protocol.
+      consumes:
+      - application/json;charset=utf-8
+      produces:
+      - application/json;charset=utf-8
+      parameters:
+      - $ref: '#/parameters/bearerToken'
+      - in: body
+        name: body
+        required: true
+        schema:
+          "$ref": "#/definitions/CreateReplaceScimUser"
+      responses:
+        '200':
+          description: Success
+          schema:
+            "$ref": "#/definitions/ScimUser"
+        '400':
+          description: Bad Request
+          schema:
+            "$ref": "#/definitions/ScimErrorResponse"
+
+    get:
+      tags:
+      - SCIM 2.0
+      operationId: getScimUsers
+      summary: Get Users
+      description: Retrieves Hootsuite users using the SCIM 2.0 protocol. Support equals filtering on username.
+      consumes:
+      - application/json;charset=utf-8
+      produces:
+      - application/json;charset=utf-8
+      parameters:
+      - $ref: '#/parameters/bearerToken'
+      - name: filter
+        in: query
+        description: Filtering by username.
+        required: false
+        type: string
+      - name: count
+        in: query
+        description: The maximum number of results to return.
+        required: false
+        type: number
+      - name: startIndex
+        in: query
+        description: The starting index for pagination.
+        required: false
+        type: number
+      responses:
+        '200':
+          description: Success
+          schema:
+            "$ref": "#/definitions/ScimUsers"
+  "/scim/v2/Users/{memberId}":
+    get:
+      tags:
+      - SCIM 2.0
+      operationId: getScimUser
+      summary: Get User
+      description: Retrieves a Hootsuite user using the SCIM 2.0 protocol.
+      consumes:
+      - application/json;charset=utf-8
+      produces:
+      - application/json;charset=utf-8
+      parameters:
+      - $ref: '#/parameters/bearerToken'
+      - name: memberId
+        in: path
+        description: The Member ID
+        required: true
+        type: string
+        x-example: 15240789
+      responses:
+        '200':
+          description: Success
+          schema:
+            "$ref": "#/definitions/ScimUser"
+    put:
+      tags:
+      - SCIM 2.0
+      operationId: replaceScimUser
+      summary: Replace User
+      description: Updates a Hootsuite user using the SCIM 2.0 protocol. To see the JSON object attributes required by the PUT endpoint, call the /Schemas endpoint. For a complete example request, see the [SCIM specification](https://tools.ietf.org/html/rfc7644#section-3.5.1)
+      consumes:
+      - application/json;charset=utf-8
+      produces:
+      - application/json;charset=utf-8
+      parameters:
+      - $ref: '#/parameters/bearerToken'
+      - in: body
+        name: body
+        required: true
+        schema:
+          "$ref": "#/definitions/CreateReplaceScimUser"
+      - name: memberId
+        in: path
+        description: The Member ID
+        required: true
+        type: string
+        x-example: 15240789
+      responses:
+        '200':
+          description: Success
+          schema:
+            "$ref": "#/definitions/ScimUser"
+        '400':
+          description: Bad Request
+          schema:
+            "$ref": "#/definitions/ScimErrorResponse"
+    patch:
+      tags:
+      - SCIM 2.0
+      operationId: modifyScimUser
+      summary: Modify User
+      description: |
+        Modify one or more attributes of a Hootsuite user. For a complete example request, see the [SCIM specification](https://tools.ietf.org/html/rfc7644#section-3.5.2).
+      consumes:
+      - application/json;charset=utf-8
+      produces:
+      - application/json;charset=utf-8
+      parameters:
+      - $ref: '#/parameters/bearerToken'
+      - in: body
+        name: body
+        required: true
+        schema:
+          "$ref": "#/definitions/ScimPatchUser"
+      - name: memberId
+        in: path
+        description: The member ID
+        required: true
+        type: string
+        x-example: 1234567
+      responses:
+        '200':
+          description: Success
+          schema:
+            "$ref": "#/definitions/ScimUser"
+        '400':
+          description: Bad Request
+          schema:
+            "$ref": "#/definitions/ScimErrorResponse"
+  "/scim/v2/Groups":
+    post:
+      tags:
+        - SCIM 2.0
+      operationId: createScimGroup
+      summary: Create Group
+      description: Creates a Hootsuite team using the SCIM 2.0 protocol.
+      consumes:
+        - application/json;charset=utf-8
+      produces:
+        - application/json;charset=utf-8
+      parameters:
+        - $ref: '#/parameters/bearerToken'
+        - in: body
+          name: body
+          required: true
+          schema:
+            "$ref": "#/definitions/CreateReplaceScimGroup"
+      responses:
+        '200':
+          description: Success
+          schema:
+            "$ref": "#/definitions/ScimGroup"
+        '400':
+          description: Bad Request
+          schema:
+            "$ref": "#/definitions/ScimErrorResponse"
+    get:
+      tags:
+        - SCIM 2.0
+      operationId: getScimGroups
+      summary: Get Groups
+      description: Retrieves Hootsuite teams using the SCIM 2.0 protocol. Support equals filtering on displayName.
+      consumes:
+        - application/json;charset=utf-8
+      produces:
+        - application/json;charset=utf-8
+      parameters:
+        - $ref: '#/parameters/bearerToken'
+        - name: filter
+          in: query
+          description: Filtering by displayName.
+          required: false
+          type: string
+        - name: count
+          in: query
+          description: The maximum number of results to return.
+          required: false
+          type: number
+        - name: startIndex
+          in: query
+          description: The starting index for pagination.
+          required: false
+          type: number
+      responses:
+        '200':
+          description: Success
+          schema:
+            "$ref": "#/definitions/ScimGroups"
+
+  "/scim/v2/Groups/{groupId}":
+    get:
+      tags:
+        - SCIM 2.0
+      operationId: getScimGroup
+      summary: Get Group
+      description: Retrieves a Hootsuite team using the SCIM 2.0 protocol.
+      consumes:
+        - application/json;charset=utf-8
+      produces:
+        - application/json;charset=utf-8
+      parameters:
+        - $ref: '#/parameters/bearerToken'
+        - name: teamId
+          in: path
+          description: The team Id
+          required: true
+          type: string
+          x-example: 15240789
+      responses:
+        '200':
+          description: Success
+          schema:
+            "$ref": "#/definitions/ScimGroup"
+    put:
+      tags:
+        - SCIM 2.0
+      operationId: replaceScimGroup
+      summary: Replace Group
+      description: Updates a Hootsuite team using the SCIM 2.0 protocol. For a complete example request, see the [SCIM specification](https://tools.ietf.org/html/rfc7644#section-3.5.1)
+      consumes:
+        - application/json;charset=utf-8
+      produces:
+        - application/json;charset=utf-8
+      parameters:
+        - $ref: '#/parameters/bearerToken'
+        - in: body
+          name: body
+          required: true
+          schema:
+            "$ref": "#/definitions/CreateReplaceScimGroup"
+        - name: teamId
+          in: path
+          description: The Team ID
+          required: true
+          type: string
+          x-example: 15240789
+      responses:
+        '200':
+          description: Success
+          schema:
+            "$ref": "#/definitions/ScimGroup"
+        '400':
+          description: Bad Request
+          schema:
+            "$ref": "#/definitions/ScimErrorResponse"
+    patch:
+      tags:
+        - SCIM 2.0
+      operationId: modifyScimGroup
+      summary: Modify Group
+      description: |
+        Modify one or more attributes of a Hootsuite team. For a complete example request, see the [SCIM specification](https://tools.ietf.org/html/rfc7644#section-3.5.2).
+      consumes:
+        - application/json;charset=utf-8
+      produces:
+        - application/json;charset=utf-8
+      parameters:
+        - $ref: '#/parameters/bearerToken'
+        - in: body
+          name: body
+          required: true
+          schema:
+            "$ref": "#/definitions/ScimPatchGroup"
+        - name: teamId
+          in: path
+          description: The team Id
+          required: true
+          type: string
+          x-example: 1234567
+      responses:
+        '200':
+          description: Success
+          schema:
+            "$ref": "#/definitions/ScimGroup"
+        '400':
+          description: Bad Request
+          schema:
+            "$ref": "#/definitions/ScimErrorResponse"
+
+  "/scim/v2/ResourceTypes":
+    get:
+      tags:
+      - SCIM 2.0
+      operationId: getScimResourceTypes
+      summary: Get Resource Types
+      description: Retrieves the configuration for all supported SCIM resource types
+      consumes:
+      - application/json;charset=utf-8
+      produces:
+      - application/json;charset=utf-8
+      parameters:
+      - $ref: '#/parameters/bearerToken'
+      responses:
+        '200':
+          description: Success
+          schema:
+            "$ref": "#/definitions/ScimResourceTypes"
+  "/v1/interactions/{socialNetworkType}":
+    get:
+      tags:
+        - Interactions
+      summary: Get Interactions
+      description: |
+        Retrieves the interactions between two users of a particular social network type such as direct messages, comments, and posts.
+
+        This API is only available to Enterprise users.
+      operationId: Get
+      responses:
+        '200':
+          description: Success
+          schema:
+            "$ref": "#/definitions/InteractionsGetResponse"
+        '400':
+          description: Bad Request
+          schema:
+            "$ref": "#/definitions/Error"
+      parameters:
+      - $ref: '#/parameters/bearerToken'
+      - name: socialNetworkType
+        in: path
+        required: true
+        type: string
+        description: Valid options are `facebook` and `twitter`.
+      - name: socialNetworkId
+        in: query
+        required: true
+        type: string
+        description: ID of the user owned by the calling member or organization. This is the ID from the social network itself, not the Hootsuite social profile ID.
+      - name: targetSocialNetworkId
+        in: query
+        required: true
+        type: string
+        description: ID of the user whose interactions with your social profile you are interested in. This is the ID from the social network itself, not the Hootsuite social profile ID.
+      - name: cursor
+        in: query
+        required: false
+        type: string
+        description: Used for pagination.
+      - name: limit
+        in: query
+        required: false
+        type: integer
+        format: int32
+        description: Maximum number of results to retrieve. Defaults to 10.
+
+definitions:
+  AnyValue: {}
+
+  DeleteMessageResponseEnvelope:
+    type: object
+    properties:
+      data:
+        type: array
+        description: The data response envelope.
+        items:
+          "$ref": ""
+  SocialProfileMessagesResponseEnvelope:
+    type: object
+    required:
+    - data
+    properties:
+      data:
+        type: array
+        description: The data response envelope.
+        items:
+          "$ref": "#/definitions/SocialProfileMessage"
+      metadata:
+        title: metadata
+        type: object
+        description: The metadata response envelope.
+        properties:
+          cursor:
+            title: cursor
+            type: object
+            description: The cursor to paginate the results. A cursor will be created if the number of results exceeds the limit set in the query parameters.
+            properties:
+              next:
+                type: string
+                description: A cursor to the next page of results. This is set to null if no more pages exist.
+                example: 1577887200000:4138476039:0
+              previous:
+                type: string
+                description: A cursor to the previous page of results. This is set to null if no previous pages exist.
+                example: 1577887200000:4138476039:1
+  Message:
+    type: object
+    properties:
+      text:
+        type: string
+        description: The message text to publish.
+        example: 5 trends that will change how we use social media this year http://owl.li/YuNr2
+      socialProfileIds:
+        type: array
+        description: The social profiles that the message will be posted to.
+        items:
+          type: string
+          example: '115185509'
+      scheduledSendTime:
+        type: string
+        description: The time the message is scheduled to be sent in UTC time, [ISO-8601](https://en.wikipedia.org/wiki/ISO_8601) format. Missing or different timezones will not be accepted, to ensure there is no ambiguity about scheduled time. Dates must end with 'Z' to be accepted.
+        example: '2020-01-01T14:00:00Z'
+      webhookUrls:
+        type: array
+        description: The webhook URL(s) to call to when the message’s state changes.
+        items:
+          type: string
+          example: https://myserver.com/inbound
+      tags:
+        type: array
+        description: The Hootsuite message tags to apply to the message. To set tags the social profile must belong to an organization. Tags are case sensitive. Limited permission members can only use the existing tags for organization and cannot create new ones. See more about message tags at the Hootsuite Help Center.<br/>Not supported by Pinterest.
+        items:
+          type: string
+          example: test_tag
+      targeting:
+        "$ref": "#/definitions/TargetingOptions"
+      privacy:
+        "$ref": "#/definitions/PrivacyOptions"
+      location:
+        "$ref": "#/definitions/Location"
+      emailNotification:
+        type: boolean
+        description: A flag to determine whether email notifications are sent when the message is published.
+        example: true
+      mediaUrls:
+        type: array
+        description: The ow.ly media to attach to the message
+        items:
+          type: object
+          properties:
+              url:
+                type: string
+                description: The media URL.
+                example: http://static.ow.ly/photos/normal/cS5.jpg
+      media:
+        type: array
+        description: The media to attach to the message
+        items:
+          type: object
+          properties:
+              id:
+                type: string
+                description: The media ID.
+                example: aHR0cDovL2V4YW1wbGUub3Jn
+              videoOptions:
+                type: object
+                description: The metadata to set for a video.
+                properties:
+                    facebook:
+                        type: object
+                        description: Facebook video metadata. Optional.
+                        properties:
+                            title:
+                                type: string
+                                description: The video title
+                                example: 'My Video'
+                            category:
+                                type: string
+                                description: The video category
+                                example: 'ENTERTAINMENT'
+                                enum:
+                                - BEAUTY_FASHION
+                                - BUSINESS
+                                - CARS_TRUCKS
+                                - COMEDY
+                                - CUTE_ANIMALS
+                                - ENTERTAINMENT
+                                - FAMILY
+                                - FOOD_HEALTH
+                                - HOME
+                                - LIFESTYLE
+                                - MUSIC
+                                - NEWS
+                                - POLITICS
+                                - SCIENCE
+                                - SPORTS
+                                - TECHNOLOGY
+                                - VIDEO_GAMING
+                                - OTHER
+      extendedInfo:
+        type: "array"
+        description: "Object used to send social profile metadata. Only available for Pinterest messages at this time."
+        items:
+          type: "object"
+          properties:
+            socialProfileType:
+              type: "string"
+              description: "The social profile type that this extendedInfo object is for."
+              example: "PINTEREST"
+              enum:
+                - PINTEREST
+            socialProfileId:
+              type: "string"
+              description: "The social profile ID that this extendedInfo object is for."
+              example: "123456789"
+            data:
+              type: "object"
+              description: "Social profile specific metadata."
+              properties:
+                boardId:
+                  type: "string"
+                  description: "Pinterest board ID for Pin"
+                  example: "123456789012345678"
+                destinationUrl:
+                  type: "string"
+                  description: "Website for Pin"
+                  example: "https://www.hootsuite.com"
+  SocialProfileMessageResponseEnvelope:
+    type: object
+    properties:
+      data:
+        description: The data response envelope.
+        "$ref": "#/definitions/SocialProfileMessage"
+    description: The response data wrapper for a social profile message
+  SocialProfileCommentResponseEnvelope:
+    type: object
+    properties:
+      data:
+        description: The data response envelope.
+        "$ref": "#/definitions/SocialProfileComment"
+    description: The response data wrapper for a social profile comment
+  SocialProfileComment:
+    type: object
+    required:
+      - id
+      - reviewState
+    properties:
+      comment:
+        type: string
+        description: 'The comment text.'
+        example: 'This is an example comment.'
+      createdDate:
+        type: string
+        description: 'The time the message is scheduled to be sent in UTC time, [ISO-8601](https://en.wikipedia.org/wiki/ISO_8601) format. Missing or different timezones will not be accepted, to ensure there is no ambiguity about scheduled time. Dates must end with "Z" to be accepted.'
+        example: '2019-01-24T00:51:33.000Z'
+      creatorId:
+        type: string
+        description: 'The author member ID.'
+        example: '12345'
+      creatorName:
+        type: string
+        description: 'The author member name.'
+        example: 'Joe Smith'
+      id:
+        type: string
+        description: 'The comment ID.'
+        example: '4138476039'
+      parentId:
+        type: string
+        description: 'The social network native ID of the parent post.'
+        example: '126123123_12314'
+      parentType:
+        type: string
+        description: 'The parent content type.'
+        enum:
+          - POST
+          - COMMENT
+      reviewState:
+        type: string
+        description: The comment's current review state.
+        enum:
+          - COMPLETED
+          - DELETED
+          - EXPIRED_APPROVAL
+          - FAILED
+          - PENDING_APPROVAL
+          - REJECTED
+      sequenceNumber:
+        type: number
+        description: 'The number representing which step in the approval process the message is on, or null if the comment is not subject to approval.'
+        example: 3
+      socialProfileId:
+        type: string
+        description: 'The social profile that the comment will be published to.'
+        example: '12345'
+  SocialProfileMessage:
+    type: object
+    required:
+    - id
+    - state
+    properties:
+      id:
+        type: string
+        description: The message ID.
+        example: '4138476039'
+      state:
+        type: string
+        description: The message state.
+        example: SCHEDULED
+        enum:
+        - SCHEDULED
+        - SUBMITTED
+        - PENDING_APPROVAL
+        - SENT
+        - SEND_FAILED_PERMANENTLY
+        - REJECTED
+      text:
+        type: string
+        description: The message text to publish.
+        example: 5 trends that will change how we use social media this year http://owl.li/YuNr2
+      socialProfile:
+        title: socialProfileReference
+        type: object
+        description: The social profile that the message will be published to.
+        properties:
+          id:
+            type: string
+            description: The social profile ID.
+            example: '115185509'
+          externalURL:
+            type: string
+            description: The external public URL of the social profile.
+            example: 'https://www.linkedin.com/in/l-lhs-8654321'
+      scheduledSendTime:
+        type: string
+        description: The time the message is scheduled to be sent in UTC time, [ISO-8601](https://en.wikipedia.org/wiki/ISO_8601) format. Missing or different timezones will not be accepted, to ensure there is no ambiguity about scheduled time. Dates must end with 'Z' to be accepted.
+        example: '2018-10-25T10:35:00Z'
+      webhookUrls:
+        type: array
+        description: The webhook URL(s) to call to when the message’s state changes.
+        items:
+          type: string
+          example: https://myserver.com/inbound
+      tags:
+        type: array
+        description: The Hootsuite message tags to apply to the message. To set tags the social profile must belong to an organization. Tags are case sensitive. Limited permission members can only use the existing tags for organization and cannot create new ones. See more about message tags at the Hootsuite Help Center.
+        items:
+          type: string
+          example: test_tag
+      targeting:
+        title: targetingOptions
+        type: object
+        description: Social network targeting options to be applied when publishing the message.
+        properties:
+          facebookPage:
+            description: Targeting options for Facebook Page.
+            "$ref": "#/definitions/FacebookPageTargeting"
+          linkedInCompany:
+            description: Targeting options for LinkedIn Company.
+            "$ref": "#/definitions/LinkedInCompanyTargeting"
+      privacy:
+        title: privacyOptions
+        type: object
+        description: Social network privacy options to be applied when publishing the message.
+        properties:
+          facebook:
+            description: Privacy options for Facebook Profile.
+            "$ref": "#/definitions/FacebookPrivacy"
+          linkedIn:
+            description: Privacy options for LinkedIn Profile.
+            "$ref": "#/definitions/LinkedInPrivacy"
+      location:
+        description: The message’s geolocation in decimal degrees for latitude and longitude. Twitter allows users to set the location for a post manually. The location object takes in Decimal Degrees for latitude and longitude. Decimal degrees are an alternative to using degrees, minutes, and seconds (DMS). The values for latitude and longitude are bounded by ±90° and ±180° respectively. Positive latitudes are north of the equator, negative latitudes are south of the equator. Positive longitudes are east of Prime Meridian, negative longitudes are west of the Prime Meridian.
+        "$ref": "#/definitions/Location"
+      emailNotification:
+        type: boolean
+        description: A flag to determine whether email notifications are sent when the message is published.
+        example: true
+      mediaUrls:
+        type: array
+        description: The ow.ly media attached to the message
+        items:
+          "$ref": "#/definitions/MediaUrl"
+      media:
+        type: array
+        description: The media attached to the message
+        items:
+          "$ref": "#/definitions/Media"
+      extendedInfo:
+        type: "array"
+        description: "Social profile metadata attached to the message. Only available for Pinterest messages at this time."
+        items:
+          type: "object"
+          properties:
+            socialProfileType:
+              type: "string"
+              description: "The social profile type that this extendedInfo object is for."
+              example: "PINTEREST"
+              enum:
+                - PINTEREST
+            socialProfileId:
+              type: "string"
+              description: "The social profile ID that this extendedInfo object is for."
+              example: "123456789"
+            data:
+              type: "object"
+              description: "Social profile specific meta data."
+              properties:
+                boardId:
+                  type: "string"
+                  description: "Pinterest board ID for Pin"
+                  example: "123456789012345678"
+                destinationUrl:
+                  type: "string"
+                  description: "Website for Pin"
+                  example: "https://www.hootsuite.com"
+      postId:
+        type: string
+        description: The external message ID used by social network for this message. Only set once the message has been published.
+        example: '705207140236001282'
+      postUrl:
+        type: string
+        description: The URL of the message live on the social network. Only set once the message has been published. Only available for Facebook and LinkedIn messages at this time.
+        example: https://www.facebook.com/177463958820/posts/10155617296368821
+      createdByMember:
+        title: memberReference
+        type: object
+        description: The identifier of the member who originally created the message.
+        properties:
+          id:
+            type: string
+            description: ID of member.
+            example: '1389211223'
+      lastUpdatedByMember:
+        title: memberReference
+        type: object
+        description: The identifier of the member who last updated the message.
+        properties:
+          id:
+            type: string
+            description: ID of member.
+            example: '1389211222'
+      sequenceNumber:
+        type: number
+        description: The number representing which step in the approval process the message is on, or null if the message is not subject to approval.
+        example: 3
+  Location:
+    description: The message’s geolocation in decimal degrees for latitude and longitude. Twitter allows users to set the location for a post manually. The location object takes in Decimal Degrees for latitude and longitude. Decimal degrees are an alternative to using degrees, minutes, and seconds (DMS). The values for latitude and longitude are bounded by ±90° and ±180° respectively. Positive latitudes are north of the equator, negative latitudes are south of the equator. Positive longitudes are east of Prime Meridian, negative longitudes are west of the Prime Meridian.<br/>Not supported by Pinterest.
+    type: object
+    properties:
+      latitude:
+        type: number
+        format: double
+        description: The latitude in decimal degrees. Must be between -90 to 90.
+        example: 57.64911
+      longitude:
+        type: number
+        format: double
+        description: The longitude in decimal degrees. Must be between -180 to 180.
+        example: 10.40744
+  TargetingOptions:
+    type: object
+    description: Social network targeting options to be applied when publishing the message.
+    properties:
+      facebookPage:
+        description: Targeting options for Facebook Page.
+        "$ref": "#/definitions/FacebookPageTargeting"
+      linkedInCompany:
+        description: Targeting options for LinkedIn Company.
+        "$ref": "#/definitions/LinkedInCompanyTargeting"
+      linkedInV2Company:
+        description: Targeting options for LinkedIn Company V2.
+        "$ref": "#/definitions/LinkedInV2CompanyTargeting"
+  FacebookPageTargeting:
+    description: Targeting options for Facebook Page. Note that recently Facebook has deprecated feed targeting fields `ageMax`, `genders`, and `locales`.
+    type: object
+    properties:
+      ageMin:
+        type: integer
+        description: Minimum age to target the message at. If used, must be value of 13, 17, 18, 19, 21.
+        example: 45
+      education:
+        type: array
+        description: Education level to target the message at.
+        items:
+          type: string
+          example: collegeGrad
+          enum:
+          - highSchool
+          - college
+          - collegeGrad
+      interestedIn:
+        type: array
+        description: Interested in preferences to target the message at.
+        items:
+          type: string
+          example: female
+          enum:
+          - male
+          - female
+      relationshipStatus:
+        type: array
+        description: Relationship status to target the message at.
+        items:
+          type: string
+          example: single
+          enum:
+          - single
+          - relationship
+          - married
+          - engaged
+      countries:
+        type: array
+        description: Country to target the message at.
+        items:
+          type: object
+          properties:
+            k:
+              type: string
+              description: The full name of the country being targeted.
+              example: Canada
+            v:
+              type: string
+              description: The 2-digit ISO 3166 format code, as provided by Facebook.
+              example: CA
+      regions:
+        type: array
+        description: Region to target the message at. Note that regions can only be specified when there is exactly one country targeted. Limit 200.
+        items:
+          type: object
+          properties:
+            k:
+              type: string
+              description: The full name of the region being targeted.
+              example: British Columbia
+            v:
+              type: string
+              description: The region key, as provided by Facebook.
+              example: '2'
+      cities:
+        type: array
+        description: City to target the message at. Note that cities can only be specified when there is exactly one country targeted. Limit 250.
+        items:
+          type: object
+          properties:
+            k:
+              type: string
+              description: The full name of the city being targeted.
+              example: Burnaby, BC
+            v:
+              type: string
+              description: The city key, as provided by Facebook.
+              example: '292466'
+      zips:
+        type: array
+        description: Zip/Postal Code to target the message at. Limit 50,000.
+        items:
+          type: object
+          properties:
+            k:
+              type: string
+              description: The name of the zip/postal code being targeted.
+              example: K1S
+            v:
+              type: string
+              description: The zip/postal code key, as provided by Facebook.
+              example: 'CA:K1S'
+  LinkedInCompanyTargeting:
+    description: Targeting options for LinkedIn Company. Legacy field, please do not use.
+    type: object
+    properties:
+      companySize:
+        type: array
+        description: |
+            Company size to target the message at.
+
+            self:             'Self employed'
+
+            1-10:             '1 to 10 employees'
+
+            11-50:            '11 to 50 employees'
+
+            51-200:           '51 to 200 employees'
+
+            201-500:          '201 to 500 employees'
+
+            501-1000:         '501 to 1000 employees'
+
+            1001-5000:        '1001 to 5000 employees'
+
+            5001-10000:       '5001 to 10000 employees'
+
+            10001:            '10001+ employees'
+
+        items:
+          type: string
+          example: 51-200
+      geography:
+        type: array
+        description: |+
+            Geography to target the message at.  Valid values:
+
+            af: 'Africa'
+
+            af.cm: 'Cameroon'
+
+            af.dz: 'Algeria'
+
+            af.eg: 'Egypt'
+
+            af.gh: 'Ghana'
+
+            af.ke: 'Kenya'
+
+            af.ma: 'Morocco'
+
+            af.ng: 'Nigeria'
+
+            af.tn: 'Tunisia'
+
+            af.tz: 'Tanzania'
+
+            af.ug: 'Uganda'
+
+            af.za: 'South Africa'
+
+            af.za.*.5852: 'Cape Town Area, south Africa'
+
+            af.za.*.5855 : 'Durban Area, South Africa'
+
+            af.za.*.5862: 'Johannesburg Area, South Africa'
+
+            af.zw: 'Zimbabwe'
+
+            aq: 'Antarctica'
+
+            as: 'Asia'
+
+            as.bd: 'Bangladesh'
+
+            as.cn: 'China'
+
+            as.cn.*.8909: 'Shanghai City, China'
+
+            as.cn.*.8910: 'Shenzhen, Guangdong, China'
+
+            as.cn.*.8911: 'Beijing City, China'
+
+            as.cn.*.8919: 'Guangzhou, Guangdong, China'
+
+            as.hk: 'Hong Kong'
+
+            as.id: 'Indonesia'
+
+            as.id.*.8594: 'Greater Jakarta Area, Indonesia'
+
+            as.in: 'India'
+
+            as.in.an: 'Andaman & Nicobar Islands'
+
+            as.in.ap: 'Andhra Pradesh'
+
+            as.in.ap.6508: 'Hyderabad Area, India'
+
+            as.in.ar: 'Arunachal Pradesh'
+
+            as.in.as: 'Assam'
+
+            as.in.br: 'Bihar'
+
+            as.in.cg: 'Chattisgarh'
+
+            as.in.ch: 'Chandigarh'
+
+            as.in.dd: 'Daman & Diu'
+
+            as.in.dl: 'Delhi'
+
+            as.in.dl.7151: 'New Delhi Area, India'
+
+            as.in.dn: 'Dadra & Nagar Haveli'
+
+            as.in.ga: 'Goa'
+
+            as.in.gj: 'Gujarat'
+
+            as.in.gj.6552: 'Vadodara Area, India'
+
+            as.in.gj.7065: 'Ahmedabad Area, India'
+
+            as.in.hp: 'Himachal Pradesh'
+
+            as.in.hr: 'Haryana'
+
+            as.in.hr.7391: 'Gurgaon, India'
+
+            as.in.jh: 'Jharkhand'
+
+            as.in.jk: 'Jammu & Kashmir'
+
+            as.in.ka: 'Karnataka'
+
+            as.in.ka.7127: 'Bengaluru Area, India'
+
+            as.in.kl: 'Kerala'
+
+            as.in.kl.6477: 'Cochin Area, India'
+
+            as.in.ld: 'Lakshadweep'
+
+            as.in.mh: 'Maharashtra'
+
+            as.in.mh.6751: 'Nagpur Area, India'
+
+            as.in.mh.7150: 'Mumbai Area, India'
+
+            as.in.mh.7350: 'Pune Area, India'
+
+            as.in.ml: 'Meghalaya'
+
+            as.in.mn: 'Manipur'
+
+            as.in.mp: 'Madhya Pradesh'
+
+            as.in.mp.7382: 'Indore Area, India'
+
+            as.in.mz: 'Mizoram'
+
+            as.in.nl: 'Nagaland'
+
+            as.in.or: 'Orissa'
+
+            as.in.pb: 'Punjab'
+
+            as.in.pb.6879: 'Chandigarh Area, India'
+
+            as.in.py: 'Pondicherry'
+
+            as.in.rj: 'Rajasthan'
+
+            as.in.rj.7287: 'Jaipur Area, India'
+
+            as.in.sk: 'Sikkim'
+
+            as.in.tn: 'Tamil Nadu'
+
+            as.in.tn.6472: 'Coimbatore Area, India'
+
+            as.in.tn.6891: 'Chennai Area, India'
+
+            as.in.tr: 'Tripura'
+
+            as.in.ul: 'Uttarakhand'
+
+            as.in.up: 'Uttar Pradesh'
+
+            as.in.up.7093: 'Lucknow Area, India'
+
+            as.in.up.7392: 'Noida Area, India'
+
+            as.in.wb: 'West Bengal'
+
+            as.in.wb.7003: 'Kolkata Area, India'
+
+            as.jp: 'Japan'
+
+            as.kr: 'Korea'
+
+            as.kr.*.7700: 'Gangnam-gu, Seoul, Korea'
+
+            as.lk: 'Sri Lanka'
+
+            as.my: 'Malaysia'
+
+            as.my.*.7945: 'Selangor, Malaysia'
+
+            as.my.*.7960: 'Kuala Lumpur, Malaysia'
+
+            as.np: 'Nepal'
+
+            as.ph: 'Philippines'
+
+            as.sg: 'Singapore'
+
+            as.th: 'Thailand'
+
+            as.tw: 'Taiwan'
+
+            as.vn: 'Vietnam'
+
+            eu: 'Europe'
+
+            eu.at: 'Austria'
+
+            eu.be: 'Belgium'
+
+            eu.be.*.4918: 'Antwerp Area, Belgium'
+
+            eu.be.*.4920: 'Brussels Area, Belgium'
+
+            eu.bg: 'Bulgaria'
+
+            eu.ch: 'Switzerland'
+
+            eu.ch.*.4930: 'Geneva Area, Switzerland'
+
+            eu.ch.*.4938: 'Zürich Area, Switzerland'
+
+            eu.cz: 'Czech Republic'
+
+            eu.de: 'Germany'
+
+            eu.de.*.4953: 'Cologne Area, Germany'
+
+            eu.de.*.4966: 'Frankfurt Am Main Area, Germany'
+
+            eu.de.*.5000: 'Munich Area, Germany'
+
+            eu.dk: 'Denmark'
+
+            eu.dk.*.5038: 'Copenhagen Area, Denmark'
+
+            eu.dk.*.5041: 'Odense Area, Denmark'
+
+            eu.dk.*.5044: 'Ålborg Area, Denmark'
+
+            eu.dk.*.5045: 'Århus Area, Denmark'
+
+            eu.es: 'Spain'
+
+            eu.es.*.5064: 'Barcelona Area, Spain'
+
+            eu.es.*.5113: 'Madrid Area, Spain'
+
+            eu.fi: 'Finland'
+
+            eu.fr: 'France'
+
+            eu.fr.*.5205: 'Lille Area, France'
+
+            eu.fr.*.5210: 'Lyon Area, France'
+
+            eu.fr.*.5211: 'Marseille Area, France'
+
+            eu.fr.*.5221: 'Nice Area, France'
+
+            eu.fr.*.5227: 'Paris Area, France'
+
+            eu.fr.*.5249: 'Toulouse Area, France'
+
+            eu.gb: 'United Kingdom'
+
+            eu.gb.*.4544: 'Birmingham, United Kingdom'
+
+            eu.gb.*.4550: 'Brighton, United Kingdom'
+
+            eu.gb.*.4552: 'Bristol, United Kingdom'
+
+            eu.gb.*.4555: 'Cambridge, United Kingdom'
+
+            eu.gb.*.4558: 'Chelmsford, United Kingdom'
+
+            eu.gb.*.4562: 'Coventry, United Kingdom'
+
+            eu.gb.*.4573: 'London, United Kingdom'
+
+            eu.gb.*.4574: 'Edinburgh, United Kingdom'
+
+            eu.gb.*.4579: 'Glasgow, United Kingdom'
+
+            eu.gb.*.4580: 'Gloucester, United Kingdom'
+
+            eu.gb.*.4582: 'Guildford, United Kingdom'
+
+            eu.gb.*.4583: 'Harrow, United Kingdom'
+
+            eu.gb.*.4586: 'Hemel Hempstead, United Kingdom'
+
+            eu.gb.*.4597: 'Kingston upon Thames, United Kingdom'
+
+            eu.gb.*.4603: 'Leicester, United Kingdom'
+
+            eu.gb.*.4606: 'Leeds, United Kingdom'
+
+            eu.gb.*.4608: 'Manchester, United Kingdom'
+
+            eu.gb.*.4610: 'Milton Keynes, United Kingdom'
+
+            eu.gb.*.4612: 'Newcastle upon Tyne, United Kingdom'
+
+            eu.gb.*.4613: 'Nottingham, United Kingdom'
+
+            eu.gb.*.4614: 'Northampton, United Kingdom'
+
+            eu.gb.*.4618: 'Oxford, United Kingdom'
+
+            eu.gb.*.4623: 'Portsmouth, United Kingdom'
+
+            eu.gb.*.4625: 'Reading, United Kingdom'
+
+            eu.gb.*.4626: 'Redhill, United Kingdom'
+
+            eu.gb.*.4628: 'Sheffield, United Kingdom'
+
+            eu.gb.*.4632: 'Slough, United Kingdom'
+
+            eu.gb.*.4635: 'Southampton, United Kingdom'
+
+            eu.gb.*.4644: 'Tonbridge, United Kingdom'
+
+            eu.gb.*.4648: 'Twickenham, United Kingdom'
+
+            eu.gr: 'Greece'
+
+            eu.hr: 'Croatia'
+
+            eu.hu: 'Hungary'
+
+            eu.ie: 'Ireland'
+
+            eu.it: 'Italy'
+
+            eu.it.*.5587: 'Bologna Area, Italy'
+
+            eu.it.*.5616: 'Milan Area, Italy'
+
+            eu.it.*.5636: 'Rome Area, Italy'
+
+            eu.it.*.5652: 'Turin Area, Italy'
+
+            eu.it.*.5657: 'Venice Area, Italy'
+
+            eu.lt: 'Lithuania'
+
+            eu.nl: 'Netherlands'
+
+            eu.nl.*.5663: 'Almere Stad Area, Netherlands'
+
+            eu.nl.*.5664: 'Amsterdam Area, Netherlands'
+
+            eu.nl.*.5665: 'Apeldoorn Area, Netherlands'
+
+            eu.nl.*.5668: 'Eindhoven Area, Netherlands'
+
+            eu.nl.*.5669: 'Enschede Area, Netherlands'
+
+            eu.nl.*.5673: 'Groningen Area, Netherlands'
+
+            eu.nl.*.5681: 'Nijmegen Area, Netherlands'
+
+            eu.nl.*.5688: 'The Hague Area, Netherlands'
+
+            eu.nl.*.5690: 'Utrecht Area, Netherlands'
+
+            eu.nl.*.5906: 'Breda Area, Netherlands'
+
+            eu.nl.*.5907: 'Tilburg Area, Netherlands'
+
+            eu.nl.*.5908: 'Rotterdam Area, Netherlands'
+
+            eu.nl.*.7417: 'Maastricht Area, Netherlands'
+
+            eu.no: 'Norway'
+
+            eu.pl: 'Poland'
+
+            eu.pt: 'Portugal'
+
+            eu.ro: 'Romania'
+
+            eu.rs: 'Serbia'
+
+            eu.ru: 'Russian Federation'
+
+            eu.se: 'Sweden'
+
+            eu.sk: 'Slovak Republic'
+
+            eu.tr: 'Turkey'
+
+            eu.tr.*.7585: 'Istanbul, Turkey'
+
+            eu.ua: 'Ukraine'
+
+            la: 'Latin America'
+
+            la.ar: 'Argentina'
+
+            la.bo: 'Bolivia'
+
+            la.br: 'Brazil'
+
+            la.br.ac: 'Acre'
+
+            la.br.al: 'Alagoas'
+
+            la.br.am: 'Amazonas'
+
+            la.br.ap: 'Amapá'
+
+            la.br.ba: 'Bahia'
+
+            la.br.ce: 'Ceará'
+
+            la.br.df: 'Distrito Federal'
+
+            la.br.es: 'Espírito Santo'
+
+            la.br.go: 'Goiás'
+
+            la.br.ma: 'Maranhão'
+
+            la.br.mg: 'Minas Gerais'
+
+            la.br.mg.6156: 'Belo Horizonte Area, Brazil'
+
+            la.br.ms: 'Mato Grosso do Sul'
+
+            la.br.mt: 'Mato Grosso'
+
+            la.br.pa: 'Pará'
+
+            la.br.pb: 'Paraíba'
+
+            la.br.pe: 'Pernambuco'
+
+            la.br.pi: 'Piauí'
+
+            la.br.pr: 'Paraná'
+
+            la.br.pr.6399: 'Curitiba Area, Brazil'
+
+            la.br.rj: 'Rio de Janeiro'
+
+            la.br.rj.6034: 'Rio de Janeiro Area, Brazil'
+
+            la.br.rn: 'Rio Grande do Norte'
+
+            la.br.ro: 'Rondônia'
+
+            la.br.rr: 'Roraima'
+
+            la.br.rs: 'Rio Grande do Sul'
+
+            la.br.rs.6467: 'Porto Alegre Area, Brazil'
+
+            la.br.sc: 'Santa Catarina'
+
+            la.br.se: 'Sergipe'
+
+            la.br.sp: 'São Paulo'
+
+            la.br.sp.6104: 'Campinas Area, Brazil'
+
+            la.br.sp.6368: 'São Paulo Area, Brazil'
+
+            la.br.to: 'Tocantins'
+
+            la.cl: 'Chile'
+
+            la.co: 'Colombia'
+
+            la.cr: 'Costa Rica'
+
+            la.do: 'Dominican Republic'
+
+            la.ec: 'Ecuador'
+
+            la.gt: 'Guatemala'
+
+            la.mx: 'Mexico'
+
+            la.mx.*.5921: 'Mexico City Area, Mexico'
+
+            la.mx.*.5955: 'Naucalpan de Juárez Area, Mexico'
+
+            la.pa: 'Panama'
+
+            la.pe: 'Peru'
+
+            la.pr: 'Puerto Rico'
+
+            la.tt: 'Trinidad and Tobago'
+
+            la.uy: 'Uruguay'
+
+            la.ve: 'Venezuela'
+
+            me: 'Middle East'
+
+            me.ae: 'United Arab Emirates'
+
+            me.bh: 'Bahrain'
+
+            me.il: 'Israel'
+
+            me.jo: 'Jordan'
+
+            me.kw: 'Kuwait'
+
+            me.pk: 'Pakistan'
+
+            me.qa: 'Qatar'
+
+            me.sa: 'Saudi Arabia'
+
+            na: 'North America'
+
+            na.ca: 'Canada'
+
+            na.ca.ab: 'Alberta'
+
+            na.ca.ab.4872: 'Edmonton, Canada Area'
+
+            na.ca.ab.4882: 'Calgary, Canada Area'
+
+            na.ca.bc: 'British Columbia'
+
+            na.ca.bc.4873: 'British Columbia, Canada'
+
+            na.ca.bc.4880: 'Vancouver, Canada Area'
+
+            na.ca.mb: 'Manitoba'
+
+            na.ca.nb: 'New Brunswick'
+
+            na.ca.nl: 'Newfoundland And Labrador'
+
+            na.ca.ns: 'Nova Scotia'
+
+            na.ca.ns.4874: 'Halifax, Canada Area'
+
+            na.ca.nt: 'Northwest Territories'
+
+            na.ca.nu: 'Nunavut'
+
+            na.ca.on: 'Ontario'
+
+            na.ca.on.4864: 'Ontario, Canada'
+
+            na.ca.on.4865: 'Kitchener, Canada Area'
+
+            na.ca.on.4869: 'London, Canada Area'
+
+            na.ca.on.4876: 'Toronto, Canada Area'
+
+            na.ca.on.4884: 'Ottawa, Canada Area'
+
+            na.ca.pe: 'Prince Edward Island'
+
+            na.ca.qc: 'Quebec'
+
+            na.ca.qc.4863: 'Montreal, Canada Area'
+
+            na.ca.qc.4866: 'Winnipeg, Canada Area'
+
+            na.ca.qc.4875: 'Quebec, Canada'
+
+            na.ca.sk: 'Saskatchewan'
+
+            na.ca.yt: 'Yukon'
+
+            na.us: 'United States'
+
+            na.us.ak: 'Alaska'
+
+            na.us.ak.38: 'Anchorage, Alaska Area'
+
+            na.us.al: 'Alabama'
+
+            na.us.al.100: 'Birmingham, Alabama Area'
+
+            na.us.al.344: 'Huntsville, Alabama Area'
+
+            na.us.al.516: 'Mobile, Alabama Area'
+
+            na.us.ar: 'Arkansas'
+
+            na.us.ar.258: 'Fayetteville, Arkansas Area'
+
+            na.us.ar.440: 'Little Rock, Arkansas Area'
+
+            na.us.az: 'Arizona'
+
+            na.us.az.620: 'Phoenix, Arizona Area'
+
+            na.us.az.852: 'Tucson, Arizona Area'
+
+            na.us.ca: 'California'
+
+            na.us.ca.284: 'Fresno, California Area'
+
+            na.us.ca.49: 'Greater Los Angeles Area'
+
+            na.us.ca.51: 'Orange County, California Area'
+
+            na.us.ca.712: 'Salinas, California Area'
+
+            na.us.ca.732: 'Greater San Diego Area'
+
+            na.us.ca.748: 'Santa Barbara, California Area'
+
+            na.us.ca.812: 'Stockton, California Area'
+
+            na.us.ca.82: 'Sacramento, California Area'
+
+            na.us.ca.84: 'San Francisco Bay Area'
+
+            na.us.co: 'Colorado'
+
+            na.us.co.172: 'Colorado Springs, Colorado Area'
+
+            na.us.co.267: 'Fort Collins, Colorado Area'
+
+            na.us.co.34: 'Greater Denver Area'
+
+            na.us.ct: 'Connecticut'
+
+            na.us.ct.327: 'Hartford, Connecticut Area'
+
+            na.us.ct.552: 'New London/Norwich, Connecticut Area'
+
+            na.us.dc: 'District Of Columbia'
+
+            na.us.dc.97: 'Washington D.C. Metro Area'
+
+            na.us.de: 'Delaware'
+
+            na.us.fl: 'Florida'
+
+            na.us.fl.202: 'Daytona Beach, Florida Area'
+
+            na.us.fl.270: 'Fort Myers, Florida Area'
+
+            na.us.fl.271: 'Fort Pierce, Florida Area'
+
+            na.us.fl.290: 'Gainesville, Florida Area'
+
+            na.us.fl.359: 'Jacksonville, Florida Area'
+
+            na.us.fl.398: 'Lakeland, Florida Area'
+
+            na.us.fl.490: 'Melbourne, Florida Area'
+
+            na.us.fl.56: 'Miami/Fort Lauderdale Area'
+
+            na.us.fl.596: 'Orlando, Florida Area'
+
+            na.us.fl.751: 'Sarasota, Florida Area'
+
+            na.us.fl.824: 'Tallahassee, Florida Area'
+
+            na.us.fl.828: 'Tampa/St. Petersburg, Florida Area'
+
+            na.us.fl.896: 'West Palm Beach, Florida Area'
+
+            na.us.ga: 'Georgia'
+
+            na.us.ga.52: 'Greater Atlanta Area'
+
+            na.us.ga.60: 'Augusta, Georgia Area'
+
+            na.us.ga.752: 'Savannah, Georgia Area'
+
+            na.us.hi: 'Hawaii'
+
+            na.us.hi.332: 'Hawaiian Islands'
+
+            na.us.ia: 'Iowa'
+
+            na.us.ia.196: 'Davenport, Iowa Area'
+
+            na.us.ia.212: 'Des Moines, Iowa Area'
+
+            na.us.id: 'Idaho'
+
+            na.us.id.108: 'Boise, Idaho Area'
+
+            na.us.il: 'Illinois'
+
+            na.us.il.14: 'Greater Chicago Area'
+
+            na.us.il.140: 'Urbana-Champaign, Illinois Area'
+
+            na.us.il.612: 'Peoria, Illinois Area'
+
+            na.us.il.688: 'Rockford, Illinois Area'
+
+            na.us.in: 'Indiana'
+
+            na.us.in.244: 'Evansville, Indiana Area'
+
+            na.us.in.276: 'Fort Wayne, Indiana Area'
+
+            na.us.in.348: 'Indianapolis, Indiana Area'
+
+            na.us.ks: 'Kansas'
+
+            na.us.ks.904: 'Wichita, Kansas Area'
+
+            na.us.ky: 'Kentucky'
+
+            na.us.ky.428: 'Lexington, Kentucky Area'
+
+            na.us.ky.452: 'Louisville, Kentucky Area'
+
+            na.us.la: 'Louisiana'
+
+            na.us.la.556: 'Greater New Orleans Area'
+
+            na.us.la.76: 'Baton Rouge, Louisiana Area'
+
+            na.us.ma: 'Massachusetts'
+
+            na.us.ma.7: 'Greater Boston Area'
+
+            na.us.ma.800: 'Springfield, Massachusetts Area'
+
+            na.us.md: 'Maryland'
+
+            na.us.md.7416: 'Baltimore, Maryland Area'
+
+            na.us.me: 'Maine'
+
+            na.us.me.640: 'Portland, Maine Area'
+
+            na.us.mi: 'Michigan'
+
+            na.us.mi.300: 'Greater Grand Rapids, Michigan Area'
+
+            na.us.mi.35: 'Greater Detroit Area'
+
+            na.us.mi.372: 'Kalamazoo, Michigan Area'
+
+            na.us.mi.404: 'Lansing, Michigan Area'
+
+            na.us.mi.696: 'Saginaw, Michigan Area'
+
+            na.us.mn: 'Minnesota'
+
+            na.us.mn.512: 'Greater Minneapolis-St. Paul Area'
+
+            na.us.mo: 'Missouri'
+
+            na.us.mo.174: 'Columbia, Missouri Area'
+
+            na.us.mo.376: 'Kansas City, Missouri Area'
+
+            na.us.mo.704: 'Greater St. Louis Area'
+
+            na.us.mo.792: 'Springfield, Missouri Area'
+
+            na.us.ms: 'Mississippi'
+
+            na.us.ms.356: 'Jackson, Mississippi Area'
+
+            na.us.mt: 'Montana'
+
+            na.us.nc: 'North Carolina'
+
+            na.us.nc.152: 'Charlotte, North Carolina Area'
+
+            na.us.nc.312: 'Greensboro/Winston-Salem, North Carolina Area'
+
+            na.us.nc.48: 'Asheville, North Carolina Area'
+
+            na.us.nc.664: 'Raleigh-Durham, North Carolina Area'
+
+            na.us.nc.920: 'Wilmington, North Carolina Area'
+
+            na.us.nd: 'North Dakota'
+
+            na.us.ne: 'Nebraska'
+
+            na.us.ne.436: 'Lincoln, Nebraska Area'
+
+            na.us.ne.592: 'Greater Omaha Area'
+
+            na.us.nh: 'New Hampshire'
+
+            na.us.nj: 'New Jersey'
+
+            na.us.nm: 'New Mexico'
+
+            na.us.nm.20: 'Albuquerque, New Mexico Area'
+
+            na.us.nv: 'Nevada'
+
+            na.us.nv.412: 'Las Vegas, Nevada Area'
+
+            na.us.nv.672: 'Reno, Nevada Area'
+
+            na.us.ny: 'New York'
+
+            na.us.ny.128: 'Buffalo/Niagara, New York Area'
+
+            na.us.ny.16: 'Albany, New York Area'
+
+            na.us.ny.684: 'Rochester, New York Area'
+
+            na.us.ny.70: 'Greater New York City Area'
+
+            na.us.ny.816: 'Syracuse, New York Area'
+
+            na.us.ny.96: 'Ithaca, New York Area'
+
+            na.us.oh: 'Ohio'
+
+            na.us.oh.184: 'Columbus, Ohio Area'
+
+            na.us.oh.200: 'Dayton, Ohio Area'
+
+            na.us.oh.21: 'Cincinnati Area'
+
+            na.us.oh.28: 'Cleveland/Akron, Ohio Area'
+
+            na.us.oh.840: 'Toledo, Ohio Area'
+
+            na.us.ok: 'Oklahoma'
+
+            na.us.ok.588: 'Oklahoma City, Oklahoma Area'
+
+            na.us.ok.856: 'Tulsa, Oklahoma Area'
+
+            na.us.or: 'Oregon'
+
+            na.us.or.240: 'Eugene, Oregon Area'
+
+            na.us.or.79: 'Portland, Oregon Area'
+
+            na.us.pa: 'Pennsylvania'
+
+            na.us.pa.24: 'Allentown, Pennsylvania Area'
+
+            na.us.pa.324: 'Harrisburg, Pennsylvania Area'
+
+            na.us.pa.400: 'Lancaster, Pennsylvania Area'
+
+            na.us.pa.628: 'Greater Pittsburgh Area'
+
+            na.us.pa.756: 'Scranton, Pennsylvania Area'
+
+            na.us.pa.77: 'Greater Philadelphia Area'
+
+            na.us.ri: 'Rhode Island'
+
+            na.us.ri.648: 'Providence, Rhode Island Area'
+
+            na.us.sc: 'South Carolina'
+
+            na.us.sc.144: 'Charleston, South Carolina Area'
+
+            na.us.sc.176: 'Columbia, South Carolina Area'
+
+            na.us.sc.316: 'Greenville, South Carolina Area'
+
+            na.us.sd: 'South Dakota'
+
+            na.us.sd.776: 'Sioux Falls, South Dakota Area'
+
+            na.us.tn: 'Tennessee'
+
+            na.us.tn.156: 'Chattanooga, Tennessee Area'
+
+            na.us.tn.366: 'Johnson City, Tennessee Area'
+
+            na.us.tn.384: 'Knoxville, Tennessee Area'
+
+            na.us.tn.492: 'Greater Memphis Area'
+
+            na.us.tn.536: 'Greater Nashville Area'
+
+            na.us.tx: 'Texas'
+
+            na.us.tx.232: 'El Paso, Texas Area'
+
+            na.us.tx.31: 'Dallas/Fort Worth Area'
+
+            na.us.tx.42: 'Houston, Texas Area'
+
+            na.us.tx.64: 'Austin, Texas Area'
+
+            na.us.tx.724: 'San Antonio, Texas Area'
+
+            na.us.ut: 'Utah'
+
+            na.us.ut.652: 'Provo, Utah Area'
+
+            na.us.ut.716: 'Greater Salt Lake City Area'
+
+            na.us.va: 'Virginia'
+
+            na.us.va.154: 'Charlottesville, Virginia Area'
+
+            na.us.va.572: 'Norfolk, Virginia Area'
+
+            na.us.va.676: 'Richmond, Virginia Area'
+
+            na.us.va.680: 'Roanoke, Virginia Area'
+
+            na.us.vt: 'Vermont'
+
+            na.us.vt.130: 'Burlington, Vermont Area'
+
+            na.us.wa: 'Washington'
+
+            na.us.wa.784: 'Spokane, Washington Area'
+
+            na.us.wa.91: 'Greater Seattle Area'
+
+            na.us.wi: 'Wisconsin'
+
+            na.us.wi.308: 'Green Bay, Wisconsin Area'
+
+            na.us.wi.46: 'Oshkosh, Wisconsin Area'
+
+            na.us.wi.472: 'Madison, Wisconsin Area'
+
+            na.us.wi.63: 'Greater Milwaukee Area'
+
+            na.us.wv: 'West Virginia'
+
+            na.us.wy: 'Wyoming'
+
+            oc: 'Oceania'
+
+            oc.au: 'Australia'
+
+            oc.au.*.4886: 'Adelaide Area, Australia'
+
+            oc.au.*.4893: 'Canberra Area, Australia'
+
+            oc.au.*.4900: 'Melbourne Area, Australia'
+
+            oc.au.*.4905: 'Perth Area, Australia'
+
+            oc.au.*.4909: 'Brisbane Area, Australia'
+
+            oc.au.*.4910: 'Sydney Area, Australia'
+
+            oc.nz: 'New Zealand'
+        items:
+          type: string
+          example: as.jp
+      industry:
+        type: array
+        description: |
+            Industry to target the message at.
+
+            63: 'Agriculture - Farming'
+
+            64: 'Agriculture - Ranching'
+
+            65: 'Agriculture - Dairy'
+
+            66: 'Agriculture - Fishery'
+
+            35: 'Arts - Motion Pictures and Film'
+
+            37: 'Arts - Museums and Institutions'
+
+            38: 'Arts - Fine Art'
+
+            39: 'Arts - Performing Arts'
+
+            99: 'Arts - Design'
+
+            111: 'Arts - Arts and Crafts'
+
+            115: 'Arts - Music'
+
+            136: 'Arts - Photography'
+
+            140: 'Arts - Graphic Design'
+
+            48: 'Construction - Construction'
+
+            49: 'Construction - Building Materials'
+
+            50: 'Construction - Architecture & Planning'
+
+            51: 'Construction - Civil Engineering'
+
+            18: 'Consumer Goods - Cosmetics'
+
+            19: 'Consumer Goods - Apparel & Fashion'
+
+            20: 'Consumer Goods - Sporting Goods'
+
+            21: 'Consumer Goods - Tobacco'
+
+            22: 'Consumer Goods - Supermarkets'
+
+            23: 'Consumer Goods - Food Production'
+
+            24: 'Consumer Goods - Consumer Electronics'
+
+            25: 'Consumer Goods - Consumer Goods'
+
+            26: 'Consumer Goods - Furniture'
+
+            27: 'Consumer Goods - Retail'
+
+            133: 'Consumer Goods - Wholesale'
+
+            134: 'Consumer Goods - Import and Export'
+
+            142: 'Consumer Goods - Wine and Spirits'
+
+            143: 'Consumer Goods - Luxury Goods & Jewelry'
+
+            11: 'Corporate - Management Consulting'
+
+            80: 'Corporate - Marketing and Advertising'
+
+            97: 'Corporate - Market Research'
+
+            98: 'Corporate - Public Relations and Communications'
+
+            104: 'Corporate - Staffing and Recruiting'
+
+            105: 'Corporate - Professional Training & Coaching'
+
+            121: 'Corporate - Security and Investigations'
+
+            122: 'Corporate - Facilities Services'
+
+            123: 'Corporate - Outsourcing/Offshoring'
+
+            137: 'Corporate - Human Resources'
+
+            138: 'Corporate - Business Supplies and Equipment'
+
+            67: 'Educational - Primary/Secondary Education'
+
+            68: 'Educational - Higher Education'
+
+            69: 'Educational - Education Management'
+
+            70: 'Educational - Research'
+
+            132: 'Educational - E-Learning'
+
+            41: 'Finance - Banking'
+
+            42: 'Finance - Insurance'
+
+            43: 'Finance - Financial Services'
+
+            44: 'Finance - Real Estate'
+
+            45: 'Finance - Investment Banking'
+
+            46: 'Finance - Investment Management'
+
+            47: 'Finance - Accounting'
+
+            106: 'Finance - Venture Capital & Private Equity'
+
+            128: 'Finance - Commercial Real Estate'
+
+            129: 'Finance - Capital Markets'
+
+            71: 'Government - Military'
+
+            72: 'Government - Legislative Office'
+
+            73: 'Government - Judiciary'
+
+            74: 'Government - International Affairs'
+
+            75: 'Government - Government Administration'
+
+            76: 'Government - Executive Office'
+
+            77: 'Government - Law Enforcement'
+
+            78: 'Government - Public Safety'
+
+            79: 'Government - Public Policy'
+
+            107: 'Government - Political Organization'
+
+            148: 'Government - Government Relations'
+
+            1:  'High Tech - Defense & Space'
+
+            3:  'High Tech - Computer Hardware'
+
+            4:  'High Tech - Computer Software'
+
+            5:  'High Tech - Computer Networking'
+
+            6:  'High Tech - Internet'
+
+            7:  'High Tech - Semiconductors'
+
+            8:  'High Tech - Telecommunications'
+
+            96: 'High Tech - Information Technology and Services'
+
+            114: 'High Tech - Nanotechnology'
+
+            118: 'High Tech - Computer & Network Security'
+
+            119: 'High Tech - Wireless'
+
+            9:  'Legal - Law Practice'
+
+            10: 'Legal - Legal Services'
+
+            120: 'Legal - Alternative Dispute Resolution'
+
+            52: 'Manufacturing - Aviation & Aerospace'
+
+            53: 'Manufacturing - Automotive'
+
+            54: 'Manufacturing - Chemicals'
+
+            55: 'Manufacturing - Machinery'
+
+            56: 'Manufacturing - Mining & Metals'
+
+            57: 'Manufacturing - Oil & Energy'
+
+            58: 'Manufacturing - Shipbuilding'
+
+            59: 'Manufacturing - Utilities'
+
+            60: 'Manufacturing - Textiles'
+
+            61: 'Manufacturing - Paper & Forest Products'
+
+            62: 'Manufacturing - Railroad Manufacture'
+
+            112: 'Manufacturing - Electrical/Electronic Manufacturing'
+
+            117: 'Manufacturing - Plastics'
+
+            135: 'Manufacturing - Mechanical or Industrial Engineering'
+
+            144: 'Manufacturing - Renewables & Environment'
+
+            145: 'Manufacturing - Glass, Ceramics & Concrete'
+
+            146: 'Manufacturing - Packaging and Containers'
+
+            147: 'Manufacturing - Industrial Automation'
+
+            36: 'Media - Broadcast Media'
+
+            81: 'Media - Newspapers'
+
+            82: 'Media - Publishing'
+
+            83: 'Media - Printing'
+
+            103: 'Media - Writing and Editing'
+
+            113: 'Media - Online Media'
+
+            126: 'Media - Media Production'
+
+            127: 'Media - Animation'
+
+            12: 'Medical - Biotechnology'
+
+            13: 'Medical - Medical Practice'
+
+            14: 'Medical - Hospital & Health Care'
+
+            15: 'Medical - Pharmaceuticals'
+
+            16: 'Medical - Veterinary'
+
+            17: 'Medical - Medical Devices'
+
+            124: 'Medical - Health, Wellness and Fitness'
+
+            125: 'Medical - Alternative Medicine'
+
+            139: 'Medical - Mental Health Care'
+
+            91: 'Non-profit - Consumer Services'
+
+            100: 'Non-profit - Non-profit Organization Management'
+
+            101: 'Non-profit - Fund-Raising'
+
+            102: 'Non-profit - Program Development'
+
+            130: 'Non-profit - Think Tanks'
+
+            131: 'Non-profit - Philanthropy'
+
+            141: 'Non-profit - International Trade and Development'
+
+            28: 'Recreational - Entertainment'
+
+            29: 'Recreational - Gambling & Casinos'
+
+            30: 'Recreational - Leisure, Travel & Tourism'
+
+            31: 'Recreational - Hospitality'
+
+            32: 'Recreational - Restaurants'
+
+            33: 'Recreational - Sports'
+
+            34: 'Recreational - Food & Beverages'
+
+            40: 'Recreational - Recreational Facilities and Services'
+
+            109: 'Recreational - Computer Games'
+
+            110: 'Recreational - Events Services'
+
+            84: 'Service - Information Services'
+
+            85: 'Service - Libraries'
+
+            86: 'Service - Environmental Services'
+
+            88: 'Service - Individual & Family Services'
+
+            89: 'Service - Religious Institutions'
+
+            90: 'Service - Civic & Social Organization'
+
+            108: 'Service - Translation and Localization'
+
+            87: 'Transportation - Package/Freight Delivery'
+
+            92: 'Transportation - Transportation/Trucking/Railroad'
+
+            93: 'Transportation - Warehousing'
+
+            94: 'Transportation - Airlines/Aviation'
+
+            95: 'Transportation - Maritime'
+
+            116: 'Transportation - Logistics and Supply Chain'
+        items:
+          type: string
+          example: '41'
+      jobFunction:
+        type: array
+        description: |
+            Job function to target the message at.
+
+            acad: 'Research'
+
+            acct: 'Accounting'
+
+            admn: 'Administrative'
+
+            bd:   'Business Development'
+
+            buy:  'Purchasing'
+
+            cnsl: 'Consulting'
+
+            cre:  'Arts and Design'
+
+            css:  'Community and Social Services'
+
+            edu:  'Education'
+
+            eng:  'Engineering'
+
+            ent:  'Entrepreneurship'
+
+            finc: 'Finance'
+
+            hr:   'Human Resources'
+
+            it:   'Information Technology'
+
+            lgl:  'Legal'
+
+            med:  'Healthcare Services'
+
+            mktg: 'Marketing'
+
+            mps:  'Military and Protective Services'
+
+            ops:  'Operations'
+
+            ppm:  'Program and Project Management'
+
+            pr:   'Media and Communication'
+
+            prod: 'Product Management'
+
+            qa:   'Quality Assurance'
+
+            re:   'Real Estate'
+
+            sale: 'Sales'
+
+            supp: 'Support'
+        items:
+          type: string
+          example: qa
+      seniority:
+        type: array
+        description: |
+            Seniority to target the message at.
+
+            c:  'Chief X Officer'
+
+            d:  'Director'
+
+            en: 'Entry'
+
+            ic: 'Senior'
+
+            m:  'Manager'
+
+            o:  'Owner'
+
+            p:  'Partner'
+
+            tr: 'Training'
+
+            up: 'Unpaid'
+
+            vp: 'Vice President'
+        items:
+          type: string
+          example: en
+  LinkedInV2CompanyTargeting:
+    description: Targeting options for LinkedIn Company V2.
+    type: object
+    properties:
+      staffCountRanges:
+        type: array
+        description: |
+          Staff count to target the message at, expected format of SIZE_{VALUES}.
+          Valid values: SIZE_1, SIZE_2_TO_10, SIZE_11_TO_50, SIZE_51_TO_200, SIZE_201_TO_500, SIZE_501_TO_1000,
+          SIZE_1001_TO_5000, SIZE_5001_TO_10000, SIZE_10001_OR_MORE
+          [Staff count codes reference](https://learn.microsoft.com/en-us/linkedin/shared/references/reference-tables/company-size-codes)
+        items:
+          type: string
+        example: ['SIZE_1','SIZE_51_TO_200', 'SIZE_10001_OR_MORE']
+      seniorities:
+        type: array
+        description: |
+          Seniorities to target the message at, expected format of urn:li:seniority:{CODE}. [Seniorities codes reference](https://learn.microsoft.com/en-us/linkedin/shared/references/reference-tables/seniority-codes)
+        items:
+          type: string
+        example: ['urn:li:seniority:1','urn:li:seniority:2']
+      industries:
+        type: array
+        description: |
+          Industries to target the message at, expected format of urn:li:industry:{CODE}. [Industries codes reference](https://learn.microsoft.com/en-us/linkedin/shared/references/reference-tables/industry-codes-v2)
+        items:
+          type: string
+        example: ['urn:li:industry:1','urn:li:industry:2']
+      interfaceLocales:
+        type: array
+        description: |
+          Languages to target the message at, expected format of {"country":"COUNTRY","language":"language"}. [Language codes reference](https://learn.microsoft.com/en-us/linkedin/shared/references/reference-tables/language-codes)
+          Languages can be interpreted as this format: language_COUNTRY, replace in request as necessary.
+        items:
+          type: object
+        example: [{"country":"US","language":"en"}, {"country": "ES","language":"es"}]
+  PrivacyOptions:
+    type: object
+    description: Social network privacy options to be applied when publishing the message.
+    properties:
+      facebook:
+        description: Privacy options for Facebook Profile.
+        "$ref": "#/definitions/FacebookPrivacy"
+      linkedIn:
+        description: Privacy options for LinkedIn Profile.
+        "$ref": "#/definitions/LinkedInPrivacy"
+  FacebookPrivacy:
+    type: object
+    properties:
+      visibility:
+        type: array
+        description: Facebook visibility rules. At most 1 can be used.
+        items:
+          type: string
+          example: everyone
+          enum:
+          - everyone
+          - friends
+          - friendsOfFriends
+  LinkedInPrivacy:
+    type: object
+    properties:
+      visibility:
+        type: array
+        description: LinkedIn visibility rules. At most 1 can be used.
+        items:
+          type: string
+          example: anyone
+          enum:
+          - anyone
+          - connectionsOnly
+  MediaUrl:
+    type: object
+    properties:
+      thumbnailUrl:
+        type: string
+        description: The thumbnail media URL.
+        example: http://static.ow.ly/photos/thumb/cS5.jpg
+      url:
+        type: string
+        description: The media URL.
+        example: http://static.ow.ly/photos/normal/cS5.jpg
+    description: An ow.ly media URL.
+  Media:
+    type: object
+    properties:
+      id:
+        type: string
+        description: The media ID.
+        example: aHR0cDovL2V4YW1wbGUub3Jn
+      thumbnailId:
+        type: string
+        description: The thumbnail media ID.
+        example: aHR0cDovL2V4YW1wbGUtMDAwMS5vcmc=
+      videoOptions:
+        type: object
+        description: The metadata to set for a video.
+        properties:
+            facebook:
+                type: object
+                description: Facebook video metadata. Optional.
+                properties:
+                    title:
+                        type: string
+                        description: The video title
+                        example: 'My Video'
+                    category:
+                        type: string
+                        description: The video category
+                        example: 'ENTERTAINMENT'
+                        enum:
+                        - BEAUTY_FASHION
+                        - BUSINESS
+                        - CARS_TRUCKS
+                        - COMEDY
+                        - CUTE_ANIMALS
+                        - ENTERTAINMENT
+                        - FAMILY
+                        - FOOD_HEALTH
+                        - HOME
+                        - LIFESTYLE
+                        - MUSIC
+                        - NEWS
+                        - POLITICS
+                        - SCIENCE
+                        - SPORTS
+                        - TECHNOLOGY
+                        - VIDEO_GAMING
+                        - OTHER
+    description: The media attached to the message.
+  SocialProfilesResponseEnvelope:
+    type: object
+    properties:
+      data:
+        type: array
+        items:
+          "$ref": "#/definitions/SocialProfile"
+    description: The response data wrapper for a social profile.
+  SocialProfileResponseEnvelope:
+    type: object
+    properties:
+      data:
+        description: The data response envelope.
+        "$ref": "#/definitions/SocialProfile"
+    description: The response data wrapper for a social profile.
+  SocialProfileTeamsResponseEnvelope:
+    type: object
+    properties:
+      data:
+        type: array
+        items:
+          "$ref": "#/definitions/TeamId"
+    description: The response data wrapper for a team.
+  SocialProfile:
+    type: object
+    properties:
+      id:
+        type: string
+        description: The social profile ID.
+        example: '115185509'
+      type:
+        type: string
+        description: The social network the profile belongs to.
+        example: FACEBOOK
+      socialNetworkId:
+        type: string
+        description: The ID for user on the social network.
+        example: '1261768027866378'
+      socialNetworkUsername:
+        type: string
+        description: The username used on the social network. This field will be **null** if the social network type is *TWITTER*.
+        example: Pammy The Dog
+      avatarUrl:
+        type: string
+        description: Link to the avatar used by user on the social network (if present). This field will be **null** if the social network type is *TWITTER*.
+        example: https://scontent.xx.fbcdn.net/v/t1.0-1/c59.0.200.200/p300x500/10354686_10151114552801856_220324501106153455_n.jpg?oh=375abcd2474f9fe943242bfe9c313bc2&oe=590D5D25"
+      owner:
+        type: string
+        description: Key representing who owns this profile the member or the organization the member is a part of.
+        example: MEMBER
+        enum:
+        - MEMBER
+        - ORGANIZATION
+      ownerId:
+        type: string
+        description: The owner ID. Either a member ID or an organization ID.
+        example: '2147516921'
+      isReauthRequired:
+        type: integer
+        description: 1 indicates that this social profile is disconnected and needs to be reconnected, 0 shows the social profile is in a connected state.
+        example: 0
+  TeamId:
+    type: object
+    properties:
+      id:
+        type: string
+        description: The team ID.
+        example: '1998554224'
+  MediaUploadUrlResponseEnvelope:
+    type: object
+    properties:
+      data:
+        description: The data response envelope.
+        "$ref": "#/definitions/MediaUploadUrl"
+    description: The response data wrapper for a Media Upload Url.
+  MediaDownloadUrlResponseEnvelope:
+    type: object
+    properties:
+      data:
+        description: The data response envelope.
+        "$ref": "#/definitions/MediaDownloadUrl"
+    description: The response data wrapper for a Media Download Url.
+  MediaUploadUrlRequest:
+    type: object
+    properties:
+      sizeBytes:
+        type: integer
+        description: Size in bytes of the media file to be uploaded.
+        example: 383631
+      mimeType:
+        type: string
+        description: MIME type of the media to be uploaded. Supported media types are video/mp4, image/gif, image/jpeg, image/jpg, image/png.
+        example: video/mp4
+  MediaUploadUrl:
+    type: object
+    properties:
+      id:
+        type: string
+        description: The media identifier.
+        example: aHR0cHM6Ly9ob290c3VpdGUtdmlkZW8uczMuYW1hem9uYXdzLmNvbS9wcm9kdWN0aW9uLzEyMjU1MjQ0XzgyOTVmZjllLWFkOWYtNGNlNy1iOGE3LTgwNzI0NDAwYTBhZS5tcDQ=
+      uploadUrl:
+        type: string
+        description: An S3 URL to upload media to Hootsuite.
+        example: https://hootsuite-video.s3.amazonaws.com/production/12255244_01942650-3d42-42b8-a191-aa84eb45d105.mp4?AWSAccessKeyId=AKIAIM7ASX2JTE3ZFAAA&Expires=1471978770&Signature=b%2B196oEHxySdmE%2FC34ZRL6pXSAI%3D
+      uploadUrlDurationSeconds:
+        type: integer
+        description: The number of seconds until the upload url is no longer valid.
+        example: 1799
+  MediaDownloadUrl:
+    type: object
+    properties:
+      id:
+        type: string
+        description: The media identifier.
+        example: aHR0cHM6Ly9ob290c3VpdGUtdmlkZW8uczMuYW1hem9uYXdzLmNvbS9wcm9kdWN0aW9uLzEyMjU1MjQ0XzgyOTVmZjllLWFkOWYtNGNlNy1iOGE3LTgwNzI0NDAwYTBhZS5tcDQ=
+      state:
+        type: string
+        description: The state of the uploaded media. This is used to determine whether the media has been processed by Hootsuite and is ready to attach to a message.
+        example: READY
+        enum:
+        - READY
+        - QUEUED
+      downloadUrl:
+        type: string
+        description: An S3 URL to download the media from Hootsuite. This is only available after the media has been processed
+        example: https://hootsuiteapis.s3-us-east-1.amazonaws.com/2147563588/5eb2d61a-1812-44d9-b1b2-a475d4238daf?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=AKIALK18ASHK1AS9DGAS%2F20160418%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Date=20160418T215337Z&X-Amz-Expires=21&X-Amz-SignedHeaders=host&X-Amz-Signature=ea25ef6b4dabad49ec8a9cf0da2a227219222065f15a38dde2955312e2f1501d
+      downloadUrlDurationSeconds:
+        type: integer
+        description: The number of seconds until the download url is no longer valid. This is only available after the media has been processed
+        example: 1799
+  MemberResponseEnvelope:
+    type: object
+    properties:
+      data:
+        description: The data response envelope.
+        "$ref": "#/definitions/Member"
+  CreateMemberRequest:
+    type: object
+    required:
+    - email
+    - fullName
+    - organizationIds
+    properties:
+      organizationIds:
+        type: array
+        description: The organizations the member should be added to.
+        items:
+          type: integer
+          example: '626731'
+      email:
+        type: string
+        description: The member’s email.
+        example: jsmith@test.com
+      fullName:
+        type: string
+        description: The member’s name.
+        example: Joe Smith
+      companyName:
+        type: string
+        description: The member’s company name.
+        example: Hootsuite
+      bio:
+        type: string
+        description: The member’s bio.
+        example: I am Joe Smith
+      timezone:
+        type: string
+        description: The member's time zone. If not provided it will default to “America/Vancouver”. Valid values are defined at http://php.net/manual/en/timezones.php.
+        example: America/Vancouver
+      language:
+        type: string
+        description: The member’s language.
+        example: en
+        enum:
+        - en
+        - ja
+        - fr
+        - it
+        - es
+        - de
+        - pt_BR
+        - pl
+        - id
+        - zh_CN
+        - zh_HK
+        - zh_TW
+        - nl
+        - ko
+        - ar
+        - ru
+        - th
+        - tr
+  Member:
+    type: object
+    required:
+    - email
+    - fullName
+    properties:
+      id:
+        type: string
+        description: The member ID.
+        example: '15240789'
+      email:
+        type: string
+        description: The member’s email.
+        example: jsmith@test.com
+      isActive:
+        type: boolean
+        description: A flag indicating if the member is active.
+        example: true
+      createdDate:
+        type: string
+        description: The date the member's account was created.
+        example: '2013-05-29T13:27:24Z'
+      modifiedDate:
+        type: string
+        description: The date the member's account was last modified.
+        example: '2013-05-29T13:27:24Z'
+      fullName:
+        type: string
+        description: The member’s name.
+        example: Joe Smith
+      companyName:
+        type: string
+        description: The member’s company name.
+        example: Hootsuite
+      bio:
+        type: string
+        description: The member’s bio.
+        example: I am Joe Smith
+      timezone:
+        type: string
+        description: The member’s time zone. Valid values are defined at http://php.net/manual/en/timezones.php.
+        example: America/Vancouver
+      language:
+        type: string
+        description: The member’s language.
+        example: en
+        enum:
+        - en
+        - ja
+        - fr
+        - it
+        - es
+        - de
+        - pt_BR
+        - pl
+        - id
+        - zh_CN
+        - zh_HK
+        - zh_TW
+        - nl
+        - ko
+        - ar
+        - ru
+        - th
+        - tr
+  TeamMember:
+    type: object
+    properties:
+      id:
+        type: string
+        description: The member ID.
+        example: '15240789'
+  TeamResponseEnvelope:
+    type: object
+    properties:
+      data:
+        description: The data response envelope.
+        "$ref": "#/definitions/Team"
+  CreateTeamRequest:
+    type: object
+    required:
+    - teamName
+    properties:
+      teamName:
+        type: string
+        description: The team name.
+        example: North America Support Team
+  Team:
+    type: object
+    properties:
+      id:
+        type: string
+        description: The team ID.
+        example: '359493'
+      name:
+        type: string
+        description: The team name.
+        example: 'North America Support Team'
+      logoUrl:
+        type: string
+        description: The team's logo URL.
+        example: 'http://ow.ly/i/logo.png'
+      createdDate:
+        type: string
+        description: The date the team was created.
+        example: '2016-01-14T16:27:40Z'
+      createdByMember:
+        type: object
+        description: The member who created the team.
+        title: MemberReference
+        properties:
+          id:
+            type: string
+            description: The member ID.
+            example: '13892119232'
+      modifiedDate:
+        type: string
+        description: The date the team was last modified.
+        example: '2016-01-14T16:27:40Z'
+      modifiedByMember:
+        type: object
+        description: The member who last modified the team.
+        title: MemberReference
+        properties:
+          id:
+            type: string
+            description: The member ID.
+            example: '13892119232'
+  MessageReviewResponseEnvelope:
+    type: object
+    properties:
+      data:
+        description: The message review response envelope.
+        "$ref": "#/definitions/Actions"
+  Actions:
+    type: object
+    description: An array of the review actions performed on the message.
+    properties:
+      actions:
+        type: array
+        items:
+          "$ref": "#/definitions/ReviewAction"
+  ReviewAction:
+    type: object
+    properties:
+      actorType:
+        type: string
+        description: The type of actor who performed this review action.
+        example: "MEMBER"
+        enum:
+        - "MEMBER"
+        - "SYSTEM"
+        - "EXTERNAL_REVIEW_V1"
+      actorId:
+        type: string
+        description: The ID of the actor that performed this review action.
+        example: "12345678"
+      actionType:
+        type: string
+        description: The action performed.
+        example: "CREATE"
+        enum:
+        - "CREATE"
+        - "APPROVE"
+        - "REJECT"
+        - "DELETE"
+        - "RESET"
+        - "EDIT"
+        - "EXPIRE"
+        - "SEND"
+        - "SCHEDULE"
+        - "SENDFAIL"
+        - "SCHEDULEFAIL"
+      timestamp:
+        type: string
+        description: The time the review action was performed. Timezone is UTC.
+        example: "2017-02-15T18:51:13.000Z"
+  EmptyDataEnvelope:
+    type: object
+    properties:
+      data:
+        description: The data response envelope.
+        type: object
+  ErrorsResponseEnvelope:
+    type: object
+    properties:
+      errors:
+        type: array
+        description: The errors response envelope.
+        items:
+          "$ref": "#/definitions/Error"
+  ScimErrorResponse:
+    type: object
+    properties:
+      schemas:
+        type: array
+        items:
+          type: string
+          example: "urn:ietf:params:scim:api:messages:2.0:Error"
+      status:
+        type: string
+        example: "400"
+      detail:
+        type: string
+        example: "A required value was missing, or the value specified was not compatible with the operation or attribute type."
+      scimType:
+        type: string
+        description: (optional) The SCIM error type
+        example: "invalidValue"
+        enum:
+        - "invalidSyntax"
+        - "mutability"
+        - "invalidValue"
+        - "uniqueness"
+
+  Error:
+    type: object
+    properties:
+      code:
+        type: number
+        description: An error code indicating the type of error that occurred.
+        example: 1234
+      message:
+        type: string
+        description: A description of error.
+        example: An error message
+      id:
+        type: string
+        description: A unique error id for tracing purposes
+        example: f7d32670-4e6a-48c0-a2a7-87803536a712
+      resource:
+        type: object
+        description: A reference to the resource in error
+        title: ResourceReference
+        properties:
+          type:
+            type: string
+            description: The resource type.
+            example: socialProfile
+          id:
+            type: string
+            description: The resource ID.
+            example: '7534653235'
+  ScimUsers:
+    type: object
+    description: ''
+    properties:
+      Resources:
+        type: array
+        description: ''
+        items:
+          "$ref": "#/definitions/ScimUser"
+      totalResults:
+        type: number
+        description: The total number of users found
+        example: 8
+      startIndex:
+        type: number
+        description: The current offset used for result paging
+        example: 1
+      itemsPerPage:
+        type: number
+        description: The page size used for paging
+        example: 10
+      schemas:
+        type: array
+        description: ''
+        items:
+          type: string
+          example: urn:ietf:params:scim:api:messages:2.0:ListResponse
+  ScimPatchUser:
+    type: object
+    properties:
+      schemas:
+        type: array
+        description: 'Must contain the URI value of "urn:ietf:params:scim:api:messages:2.0:PatchOp"'
+        items:
+          type: string
+          example: urn:ietf:params:scim:api:messages:2.0:PatchOp
+      Operations:
+        type: array
+        items:
+          "$ref": "#/definitions/ScimPatchUserOperation"
+  ScimPatchUserOperation:
+    type: object
+    properties:
+      op:
+        type: string
+        description: 'The operation to perform: can be `add`, `replace` or `remove`'
+        example: replace
+      path:
+        type: string
+        description: 'Contains an attribute path describing the target of the operation. OPTIONAL for `add` and `replace`'
+        example: "emails[type eq \"work\"]"
+      value:
+        type: object
+        x-anyOf:
+        - "$ref": "#/definitions/AnyValue"
+        example: "new_value"
+        description: 'New value if add/replace, or name of target for remove'
+  ScimSchemas:
+    type: array
+    description: 'Required SCIM schemas'
+    items:
+      type: string
+    example:
+    - "urn:ietf:params:scim:schemas:core:2.0:User"
+
+  # The request model is slightly different than the response model. E.g., the 'id' and 'meta' fields are not needed
+  CreateReplaceScimUser:
+    type: object
+    required:
+      - displayName
+      - userName
+      - active
+    properties:
+      schemas:
+        "$ref": "#/definitions/ScimSchemas"
+      userName:
+        type: string
+        description: ''
+        example: joe.smith@hootsuite.com
+      name:
+        type: object
+        description: ''
+        properties:
+          givenName:
+            type: string
+            description: ''
+            example: joe.smith
+          familyName:
+            type: string
+            description: ''
+            example: joe.smith
+      emails:
+        type: array
+        description: ''
+        items:
+          required:
+            - primary
+          type: object
+          description: ''
+          properties:
+            primary:
+              type: boolean
+              description: ''
+              example: true
+            value:
+              type: string
+              description: ''
+              example: joe.smith@hootsuite.com
+            type:
+              type: string
+              description: ''
+              example: work
+      displayName:
+        type: string
+        description: ''
+        example: Joe Smith
+      timezone:
+        type: string
+        description: The user's time zone. If not provided it will default to "America/Vancouver". Valid values are defined at http://php.net/manual/en/timezones.php.
+        example: America/Vancouver
+      preferredLanguage:
+        type: string
+        description: The user's language.
+        example: en
+        enum:
+          - en
+          - ja
+          - fr
+          - it
+          - es
+          - de
+          - pt_BR
+          - pl
+          - id
+          - zh_CN
+          - zh_HK
+          - zh_TW
+          - nl
+          - ko
+          - ar
+          - ru
+          - th
+          - tr
+      title:
+        type: string
+        description: ''
+        example: Manager
+      groups:
+        type: array
+        description: ''
+        items:
+          "$ref": "#/definitions/GroupRef"
+      active:
+        type: boolean
+        description: ''
+        example: true
+  ScimUser:
+    type: object
+    properties:
+      schemas:
+        "$ref": "#/definitions/ScimSchemas"
+      id:
+        type: string
+        description: ''
+        example: '3918310'
+      meta:
+        type: object
+        description: ''
+        properties:
+          resourceType:
+            type: string
+            description: ''
+            example: User
+          created:
+            type: string
+            description: ''
+            example: '2012-05-07T15:36:18.000Z'
+          lastModified:
+            type: string
+            description: ''
+            example: '2015-04-21T21:25:40.000Z'
+      userName:
+        type: string
+        description: ''
+        example: joe.smith@hootsuite.com
+      name:
+        type: object
+        description: ''
+        properties:
+          givenName:
+            type: string
+            description: ''
+            example: joe.smith
+          familyName:
+            type: string
+            description: ''
+            example: joe.smith
+      emails:
+        type: array
+        description: ''
+        items:
+          type: object
+          description: ''
+          properties:
+            primary:
+              type: boolean
+              description: ''
+              example: true
+            value:
+              type: string
+              description: ''
+              example: joe.smith@hootsuite.com
+            type:
+              type: string
+              description: ''
+              example: work
+      displayName:
+        type: string
+        description: ''
+        example: Joe Smith
+      timezone:
+        type: string
+        description: The user's time zone. If not provided it will default to "America/Vancouver". Valid values are defined at http://php.net/manual/en/timezones.php.
+        example: America/Vancouver
+      preferredLanguage:
+        type: string
+        description: The user's language.
+        example: en
+        enum:
+          - en
+          - ja
+          - fr
+          - it
+          - es
+          - de
+          - pt_BR
+          - pl
+          - id
+          - zh_CN
+          - zh_HK
+          - zh_TW
+          - nl
+          - ko
+          - ar
+          - ru
+          - th
+          - tr
+      title:
+        type: string
+        description: ''
+        example: Manager
+      groups:
+        type: array
+        description: ''
+        items:
+          type: object
+      active:
+        type: boolean
+        description: ''
+        example: true
+  ScimGroups:
+    type: object
+    description: ''
+    properties:
+      Resources:
+        type: array
+        description: ''
+        items:
+          "$ref": "#/definitions/ScimGroup"
+      totalResults:
+        type: number
+        description: The total number of groups found
+        example: 8
+      startIndex:
+        type: number
+        description: The current offset used for result paging
+        example: 1
+      itemsPerPage:
+        type: number
+        description: The page size used for paging
+        example: 10
+      schemas:
+        type: array
+        description: ''
+        items:
+          type: string
+          example: urn:ietf:params:scim:api:messages:2.0:ListResponse
+  # The request model is slightly different than the response model. E.g., the 'id' and 'meta' fields are not needed
+  CreateReplaceScimGroup:
+    type: object
+    required:
+      - displayName
+      - schema
+    properties:
+      schemas:
+        "$ref": "#/definitions/ScimSchemas"
+      displayName:
+        type: string
+        description: ''
+        example: Group 1
+      members:
+        type: array
+        description: ''
+        items:
+          "$ref": "#/definitions/MemberRef"
+  ScimPatchGroup:
+    type: object
+    properties:
+      schemas:
+        type: array
+        description: 'Must contain the URI value of "urn:ietf:params:scim:api:messages:2.0:PatchOp"'
+        items:
+          type: string
+          example: urn:ietf:params:scim:api:messages:2.0:PatchOp
+      Operations:
+        type: array
+        items:
+          "$ref": "#/definitions/ScimPatchGroupOperation"
+  ScimPatchGroupOperation:
+    type: object
+    properties:
+      op:
+        type: string
+        description: 'The operation to perform: can be `add`, `replace` or `remove`'
+        example: replace
+      value:
+        type: object
+        x-anyOf:
+          - "$ref": "#/definitions/AnyValue"
+        example: "new_value"
+        description: 'New value to set for attribute'
+  ScimResourceTypes:
+    type: object
+    properties:
+      schemas:
+        type: array
+        items:
+          type: string
+          example: "urn:ietf:params:scim:api:messages:2.0:ListResponse"
+      Resources:
+        type: array
+        items:
+          "$ref": "#/definitions/ScimResourceInfo"
+  ScimResourceInfo:
+    type: object
+    properties:
+      name:
+        type: string
+        example: "User"
+      schemaExtensions:
+        type: array
+        items:
+          type: object
+          properties:
+            schema:
+              type: string
+              example: "urn:ietf:params:scim:schemas:core:2.0:User"
+            required:
+              type: boolean
+              example: true
+      description:
+        type: string
+        example: "User Account"
+      id:
+        type: string
+        example: "User"
+      meta:
+        type: object
+        properties:
+          resourceType:
+            type: string
+            example: "ResourceType"
+          location:
+            type: string
+            example: "/scim/v2/ResourceTypes/User"
+      schema:
+        type: string
+        example: "urn:ietf:params:scim:schemas:core:2.0:User"
+      endpoint:
+        type: string
+        example: "/scim/v2/Users"
+      schemas:
+        type: array
+        items:
+          type: string
+          example: "urn:ietf:params:scim:schemas:core:2.0:ResourceType"
+  ScimGroup:
+    type: object
+    properties:
+      schemas:
+        "$ref": "#/definitions/ScimSchemas"
+      id:
+        type: string
+        description: ''
+        example: '3918310'
+      meta:
+        type: object
+        description: ''
+        properties:
+          resourceType:
+            type: string
+            description: ''
+            example: Group
+          created:
+            type: string
+            description: ''
+            example: '2012-05-07T15:36:18.000Z'
+          lastModified:
+            type: string
+            description: ''
+            example: '2015-04-21T21:25:40.000Z'
+          location:
+            type: string
+            description: ''
+            example: 'https://platform.hootsuite.com/scim/v2/groups/627221'
+      displayName:
+        type: string
+        description: ''
+        example: team 1
+      members:
+        type: array
+        description: ''
+        items:
+          "$ref": "#/definitions/MemberRef"
+  MemberRef:
+    type: object
+    properties:
+      value:
+        type: string
+        description: ''
+        example: '235836528356'
+      $ref:
+        type: string
+        description: ''
+        example: 'https://platform.hootsuite.com/scim/v2/users/21790633'
+      display:
+        type: string
+        description: ''
+        example: John Doe
+  GroupRef:
+    type: object
+    properties:
+      value:
+        type: string
+        description: ''
+        example: '5838356'
+      $ref:
+        type: string
+        description: ''
+        example: 'https://platform.hootsuite.com/scim/v2/groups/663806'
+      display:
+        type: string
+        description: ''
+        example: Group 1
+  TeamMembersResponseEnvelope:
+    type: object
+    properties:
+      data:
+        type: array
+        description: The data response envelope.
+        items:
+          "$ref": "#/definitions/TeamMember"
+  OrganizationTeamsResponseEnvelope:
+    type: object
+    properties:
+      data:
+        type: array
+        description: The data response envelope.
+        items:
+          "$ref": "#/definitions/Team"
+  OrganizationMembersResponseEnvelope:
+    type: object
+    properties:
+      data:
+        type: array
+        description: The data response envelope.
+        items:
+          "$ref": "#/definitions/TeamMember"
+  OrganizationMemberTeamsResponseEnvelope:
+    type: object
+    properties:
+      data:
+        type: array
+        description: The data response envelope.
+        items:
+          "$ref": "#/definitions/Teams"
+  OrganizationMemberTeamPermissionsResponseEnvelope:
+    type: object
+    properties:
+      data:
+        description: The data response envelope.
+        "$ref": "#/definitions/TeamPermissions"
+  OrganizationMemberSocialProfilesResponseEnvelope:
+    type: object
+    properties:
+      data:
+        type: array
+        description: The data response envelope.
+        items:
+          "$ref": "#/definitions/MemberSocialProfiles"
+  OrganizationMemberSocialProfilePermissionsResponseEnvelope:
+    type: object
+    properties:
+      data:
+        description: The data response envelope.
+        "$ref": "#/definitions/SocialProfilePermissions"
+  OrganizationMemberOrganizationPermissionsResponseEnvelope:
+    type: object
+    properties:
+      data:
+        description: The data response envelope.
+        "$ref": "#/definitions/OrganizationPermissions"
+  OrganizationTeamSocialProfilesResponseEnvelope:
+    type: object
+    properties:
+      data:
+        type: array
+        description: The data response envelope.
+        items:
+          "$ref": "#/definitions/TeamSocialProfiles"
+  TeamSocialProfiles:
+    type: object
+    properties:
+      id:
+        type: string
+        description: The social profile ID.
+        example: '115185509'
+  Teams:
+    type: object
+    properties:
+      id:
+        type: string
+        description: The team ID.
+        example: '359493'
+  MemberSocialProfiles:
+    type: object
+    properties:
+      id:
+        type: string
+        description: The social profile ID.
+        example: '115185509'
+  SocialProfilePermissions:
+    type: object
+    properties:
+      permissions:
+        type: array
+        description: The organization member's social profile permissions.
+        items:
+          type: string
+          description: The permission.
+          example: 'BASIC_USAGE'
+      permissionPreset:
+          type: string
+          description: The permission preset.
+          example: 'EDITOR'
+  OrganizationPermissions:
+    type: object
+    properties:
+      permissions:
+        type: array
+        description: The organization member's organization permissions.
+        items:
+          type: string
+          description: The permission.
+          example: 'ORG_MANAGE_MEMBER'
+      permissionPreset:
+          type: string
+          description: The permission preset.
+          example: 'CUSTOM'
+  TeamPermissions:
+    type: object
+    properties:
+      permissions:
+        type: array
+        description: The organization member's team permissions.
+        items:
+          type: string
+          description: The permission.
+          example: 'ORG_MANAGE_TEAM'
+      permissionPreset:
+          type: string
+          description: The permission preset.
+          example: 'CUSTOM'
+  MemberOrganizationsResponseEnvelope:
+    type: object
+    properties:
+      data:
+        type: array
+        description: The data response envelope.
+        items:
+          "$ref": "#/definitions/MemberOrganizations"
+  MemberOrganizations:
+    type: object
+    properties:
+      id:
+        type: string
+        description: The organization ID
+        example: '626731'
+  OAuth2BearerToken:
+    type: object
+    properties:
+      access_token:
+        type: string
+        description: The access token.
+        example: e9a90a81-xf2d-dgh3-cfsd-23jhvn76
+      token_Type:
+        type: string
+        description: The access token type.
+        example: Bearer
+      expires_in:
+        type: number
+        description: The number of seconds until expiry
+        example: 2592000
+      refresh_token:
+        type: string
+        description: The refresh token.
+        example: 82d82cf4-76gf-gfds-nt3k-lzpo12jg
+      scope:
+        type: string
+        description: The scopes granted to this token.
+        example: offline
+  AppToken:
+    type: object
+    properties:
+      access_token:
+        type: string
+        description: The access token.
+        example: ce11c0ca-6213-424f-abfd-5d0f43922e90
+      expires_in:
+        type: number
+        description: The number of seconds until expiry
+        example: 2592000
+  AppTokenRequest:
+    type: object
+    properties:
+      memberId:
+        type: string
+        description: The ID of the member to grant a token for. Provide either the member or organization ID, not both
+        example: '15240789'
+      organizationId:
+        type: string
+        description: The ID of the organization to grant a token for. Provide either the member or organization ID, not both.
+        example: '626731'
+  ApproveMessageRequest:
+    type: object
+    required:
+    - sequenceNumber
+    properties:
+      sequenceNumber:
+        type: integer
+        description: The sequence number of the message being approved.
+        example: 11
+      reviewerType:
+        type: "string"
+        description: |
+            The actor that will be approving the message. Leaving this field empty will use "EXTERNAL" by default.
+
+            Using "MEMBER" requires that you use a member token to approve a message that is pending approval by that member.
+        enum: [
+            "EXTERNAL",
+            "MEMBER"
+        ]
+  ApproveCommentRequest:
+    type: object
+    required:
+      - sequenceNumber
+    properties:
+      sequenceNumber:
+        type: integer
+        description: The sequence number of the comment being approved.
+        example: 11
+      reviewerType:
+        type: string
+        description: |
+          The actor that will be approving the comment. Leaving this field empty will use "EXTERNAL" by default.
+
+          Using "MEMBER" requires that you use a member token to approve a comment that is pending approval by that member.
+        enum: [
+          "EXTERNAL",
+          "MEMBER"
+        ]
+  RejectMessageRequest:
+    type: object
+    required:
+    - reason
+    - sequenceNumber
+    properties:
+      reason:
+        type: string
+        description: The rejection reason to be displayed to the creator of the message.
+        example: 'Message contains profanity'
+      sequenceNumber:
+        type: integer
+        description: The sequence number of the message being rejected.
+        example: 11
+      reviewerType:
+        type: "string"
+        description: |
+            The actor that will be rejecting the message. Leaving this field empty will use "EXTERNAL" by default.
+
+            Using "MEMBER" requires that you use a member token to reject a message that is pending approval by that member.
+        enum: [
+            "EXTERNAL",
+            "MEMBER"
+        ]
+  RejectCommentRequest:
+    type: object
+    required:
+      - reason
+      - sequenceNumber
+    properties:
+      reason:
+        type: string
+        description: The rejection reason to be displayed to the creator of the comment.
+        example: 'Message contains profanity'
+      sequenceNumber:
+        type: integer
+        description: The sequence number of the comment being rejected.
+        example: 11
+      reviewerType:
+        type: string
+        description: |
+          The actor that will be rejecting the comment. Leaving this field empty will use "EXTERNAL" by default.
+
+          Using "MEMBER" requires that you use a member token to reject a comment that is pending approval by that member.
+        enum: [
+          "EXTERNAL",
+          "MEMBER"
+        ]
+  InteractionsGetResponse:
+    type: object
+    properties:
+      data:
+        type: object
+        properties:
+          interactions:
+            type: array
+            items:
+              "$ref": "#/definitions/InteractionsInteraction"
+          metadata:
+            "$ref": "#/definitions/InteractionsMetadata"
+  InteractionsMetadata:
+    type: object
+    properties:
+      cursor:
+        type: object
+        properties:
+          next:
+            type: string
+            example: '12345'
+            description: A cursor to the next page of results.
+          previous:
+            type: string
+            example: '12345'
+            description: A cursor to the previous page of results.
+  InteractionsInteraction:
+    type: object
+    properties:
+      fromSocialNetworkId:
+        type: string
+        example: '129458073'
+        description: The sender of the interaction, eg&#58; the user who sent the DM
+      toSocialNetworkId:
+        type: string
+        example: '11204584'
+        description: The receiver of the interaction, eg&#58; the user the DM was sent to
+      socialNetworkType:
+        type: string
+        example: 'TWITTER'
+        description: Valid options are 'TWITTER' and 'FACEBOOK'
+      externalMessageId:
+        type: string
+        example: '214590243384'
+        description: Used to fetch the actual interaction from the social network.
+      type:
+        type: string
+        example: 'PRIVATE_MESSAGE'
+        description: |
+          Valid responses are:
+
+          Twitter:
+          - MENTION
+          - QUOTE (Deprecated, but still may be returned)
+          - DIRECT_MESSAGE
+          - RETWEET (Deprecated, but still may be returned)
+          - FAVORITE (Deprecated, but still may be returned)
+
+          Facebook:
+          - COMMENT
+          - REPLY
+          - POST
+          - POST_LIKE
+          - COMMENT_LIKE
+          - REPLY_LIKE
+  OAuthError:
+    type: object
+    properties:
+      error:
+        type: string
+        description: An error code indicating the type of error that occurred. Should be used in conjunction with HTTP status.
+        enum: [
+          "request_unauthorized",
+          "request_forbidden",
+          "invalid_request",
+          "unauthorized_client",
+          "access_denied",
+          "unsupported_response_type",
+          "invalid_scope",
+          "server_error",
+          "temporarily_unavailable",
+          "unsupported_grant_type",
+          "invalid_grant",
+          "invalid_client",
+          "unknown_error",
+          "not_found",
+          "invalid_state",
+          "misconfiguration",
+          "insufficient_entropy",
+          "invalid_token",
+          "token_signature_mismatch",
+          "token_expired",
+          "scope_not_granted",
+          "token_claim",
+          "token_inactive"
+        ]
+      error_description:
+        type: string
+        description: A description of error.
+        example: 'An error message'
+      error_hint:
+        type: string
+        description: A helpful hint about the error.
+        example: '"Make sure that the various parameters are correct, be aware of case sensitivity and trim your parameters.'
+      status_code:
+        type: number
+        description: The status code
+        example: 400

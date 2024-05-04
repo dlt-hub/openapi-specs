@@ -1,0 +1,92 @@
+---
+swagger: '2.0'
+info:
+  version: '1.0'
+  title: ServicosWebService
+host: homextservicos-siafi.tesouro.gov.br
+basePath: "/siafi2018he/services/siafi-soap/servicosWeb"
+schemes:
+- https
+consumes:
+- application/json
+produces:
+- application/json
+paths:
+  "/bloquearRepasseEstadoMunicipio":
+    post:
+      summary: bloquearRepasseEstadoMunicipio
+      tags:
+      - ServicosWebServiceSoapBinding
+      operationId: BloquearRepasseEstadoMunicipioPost
+      produces:
+      - application/json
+      parameters:
+      - name: Body
+        in: body
+        required: true
+        description: ''
+        schema:
+          "$ref": "#/definitions/BloqueioRepEstMun"
+      - name: cabecalhoSIAFI
+        in: header
+        required: true
+        type: string
+        description: ''
+      responses:
+        '200':
+          description: ''
+          schema:
+            "$ref": "#/definitions/ManterBloqRepEstMunResponse"
+  "/desbloquearRepasseEstadoMunicipio":
+    post:
+      summary: desbloquearRepasseEstadoMunicipio
+      tags:
+      - ServicosWebServiceSoapBinding
+      operationId: DesbloquearRepasseEstadoMunicipioPost
+      produces:
+      - application/json
+      parameters:
+      - name: Body
+        in: body
+        required: true
+        description: ''
+        schema:
+          "$ref": "#/definitions/DesbloqueioRepEstMun"
+      - name: cabecalhoSIAFI
+        in: header
+        required: true
+        type: string
+        description: ''
+      responses:
+        '200':
+          description: ''
+          schema:
+            "$ref": "#/definitions/ManterBloqRepEstMunResponse"
+definitions:
+  ManterBloqRepEstMunResponse:
+    title: manterBloqRepEstMunResponse
+    type: object
+    properties:
+      parameters:
+        description: ''
+        type: string
+    required:
+    - parameters
+  BloqueioRepEstMun:
+    title: bloqueioRepEstMun
+    type: object
+    properties:
+      parameters:
+        description: ''
+        type: string
+    required:
+    - parameters
+  DesbloqueioRepEstMun:
+    title: desbloqueioRepEstMun
+    type: object
+    properties:
+      parameters:
+        description: ''
+        type: string
+    required:
+    - parameters

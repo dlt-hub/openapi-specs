@@ -1,0 +1,788 @@
+swagger: "2.0"
+info:
+  title: Intent
+  version: version not set
+tags:
+  - name: Intent
+    description: "The MessageBird Intent API enables predicting intents from a given phrase using a machine learning model that was trained on one of your datasets. Datasets can be created and managed using the [dataset section of the MessageBird Dashboard](https://dashboard.messagebird.com/knowledge-base/list). \n\nIntent recognition is a way to group the phrases from incoming messages. For example, `\"hi\"` and `\"hello\"` are both ways to express a greeting. The corresponding intent would be `greeting`. You might also want to define a `book-room` intent that might be phrased as: `\"Can I book a room for tomorrow?\"` or `\"do you have any vacancies?\"`. The MessageBird Intent API applies machine learning to generalize from the phrases that you added to your intents so that unseen phrases are automatically mapped to the right intent. You can use this to route your messages based on their topic, or build an intelligent IVR menu that can deal with natural language, or integrate this into your chatbot system. The possibilities are endless! \n\nYou can configure the intents you want to recognize through the [datasets section of the dashboard](https://dashboard.messagebird.com/knowledge-base/list). You can easily improve your intent recognition accuracy by using the Train UI that can be accessed from the [dataset overview](https://dashboard.messagebird.com/knowledge-base/list)."
+host: intent.messagebird.com
+schemes:
+  - https
+consumes:
+  - application/json
+produces:
+  - application/json
+paths:
+  /api/v1/datasets:
+    get:
+      summary: list datasets
+      description: "Lists datasets containing intents and corresponding phrases. You can choose to list only your own datasets, as well as template datasets, or both. Template datasets are used as examples and can be found under the `Templates` tab in the [dataset overview of the dashboard](https://dashboard.messagebird.com/knowledge-base/list). You can clone such datasets to kickstart the creation of a dataset that is tailored to your use-case. \n\nNote that the results are paginated and so you might need to iteratively call this endpoint to obtain all your datasets."
+      operationId: Intent_ListDatasets
+      responses:
+        "200":
+          description: A successful response.
+          schema:
+            $ref: '#/definitions/v1ListDatasetsResponse'
+        "401":
+          description: Returned when the user is not authorized.
+          schema: {}
+        "404":
+          description: Returned when the resource does not exist.
+          schema: {}
+        default:
+          description: An unexpected error response.
+          schema:
+            $ref: '#/definitions/rpcStatus'
+      parameters:
+        - name: listMode
+          description: |-
+            List mode indicating to query template datasets, only user datasets or both.
+
+             - ALL: List all datasets.
+             - ONLY_TEMPLATE: List the template datasets. Template datasets are used as examples and can be found under the `Templates` tab in the [dataset overview of the dashboard](https://dashboard.messagebird.com/knowledge-base/list). You can clone such datasets to kickstart the creation of a dataset that is tailored to your use-case.
+             - ONLY_USER: List the user datasets.
+          in: query
+          required: false
+          type: string
+          enum:
+            - ALL
+            - ONLY_TEMPLATE
+            - ONLY_USER
+          default: ALL
+          x-example: ONLY_USER
+        - name: limit
+          description: The limit defining the maximal number of datasets to return.
+          in: query
+          required: false
+          type: integer
+          format: int64
+          default: "20"
+        - name: cursor
+          description: The cursor to view the next paginated collection of datasets as provided by the `next_cursor` value in the [`ListDatasetsResponse`](#listdatasetsresponse-object).
+          in: query
+          required: false
+          type: string
+          default: "null"
+      tags:
+        - Intent
+      security:
+        - AccessKey: []
+  /api/v1/datasets/{datasetId}:
+    get:
+      summary: Get description of a model, model can still be in training and not available for predictions
+      description: Retrieves the dataset for the given dataset ID. It only displays the metadata corresponding to the dataset. If you want to view the individual intent phrases that you have added, you can use the [dataset section of the dashboard](https://dashboard.messagebird.com/knowledge-base/list).
+      operationId: Intent_GetDataset
+      responses:
+        "200":
+          description: A successful response.
+          schema:
+            $ref: '#/definitions/v1Dataset'
+        "401":
+          description: Returned when the user is not authorized.
+          schema: {}
+        "404":
+          description: Returned when the resource does not exist.
+          schema: {}
+        default:
+          description: An unexpected error response.
+          schema:
+            $ref: '#/definitions/rpcStatus'
+      parameters:
+        - name: datasetId
+          description: Unique ID for the dataset. You can obtain the IDs either from the [dataset section in the dashboard](https://dashboard.messagebird.com/knowledge-base/list) or by listing the datasets with the Intent API.
+          in: path
+          required: true
+          type: string
+      tags:
+        - Intent
+      security:
+        - AccessKey: []
+  /api/v1/datasets/{datasetId}/predict:
+    post:
+      summary: Predict an intent for a phrase given a dataset
+      description: "Predicts an intent for a phrase given a dataset ID. The Intent API uses machine learning to generalize from the intents and phrases in the dataset that was created in the [datasets overview](https://dashboard.messagebird.com/knowledge-base-list) to infer the intent of the given `phrase`. Requires the active model for the dataset to be trained. \n\nTraining a model usually takes around 1 after a dataset is created or updated. This endpoint yields an error if the model has not been trained yet."
+      operationId: Intent_PredictIntent
+      responses:
+        "200":
+          description: A successful response.
+          schema:
+            $ref: '#/definitions/v1PredictIntentResponse'
+        "401":
+          description: Returned when the user is not authorized.
+          schema: {}
+        "404":
+          description: Returned when the resource does not exist.
+          schema: {}
+        default:
+          description: An unexpected error response.
+          schema:
+            $ref: '#/definitions/rpcStatus'
+      parameters:
+        - name: datasetId
+          description: The unique ID that identifies the dataset for which a prediction should be made.
+          in: path
+          required: true
+          type: string
+        - name: body
+          in: body
+          required: true
+          schema:
+            type: object
+            example:
+              phrase: I'd like to order something
+            properties:
+              phrase:
+                type: string
+                example: I'd like to order something
+                description: The phrase that might contain an intent.
+                title: Phrase
+            description: A request for predicting an intent from a phrase and a dataset ID.
+            title: PredictIntentRequest
+      tags:
+        - Intent
+      security:
+        - AccessKey: []
+  /api/v1/supported-languages:
+    get:
+      summary: Get supported languages.
+      description: Lists the languages supported by the Intent API.
+      operationId: Intent_ListSupportedLanguages
+      responses:
+        "200":
+          description: A successful response.
+          schema:
+            $ref: '#/definitions/v1LanguageList'
+        "401":
+          description: Returned when the user is not authorized.
+          schema: {}
+        "404":
+          description: Returned when the resource does not exist.
+          schema: {}
+        default:
+          description: An unexpected error response.
+          schema:
+            $ref: '#/definitions/rpcStatus'
+      tags:
+        - Intent
+      security:
+        - AccessKey: []
+definitions:
+  protobufAny:
+    type: object
+    properties:
+      '@type':
+        type: string
+    additionalProperties: {}
+  rpcStatus:
+    type: object
+    properties:
+      code:
+        type: integer
+        format: int32
+      message:
+        type: string
+      details:
+        type: array
+        items:
+          $ref: '#/definitions/protobufAny'
+  v1Dataset:
+    type: object
+    example:
+      createdAt: "2021-08-24T12:04:32Z"
+      datasetId: dde4eeae-7652-4bc8-8be1-1cd6ac898dc7
+      description: This dataset is clearly some awesome dataset.
+      intents:
+        - order
+        - reservation
+      isTemplate: false
+      lastTrainedAt: "2021-08-24T12:04:32Z"
+      name: My awesome dataset
+      updatedAt: "2021-08-24T12:04:32Z"
+    properties:
+      datasetId:
+        type: string
+        format: uuid
+        example: dde4eeae-7652-4bc8-8be1-1cd6ac898dc7
+        description: The unique ID for the dataset.
+        title: Dataset Id
+      intents:
+        type: array
+        example:
+          - order
+          - reservation
+        items:
+          type: string
+        description: The collection of intents that were added to this dataset.
+        title: Intents
+      isTemplate:
+        type: boolean
+        example: false
+        description: Describes if this dataset is a template dataset or not. Template datasets are used as examples and can be found under the `Templates` tab in the [dataset overview of the dashboard](https://dashboard.messagebird.com/knowledge-base/list). You can clone such datasets to kickstart the creation of a dataset that is tailored to your use-case.
+        title: Is Template
+        readOnly: true
+      name:
+        type: string
+        example: My awesome dataset
+        description: The name of the dataset. You can configure the name once creating a dataset in the [dashboard](https://dashboard.messagebird.com/knowledge-base/list).
+        title: Name
+      createdAt:
+        type: string
+        format: timestamp
+        example: "2021-08-24T12:04:32Z"
+        description: The timestamp of dataset creation. Uses the [ISO-8601 standard](https://en.wikipedia.org/wiki/ISO_8601).
+        title: Created At
+        readOnly: true
+      updatedAt:
+        type: string
+        format: timestamp
+        example: "2021-08-24T12:04:32Z"
+        description: The timestamp of last update. Uses the [ISO-8601 standard](https://en.wikipedia.org/wiki/ISO_8601).
+        title: Updated At
+        readOnly: true
+      description:
+        type: string
+        example: This dataset is clearly some awesome dataset.
+        description: The optional description of the dataset.
+        title: Description
+      lastTrainedAt:
+        type: string
+        format: timestamp
+        example: "2021-08-24T12:04:32Z"
+        description: The timestamp of last model that completed training. Uses the [ISO-8601 standard](https://en.wikipedia.org/wiki/ISO_8601). If there is not a model trained already, this field will not be populated.
+        title: Last Trained At
+        readOnly: true
+    description: A collection of phrases with the corresponding intents. There can be multiple matching phrases per intent. To inspect the phrases that were added, go to the [datasets section in the dashboard](https://dashboard.messagebird.com/knowledge-base/list).
+    title: Dataset
+  v1Language:
+    type: object
+    example:
+      iso6393Code: nld
+      languageCode: NLD
+      name: Dutch
+    properties:
+      iso6393Code:
+        type: string
+        example: nld
+        description: The ISO-639-3 code of the language.
+        title: Iso 639 3 Code
+      name:
+        type: string
+        example: Dutch
+        description: The English name of the language.
+        title: Name
+      languageCode:
+        $ref: '#/definitions/v1LanguageCode'
+        example: NLD
+        description: The enum value of the ISO639-3 language code.
+        title: Language Code
+    description: Language that was detected from the given phrase.
+    title: Language
+  v1LanguageCode:
+    type: string
+    enum:
+      - LANGUAGE_INVALID
+      - LANGUAGE_UNDETERMINED
+      - ENG
+      - RUS
+      - DEU
+      - FRA
+      - ITA
+      - JPN
+      - SPA
+      - CEB
+      - TUR
+      - POR
+      - UKR
+      - EPO
+      - POL
+      - SWE
+      - NLD
+      - HEB
+      - ZHO
+      - HUN
+      - ARA
+      - CAT
+      - FIN
+      - CES
+      - FAS
+      - SRP
+      - ELL
+      - VIE
+      - BUL
+      - KOR
+      - NOR
+      - MKD
+      - RON
+      - IND
+      - THA
+      - HYE
+      - DAN
+      - TAM
+      - HIN
+      - HRV
+      - HBS
+      - BEL
+      - KAT
+      - TEL
+      - KAZ
+      - WAR
+      - LIT
+      - GLG
+      - SLK
+      - BEN
+      - EUS
+      - SLV
+      - KAN
+      - MAL
+      - MAR
+      - EST
+      - AZE
+      - MSA
+      - SQI
+      - LAT
+      - BOS
+      - NNO
+      - URD
+      - LAV
+      - MYA
+      - TAT
+      - AFR
+      - OCI
+      - NDS
+      - KIR
+      - AST
+      - TGL
+      - ISL
+      - INA
+      - SIN
+      - GUJ
+      - KHM
+      - BRE
+      - BAK
+      - UZB
+      - BOD
+      - PAN
+      - VOL
+      - ALS
+      - NEP
+      - CYM
+      - JBO
+      - FRY
+      - MON
+      - LTZ
+      - CHE
+      - UIG
+      - TGK
+      - SCO
+      - SAN
+      - CHV
+      - JAV
+      - MIN
+      - IDO
+      - ORI
+      - ASM
+      - NEW
+      - GLE
+      - MLG
+      - ARG
+      - CKB
+      - SWA
+      - BAR
+      - LMO
+      - YID
+      - ARZ
+      - MHR
+      - AZB
+      - SAH
+      - PNB
+      - SUN
+      - BPY
+      - PMS
+      - ILO
+      - WUU
+      - KUR
+      - PUS
+      - ILE
+      - XMF
+      - YUE
+      - GOM
+      - LIM
+      - MWL
+      - COR
+      - SND
+      - HSB
+      - SCN
+      - GLA
+      - PAM
+      - BHO
+      - MAI
+      - VEC
+      - MLT
+      - DIV
+      - WLN
+      - MZN
+      - AMH
+      - QUE
+      - CBK
+      - TUK
+      - ROH
+      - OSS
+      - VLS
+      - YOR
+      - LAO
+      - LEZ
+      - SOM
+      - MYV
+      - DIQ
+      - MRJ
+      - DSB
+      - FRR
+      - HAT
+      - GRN
+      - BXR
+      - KOM
+      - SRD
+      - KRC
+      - BCL
+      - NAP
+      - GLV
+      - AVA
+      - RUE
+      - XAL
+      - PFL
+      - DTY
+      - HIF
+      - COS
+      - LRC
+      - VEP
+      - TYV
+      - NOB
+      - SNA
+      - KIN
+      - IBO
+      - SMO
+      - SOT
+      - MRI
+      - WOL
+      - XHO
+      - HAU
+      - HAW
+      - NYA
+      - ZUL
+      - HMN
+    default: LANGUAGE_INVALID
+    valueComments:
+      - Language code is invalid.
+      - Language could not be determined.
+      - English.
+      - Russian.
+      - German.
+      - French.
+      - Italian.
+      - Japanese.
+      - Spanish.
+      - Cebuano.
+      - Turkish.
+      - Portuguese.
+      - Ukrainian.
+      - Esperanto.
+      - Polish.
+      - Swedish.
+      - Dutch.
+      - Hebrew.
+      - Chinese.
+      - Hungarian.
+      - Arabic.
+      - Catalan.
+      - Finnish.
+      - Czech.
+      - Persian.
+      - Serbian.
+      - Greek.
+      - Vietnamese.
+      - Bulgarian.
+      - Korean.
+      - Norwegian.
+      - Macedonian.
+      - Romanian.
+      - Indonesian.
+      - Thai.
+      - Armenian.
+      - Danish.
+      - Tamil.
+      - Hindi.
+      - Croatian.
+      - Serbo-Croatian.
+      - Belarusian.
+      - Georgian.
+      - Telugu.
+      - Kazakh.
+      - Waray.
+      - Lithuanian.
+      - Galician.
+      - Slovak.
+      - Bengali.
+      - Basque.
+      - Slovenian.
+      - Kannada.
+      - Malayalam.
+      - Marathi.
+      - Estonian.
+      - Azerbaijani.
+      - Malay.
+      - Albanian.
+      - Latin.
+      - Bosnian.
+      - Norwegian Nynorsk.
+      - Urdu.
+      - Latvian.
+      - Burmese.
+      - Tatar.
+      - Afrikaans.
+      - Occitan.
+      - Low German.
+      - Kirghiz.
+      - Asturian.
+      - Tagalog.
+      - Icelandic.
+      - Interlingua.
+      - Sinhala.
+      - Gujarati.
+      - Central Khmer.
+      - Breton.
+      - Bashkir.
+      - Uzbek.
+      - Tibetan.
+      - Panjabi.
+      - Volapük.
+      - Tosk Albanian.
+      - Nepali.
+      - Welsh.
+      - Lojban.
+      - Western Frisian.
+      - Mongolian.
+      - Luxembourgish.
+      - Chechen.
+      - Uighur.
+      - Tajik.
+      - Scots.
+      - Sanskrit.
+      - Chuvash.
+      - Javanese.
+      - Minangkabau.
+      - Ido.
+      - Oriya.
+      - Assamese.
+      - Newari.
+      - Irish.
+      - Malagasy.
+      - Aragonese.
+      - Central Kurdish.
+      - Swahili.
+      - Bavarian.
+      - Lombard.
+      - Yiddish.
+      - Egyptian Arabic.
+      - Eastern Mari.
+      - South Azerbaijani.
+      - Yakut.
+      - Western Panjabi.
+      - Sundanese.
+      - Bishnupriya.
+      - Piemontese.
+      - Iloko.
+      - Wu Chinese.
+      - Kurdish.
+      - Pushto.
+      - Interlingue.
+      - Mingrelian.
+      - Yue Chinese.
+      - Goan Konkani.
+      - Limburgan.
+      - Mirandese.
+      - Cornish.
+      - Sindhi.
+      - Upper Sorbian.
+      - Sicilian.
+      - Scottish Gaelic.
+      - Pampanga.
+      - Bhojpuri.
+      - Maithili.
+      - Venetian.
+      - Maltese.
+      - Dhivehi.
+      - Walloon.
+      - Mazanderani.
+      - Amharic.
+      - Quechua.
+      - Chavacano.
+      - Turkmen.
+      - Romansh.
+      - Ossetian.
+      - Vlaams.
+      - Yoruba.
+      - Lao.
+      - Lezghian.
+      - Somali.
+      - Erzya.
+      - Dimli.
+      - Western Mari.
+      - Lower Sorbian.
+      - Northern Frisian.
+      - Haitian.
+      - Guarani.
+      - Russia Buriat.
+      - Komi.
+      - Sardinian.
+      - Karachay-Balkar.
+      - Central Bikol.
+      - Neapolitan.
+      - Manx.
+      - Avaric.
+      - Rusyn.
+      - Kalmyk.
+      - Pfaelzisch.
+      - Dotyali.
+      - Fiji Hindi.
+      - Corsican.
+      - Northern Luri.
+      - Veps.
+      - Tuvinian.
+      - Norwegian Bokmål.
+      - Shona.
+      - Kinyarwanda.
+      - Igbo.
+      - Samoan.
+      - Southern Sotho.
+      - Maori.
+      - Wolof.
+      - Xhosa.
+      - Hausa.
+      - Hawaiian.
+      - Nyanja.
+      - Zulu.
+      - Hmong.
+    description: 'Language code in ISO639-3 format. More info can be found here: https://iso639-3.sil.org/code_tables/639/data.'
+  v1LanguageList:
+    type: object
+    example:
+      languages:
+        - iso6393Code: nld
+          languageCode: NLD
+          name: Dutch
+        - iso6393Code: eng
+          languageCode: ENG
+          name: English
+        - iso6393Code: spa
+          languageCode: SPA
+          name: Spanish
+        - iso6393Code: zho
+          languageCode: ZHO
+          name: Chinese
+    properties:
+      languages:
+        type: array
+        example:
+          - iso6393Code: nld
+            languageCode: NLD
+            name: Dutch
+          - iso6393Code: eng
+            languageCode: ENG
+            name: English
+          - iso6393Code: spa
+            languageCode: SPA
+            name: Spanish
+          - iso6393Code: zho
+            languageCode: ZHO
+            name: Chinese
+        items:
+          $ref: '#/definitions/v1Language'
+        description: The collection of languages.
+        title: Languages
+    description: List of recognized languages.
+    title: LanguageList
+  v1ListDatasetMode:
+    type: string
+    enum:
+      - ALL
+      - ONLY_TEMPLATE
+      - ONLY_USER
+    default: ALL
+    valueComments:
+      - List all datasets.
+      - List the template datasets. Template datasets are used as examples and can be found under the `Templates` tab in the [dataset overview of the dashboard](https://dashboard.messagebird.com/knowledge-base/list). You can clone such datasets to kickstart the creation of a dataset that is tailored to your use-case.
+      - List the user datasets.
+    description: Mode for listing datasets.
+  v1ListDatasetsResponse:
+    type: object
+    example:
+      datasets:
+        - createdAt: "2021-08-24T12:04:32Z"
+          datasetId: dde4eeae-7652-4bc8-8be1-1cd6ac898dc7
+          description: This dataset is clearly some awesome dataset.
+          intents:
+            - order
+            - reservation
+          isTemplate: false
+          lastTrainedAt: "2021-08-24T12:04:32Z"
+          name: My awesome dataset
+          updatedAt: "2021-08-24T12:04:32Z"
+      limit: 20
+      nextCursor: VGhpcyBpcyBub3QgYSByZWFsIGN1cnNvciwgYnV0IHRoZXkgd291bGQgYmUgYmFzZTY0IGVuY29kZWQgdG9vCg==
+    properties:
+      datasets:
+        type: array
+        example:
+          - createdAt: "2021-08-24T12:04:32Z"
+            datasetId: dde4eeae-7652-4bc8-8be1-1cd6ac898dc7
+            description: This dataset is clearly some awesome dataset.
+            intents:
+              - order
+              - reservation
+            isTemplate: false
+            lastTrainedAt: "2021-08-24T12:04:32Z"
+            name: My awesome dataset
+            updatedAt: "2021-08-24T12:04:32Z"
+        items:
+          $ref: '#/definitions/v1Dataset'
+        description: The (paginated) collection of datasets. This can contain both your own datasets as well as template datasets. Template datasets are used as examples and can be found under the `Templates` tab in the [dataset overview of the dashboard](https://dashboard.messagebird.com/knowledge-base/list). You can clone such datasets to kickstart the creation of a dataset that is tailored to your use-case.
+        title: Datasets
+      limit:
+        type: integer
+        format: int64
+        example: 20
+        description: The effective limit of the maximum number of datasets that could be returned by the list endpoint. If the `limit` defined in [`ListDatasetsRequest`](#listdatasetsrequest-object) was not set, this value indicates the used limit.
+        title: Limit
+      nextCursor:
+        type: string
+        example: VGhpcyBpcyBub3QgYSByZWFsIGN1cnNvciwgYnV0IHRoZXkgd291bGQgYmUgYmFzZTY0IGVuY29kZWQgdG9vCg==
+        description: The cursor that can be used to obtain the next paginated collection of datasets.
+        title: Next Cursor
+    description: A response containing the Intent datasets that were queried.
+    title: ListDatasetsResponse
+  v1PredictIntentResponse:
+    type: object
+    example:
+      intent: order
+      intentPredicted: true
+    properties:
+      intent:
+        type: string
+        example: order
+        description: The intent that is predicted for the given phrase.
+        title: Intent
+      intentPredicted:
+        type: boolean
+        example: true
+        description: Boolean indicating an intent was predicted. If false the phrase could not be matched with an intent.
+        title: Intent Predicted
+    description: A response for predicting an intent from a phrase and a dataset ID.
+    title: PredictIntentResponse
+securityDefinitions:
+  AccessKey:
+    type: apiKey
+    name: Authorization
+    in: header
+externalDocs:
+  description: Find our official documentation in the MessageBird Docs
+  url: https://developers.messagebird.com/api

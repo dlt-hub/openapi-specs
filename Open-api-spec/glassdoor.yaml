@@ -1,0 +1,23 @@
+openapi: 3.0.3
+info:
+  version: 0.1.0
+  title: Glassdoor API
+  license:
+    name: MIT
+    url: https://github.com/noid-dev/codewars-openapi/blob/main/LICENSE
+  description: >
+    Official Glassdoor API documentation - [https://www.glassdoor.com/developer/](https://www.glassdoor.com/developer/index.htm)
+servers:
+  - url: https://api.glassdoor.com
+security:
+  - PartnerID: []
+  - PartnerKey: []
+paths:
+  /api/api.htm:
+    $ref: ./paths/Api.yaml
+components:
+  securitySchemes:
+    PartnerID:
+      $ref: ./components/securitySchemes/PartnerID.yaml
+    PartnerKey:
+      $ref: ./components/securitySchemes/PartnerKey.yaml

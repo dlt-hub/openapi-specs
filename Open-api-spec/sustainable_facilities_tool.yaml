@@ -1,0 +1,712 @@
+openapi: 3.0.0
+info:
+    title: SFTool API
+    version: 1.0.0
+	description: |
+        SFTool API provides machine readable data to develop a service or services to search, 
+		display, analyze, retrieve, and view SFTool data about healthy buildings and environmentally responsible purchasing.
+
+        You can find out more about SFTool at [https://sftool.gov](https://sftool.gov).
+        Use the api key 'DEMO_KEY' to test the SFTool API.
+
+        Introduction
+
+        This API is documented in OpenAPI format as provided by  [swagger.io](http://swagger.io) team.
+               
+        Cross Origin Resource Sharing
+        This API features Cross Origin Resource Sharing (CORS) implemented in compliance with    [W3C spec](https://www.w3.org/TR/cors/).
+        And that allows cross domain communication from the browser.
+        All responses have a wildcard same origin which makes them completely public and accessible to everyone, including any code on any site.
+
+        Authentication
+
+        SFTool API offers the following form of authentication:
+            - API Key        
+
+    contact:
+        name: SFTool API Support
+        email: sftool@gsa.gov
+        url: 'https://sftool.gov/feedback/new'
+    x-logo:
+        url: 'https://sftool.gov'
+        altText: SFTool logo
+    
+servers:    
+    - url: 'https://api.gsa.gov'
+		description: Default server
+paths:
+    /sustainability/sftool/v1/building-systems/resources:
+        get:
+            
+            parameters:
+                -   name: api_key
+                    in: query
+                    schema:
+                        type: string
+                    example: DEMO_KEY
+            responses:
+                '200':
+                    
+    /sustainability/sftool/v1/contentpages:
+        get:
+            
+            parameters:
+                -   name: api_key
+                    in: query
+                    schema:
+                        type: string
+                    example: DEMO_KEY
+            responses:
+                '200':
+                    
+    /sustainability/sftool/v1/building-systems/case-studies:
+        get:
+            
+            parameters:
+                -   name: api_key
+                    in: query
+                    schema:
+                        type: string
+                    example: DEMO_KEY
+            responses:
+                '200':
+                    
+    /sustainability/sftool/v1/procurementclauses/naics/238220:
+        get:
+            
+            parameters:
+                -   name: api_key
+                    in: query
+                    schema:
+                        type: string
+                    example: DEMO_KEY
+            responses:
+                '200':
+                    
+    /sustainability/sftool/v1/building-systems:
+        get:
+            
+            parameters:
+                -   name: api_key
+                    in: query
+                    schema:
+                        type: string
+                    example: DEMO_KEY
+            responses:
+                '200':
+                    
+                    content:
+                        application/json; charset=utf-8:
+                            schema:
+                                type: string
+                            examples: {}
+    /sustainability/sftool/v1/building-systems/hvac:
+        get:
+            
+            parameters:
+                -   name: api_key
+                    in: query
+                    schema:
+                        type: string
+                    example: DEMO_KEY
+            responses:
+                '200':
+                    
+                    content:
+                        application/json; charset=utf-8:
+                            schema:
+                                type: string
+                            examples: {}
+    /sustainability/sftool/v1/contentpages/4:
+        get:
+            
+            parameters:
+                -   name: api_key
+                    in: query
+                    schema:
+                        type: string
+                    example: DEMO_KEY
+            responses:
+                '200':
+                    
+                    content:
+                        application/json; charset=utf-8:
+                            schema:
+                                type: string
+                            examples: {}
+    /sustainability/sftool/v1/building-systems/1:
+        get:
+            
+            parameters:
+                -   name: api_key
+                    in: query
+                    schema:
+                        type: string
+                    example: DEMO_KEY
+            responses:
+                '200':
+                    
+                    content:
+                        application/json; charset=utf-8:
+                            schema:
+                                type: string
+                            examples: {}
+    /sustainability/sftool/v1/building-systems/2/case-studies:
+        get:
+            
+            parameters:
+                -   name: api_key
+                    in: query
+                    schema:
+                        type: string
+                    example: DEMO_KEY
+            responses:
+                '200':
+                    
+                    content:
+                        application/json; charset=utf-8:
+                            schema:
+                                type: string
+                            examples: {}
+    /sustainability/sftool/v1/building-systems/3/mandates:
+        get:
+            
+            parameters:
+                -   name: api_key
+                    in: query
+                    schema:
+                        type: string
+                    example: DEMO_KEY
+            responses:
+                '200':
+                    
+                    content:
+                        application/json; charset=utf-8:
+                            schema:
+                                type: string
+                            examples: {}
+    /sustainability/sftool/v1/procurementclauses:
+        get:
+            
+            parameters:
+                -   name: api_key
+                    in: query
+                    schema:
+                        type: string
+                    example: DEMO_KEY
+            responses:
+                '200':
+                    
+    /sustainability/sftool/v1/building-systems/mandates:
+        get:
+            
+            parameters:
+                -   name: api_key
+                    in: query
+                    schema:
+                        type: string
+                    example: DEMO_KEY
+            responses:
+                '200':
+                    
+    /sustainability/sftool/v1/building-systems/rating-systems:
+        get:
+            
+            parameters:
+                -   name: api_key
+                    in: query
+                    schema:
+                        type: string
+                    example: DEMO_KEY
+            responses:
+                '200':
+                    
+    /sustainability/sftool/v1/building-systems/integrative-teams:
+        get:
+            
+            parameters:
+                -   name: api_key
+                    in: query
+                    schema:
+                        type: string
+                    example: DEMO_KEY
+            responses:
+                '200':
+                    
+    /sustainability/sftool/v1/procurementclauses/psc/7290:
+        get:
+            
+            parameters:
+                -   name: api_key
+                    in: query
+                    schema:
+                        type: string
+                    example: DEMO_KEY
+            responses:
+                '200':
+                    
+                    content:
+                        application/json; charset=utf-8:
+                            schema:
+                                type: string
+                            examples: {}
+    /sustainability/sftool/v1/building-systems/system-bundles:
+        get:
+            
+            parameters:
+                -   name: api_key
+                    in: query
+                    schema:
+                        type: string
+                    example: DEMO_KEY
+            responses:
+                '200':
+                    
+    /sustainability/sftool/v1/building-systems/1/integrative-teams:
+        get:
+            
+            parameters:
+                -   name: api_key
+                    in: query
+                    schema:
+                        type: string
+                    example: DEMO_KEY
+            responses:
+                '200':
+                    
+    /sustainability/sftool/v1/building-systems/1/resources:
+        get:
+            
+            parameters:
+                -   name: api_key
+                    in: query
+                    schema:
+                        type: string
+                    example: DEMO_KEY
+            responses:
+                '200':
+                    
+                    content:
+                        application/json; charset=utf-8:
+                            schema:
+                                type: string
+                            examples: {}
+    /sustainability/sftool/v1/building-systems/8/rating-systems:
+        get:
+            
+            parameters:
+                -   name: api_key
+                    in: query
+                    schema:
+                        type: string
+                    example: DEMO_KEY
+            responses:
+                '200':
+                    
+    /sustainability/sftool/v1/building-systems/10/system-bundles:
+        get:
+            
+            parameters:
+                -   name: api_key
+                    in: query
+                    schema:
+                        type: string
+                    example: DEMO_KEY
+            responses:
+                '200':
+                    		    
+    /sustainability/sftool/v1/products/272/details:
+        get:
+            
+            parameters:
+                -   name: api_key
+                    in: query
+                    schema:
+                        type: string
+                    example: DEMO_KEY
+            responses:
+                '200':
+                    
+                    content:
+                        application/json; charset=utf-8:
+                            schema:
+                                type: string
+                            examples: {}
+    /sustainability/sftool/v1/materials/timer/comparisons:
+        get:
+            
+            parameters:
+                -   name: api_key
+                    in: query
+                    schema:
+                        type: string
+                    example: DEMO_KEY
+            responses:
+                '200':
+                    
+                    content:
+                        application/json; charset=utf-8:
+                            schema:
+                                type: string
+                            examples: {}
+    /sustainability/sftool/v1/services/byname/related-products:
+        get:
+            
+            parameters:
+                -   name: api_key
+                    in: query
+                    schema:
+                        type: string
+                    example: DEMO_KEY
+                -   name: name
+                    in: query
+                    schema:
+                        type: string
+                    example: pest management
+            responses:
+                '200':
+                    
+                    content:
+                        application/json; charset=utf-8:
+                            schema:
+                                type: string
+                            examples: {}
+    /sustainability/sftool/v1/tags:
+        get:
+            
+            parameters:
+                -   name: api_key
+                    in: query
+                    schema:
+                        type: string
+                    example: DEMO_KEY
+            responses:
+                '200':
+                    
+    /sustainability/sftool/v1/services/10:
+        get:
+            
+            parameters:
+                -   name: api_key
+                    in: query
+                    schema:
+                        type: string
+                    example: DEMO_KEY
+            responses:
+                '200':
+                    
+    /sustainability/sftool/v1/materials/2022/alternatives:
+        get:
+            
+            parameters:
+                -   name: api_key
+                    in: query
+                    schema:
+                        type: string
+                    example: DEMO_KEY
+            responses:
+                '200':
+                    
+                    content:
+                        application/json; charset=utf-8:
+                            schema:
+                                type: string
+                            examples: {}
+    /sustainability/sftool/v1/procurementclauses/allcontractlanguage:
+        get:
+            
+            parameters:
+                -   name: api_key
+                    in: query
+                    schema:
+                        type: string
+                    example: DEMO_KEY
+            responses:
+                '200':
+                    
+    /sustainability/sftool/v1/materials/1968:
+        get:
+            
+            parameters:
+                -   name: api_key
+                    in: query
+                    schema:
+                        type: string
+                    example: DEMO_KEY
+            responses:
+                '200':
+                    
+                    content:
+                        application/json; charset=utf-8:
+                            schema:
+                                type: string
+                            examples: {}
+    /sustainability/sftool/v1/gpcsearch:
+        get:
+            
+            parameters:
+                -   ame: q
+                    in: query
+                    schema:
+                        type: string
+                    example: janitorial
+                -   name: api_key
+                    in: query
+                    schema:
+                        type: string
+                    example: DEMO_KEY
+            responses:
+                '200':
+                    
+    /sustainability/sftool/v1/products/byname:
+        get:
+            
+            parameters:
+                -   name: api_key
+                    in: query
+                    schema:
+                        type: string
+                    example: DEMO_KEY
+                -   name: name
+                    in: query
+                    schema:
+                        type: string
+                    example: Wastebasket Liners (24" x 33" or smaller)
+            responses:
+                '200':
+                    
+                    content:
+                        application/json; charset=utf-8:
+                            schema:
+                                type: string
+                            examples: {}
+    /sustainability/sftool/v1/services/byname:
+        get:
+            
+            parameters:
+                -   name: api_key
+                    in: query
+                    schema:
+                        type: string
+                    example: DEMO_KEY
+                -   name: name
+                    in: query
+                    schema:
+                        type: string
+                    example: pest management
+            responses:
+                '200':
+                    
+    /sustainability/sftool/v1/services/10/related-products/details:
+        get:
+            
+            parameters:
+                -   name: api_key
+                    in: query
+                    schema:
+                        type: string
+                    example: DEMO_KEY
+            responses:
+                '200':
+                    
+    /sustainability/sftool/v1/services/byname/related-products/details:
+        get:
+            
+            parameters:
+                -   name: api_key
+                    in: query
+                    schema:
+                        type: string
+                    example: DEMO_KEY
+                - name: name
+                    in: query
+                    schema:
+                        type: string
+                    example: pest management
+            responses:
+                '200':
+                    
+    /sustainability/sftool/v1/products/11:
+        get:
+            
+            parameters:
+                -   name: api_key
+                    in: query
+                    schema:
+                        type: string
+                    example: DEMO_KEY
+            responses:
+                '200':
+                    
+                    content:
+                        application/json; charset=utf-8:
+                            schema:
+                                type: string
+                            examples: {}
+    /sustainability/sftool/v1/materials:
+        get:
+            
+            parameters:
+                -   name: api_key
+                    in: query
+                    schema:
+                        type: string
+                    example: DEMO_KEY
+            responses:
+                '200':
+                    
+    /sustainability/sftool/v1/services:
+        get:
+            
+            parameters:
+                -   name: api_key
+                    in: query
+                    schema:
+                        type: string
+                    example: DEMO_KEY
+            responses:
+                '200':
+                    
+    /sustainability/sftool/v1/services/10/related-products:
+        get:
+            
+            parameters:
+                -   name: api_key
+                    in: query
+                    schema:
+                        type: string
+                    example: DEMO_KEY
+            responses:
+                '200':
+                    
+    /sustainability/sftool/v1/products/byname/details:
+        get:
+            
+            parameters:
+                -   name: api_key
+                    in: query
+                    schema:
+                        type: string
+                    example: DEMO_KEY
+                -   name: name
+                    in: query
+                    schema:
+                        type: string
+                    example: Wastebasket Liners (24" x 33" or smaller)
+            responses:
+                '200':
+                    
+                    content:
+                        application/json; charset=utf-8:
+                            schema:
+                                type: string
+                            examples: {}
+    /sustainability/sftool/v1/products:
+        get:
+            
+            parameters:
+                -   name: api_key
+                    in: query
+                    schema:
+                        type: string
+                    example: DEMO_KEY
+            responses:
+                '200':
+                    
+    /sustainability/sftool/v1/tags/480:
+        get:
+            
+            parameters:
+                -   name: api_key
+                    in: query
+                    schema:
+                        type: string
+                    example: DEMO_KEY
+            responses:
+                '200':
+                    
+                    content:
+                        application/json; charset=utf-8:
+                            schema:
+                                type: string
+                            examples: {}
+    /sustainability/sftool/v1/workspaces:
+        get:
+            
+            parameters:
+                -   name: api_key
+                    in: query
+                    schema:
+                        type: string
+                    example: DEMO_KEY
+            responses:
+                '200':
+                    
+    /sustainability/sftool/v1/workspaces/83:
+        get:
+            
+            parameters:
+                -   name: api_key
+                    in: query
+                    schema:
+                        type: string
+                    example: DEMO_KEY
+            responses:
+                '200':
+                    
+                    content:
+                        application/json; charset=utf-8:
+                            schema:
+                                type: string
+                            examples: {}
+    /sustainability/sftool/v1/workspaces/81/material-groups:
+        get:
+            
+            parameters:
+                -   name: api_key
+                    in: query
+                    schema:
+                        type: string
+                    example: DEMO_KEY
+            responses:
+                '200':
+                    
+                    content:
+                        application/json; charset=utf-8:
+                            schema:
+                                type: string
+                            examples: {}
+    /sustainability/sftool/v1/tags/biofuel:
+        get:
+            
+            parameters:
+                -   name: api_key
+                    in: query
+                    schema:
+                        type: string
+                    example: DEMO_KEY
+            responses:
+                '200':
+                    
+                    content:
+                        application/json; charset=utf-8:
+                            schema:
+                                type: string
+                            examples: {}
+    /sustainability/sftool/v1/workspaces/82/materials:
+        get:
+            
+            parameters:
+                -   name: api_key
+                    in: query
+                    schema:
+	    type: string
+                    example: DEMO_KEY
+            responses:
+                '200':
+                    
+                    content:
+                        application/json; charset=utf-8:
+                            schema:
+                                type: string
+                            examples: {}

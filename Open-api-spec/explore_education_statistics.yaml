@@ -1,0 +1,2061 @@
+---
+openapi: 3.0.1
+info:
+  title: Explore education statistics - public data API
+  version: 1.0.0
+  description: 'This is a draft specification for the upcoming public data API for
+    the EES platform.
+
+    '
+  contact:
+    name: Explore education statistics
+    email: explore.statistics@education.gov.uk
+    url: https://explore-education-statistics.service.gov.uk
+servers:
+- url: https://ees-api-mock.ambitiousocean-cb084d07.uksouth.azurecontainerapps.io/
+  description: Mock API
+tags:
+- name: Publication
+  description: Operations related to publications.
+- name: Data Set
+  description: Operations related to data sets and their querying.
+paths:
+  "/api/v1/publications":
+    get:
+      operationId: ListPublications
+      summary: List publications
+      description: Lists details about publications with data available for querying.
+      tags:
+      - Publication
+      parameters:
+      - name: page
+        in: query
+        description: The page of results to fetch.
+        required: false
+        schema:
+          type: number
+          minimum: 1
+          format: int32
+      - name: pageSize
+        in: query
+        description: The maximum number of results per page.
+        required: false
+        schema:
+          type: number
+          format: int32
+          minimum: 0
+          maximum: 40
+          default: 20
+      - name: search
+        in: query
+        description: A search term to find matching publications.
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/PagedPublicationSummaryViewModel"
+  "/api/v1/publications/{publicationId}":
+    get:
+      operationId: GetPublication
+      summary: Get a publication's details
+      description: Gets a specific publication's details.
+      tags:
+      - Publication
+      parameters:
+      - name: publicationId
+        in: path
+        description: The ID of the publication.
+        required: true
+        schema:
+          type: string
+          format: uuid
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/PublicationSummaryViewModel"
+  "/api/v1/publications/{publicationId}/data-sets":
+    get:
+      operationId: ListPublicationDataSets
+      summary: List a publication's data sets
+      description: Lists summary details of all the data sets related to a publication.
+      tags:
+      - Publication
+      parameters:
+      - name: publicationId
+        in: path
+        description: The ID of the publication.
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: page
+        in: query
+        description: The page of results to fetch.
+        required: false
+        schema:
+          type: number
+          minimum: 1
+          format: int32
+      - name: pageSize
+        in: query
+        description: The maximum number of results per page.
+        required: false
+        schema:
+          type: number
+          format: int32
+          minimum: 0
+          maximum: 20
+          default: 10
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/PagedDataSetsViewModel"
+        '400':
+          "$ref": "#/components/responses/BadRequest"
+        '404':
+          "$ref": "#/components/responses/NotFound"
+  "/api/v1/data-sets/{dataSetId}":
+    get:
+      operationId: GetDataSet
+      summary: Get a data set's summary
+      description: Gets a specific data set's summary details.
+      tags:
+      - Data Set
+      parameters:
+      - name: dataSetId
+        in: path
+        description: The ID of the data set.
+        required: true
+        schema:
+          type: string
+          format: uuid
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/DataSetViewModel"
+        '400':
+          "$ref": "#/components/responses/BadRequest"
+        '404':
+          "$ref": "#/components/responses/NotFound"
+  "/api/v1/data-sets/{dataSetId}/query":
+    get:
+      operationId: QueryDataSetGet
+      summary: Query a data set (GET)
+      description: "Query a data set using a `GET` request, returning the filtered
+        results.\n\nNote that there is a `POST` variant of this endpoint which provides
+        a more complete set\nof querying functionality. The `GET` variant is only
+        recommended for initial exploratory \ntesting or simple queries that do not
+        need advanced functionality.\n\nUnlike the `POST` variant, this endpoint does
+        not allow condition clauses (`and`, `or`, `not`)\nand consequently cannot
+        express more complex queries."
+      tags:
+      - Data Set
+      parameters:
+      - name: dataSetId
+        in: path
+        description: The ID of the data set.
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: dataSetVersion
+        in: query
+        description: The version of the data set to use e.g. 2.0, 1.1, etc.
+        schema:
+          type: string
+      - name: filters
+        in: query
+        description: The filters to match results by.
+        explode: false
+        allowReserved: true
+        schema:
+          "$ref": "#/components/schemas/DataSetQueryCriteriaFilters"
+      - name: geographicLevels
+        in: query
+        description: The geographic levels to match results by.
+        explode: false
+        allowReserved: true
+        schema:
+          "$ref": "#/components/schemas/DataSetQueryCriteriaGeographicLevels"
+      - name: locations
+        in: query
+        description: The locations to match results by.
+        explode: false
+        allowReserved: true
+        schema:
+          "$ref": "#/components/schemas/DataSetQueryCriteriaLocations"
+      - name: timePeriods
+        in: query
+        description: The time periods to match results by.
+        explode: false
+        allowReserved: true
+        schema:
+          "$ref": "#/components/schemas/DataSetQueryCriteriaTimePeriods"
+      - name: indicators
+        in: query
+        description: The IDs of indicators to get values for.
+        required: true
+        explode: false
+        allowReserved: true
+        schema:
+          type: array
+          items:
+            type: string
+      - name: sort
+        in: query
+        description: |-
+          List of sorts to apply to results. Sorts at the start of the list will be applied first.
+          By default, results are sorted by time period in descending order.
+        explode: false
+        allowReserved: true
+        schema:
+          type: array
+          minItems: 1
+          items:
+            "$ref": "#/components/schemas/DataSetQuerySort"
+      - name: debug
+        in: query
+        description: Enable debug mode. Results will be formatted with human-readable
+          labels to assist identification.
+        required: false
+        schema:
+          type: boolean
+          default: false
+      - name: page
+        in: query
+        description: The page of results to fetch.
+        required: false
+        schema:
+          type: number
+          format: int32
+          minimum: 1
+      - name: pageSize
+        in: query
+        description: The maximum number of results per page.
+        required: false
+        schema:
+          type: number
+          format: int32
+          minimum: 0
+          maximum: 10000
+          default: 1000
+      - name: Accept
+        in: header
+        description: |-
+          The media type to format the response data in (defaults to `application/json`). Allowed options:
+
+          - `application/json`
+          - `text/csv`
+        schema:
+          type: string
+          default: application/json
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/DataSetQueryResultsViewModel"
+            text/csv:
+              schema:
+                type: string
+        '400':
+          "$ref": "#/components/responses/BadRequest"
+        '404':
+          "$ref": "#/components/responses/NotFound"
+    post:
+      operationId: QueryDataSetPost
+      summary: Query a data set (POST)
+      description: "Query a data set using a `POST` request, returning the filtered
+        results.\n\nNote that for simpler queries or exploratory testing, there is
+        also `GET` variant of this \nendpoint which only handles a smaller subset
+        of querying functionality. However, for most \nuse-cases, this endpoint is
+        recommended as it provides the complete set of functionality.\n\nUnlike the
+        `GET` variant, this endpoint allows condition clauses (`and`, `or`, `not`)\nand
+        consequently can express more complex queries."
+      tags:
+      - Data Set
+      parameters:
+      - name: dataSetId
+        in: path
+        description: The ID of the data set.
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: dataSetVersion
+        in: query
+        description: The version of the data set to use e.g. 2.0, 1.1, etc.
+        schema:
+          type: string
+      - name: debug
+        in: query
+        description: Enable debug mode. Results will be formatted with human-readable
+          labels to assist identification.
+        required: false
+        schema:
+          type: boolean
+          default: false
+      - name: page
+        in: query
+        description: The page of results to fetch.
+        required: false
+        schema:
+          type: number
+          format: int32
+          minimum: 1
+      - name: pageSize
+        in: query
+        description: The maximum number of results per page.
+        required: false
+        schema:
+          type: number
+          format: int32
+          minimum: 0
+          maximum: 10000
+          default: 1000
+      - name: Accept
+        in: header
+        description: |-
+          The media type to format the response data in (defaults to `application/json`). Allowed options:
+
+          - `application/json`
+          - `text/csv`
+        schema:
+          type: string
+          default: application/json
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              "$ref": "#/components/schemas/DataSetQuery"
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/DataSetQueryResultsViewModel"
+            text/csv:
+              schema:
+                type: string
+        '400':
+          "$ref": "#/components/responses/BadRequest"
+        '404':
+          "$ref": "#/components/responses/NotFound"
+  "/api/v1/data-sets/{dataSetId}/file":
+    get:
+      operationId: GetDataSetFile
+      summary: Get a data set file
+      description: Get the entire data set in a specified file format.
+      tags:
+      - Data Set
+      parameters:
+      - name: dataSetId
+        in: path
+        description: The ID of the data set.
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: dataSetVersion
+        in: query
+        description: The version of the data set to use e.g. 2.0, 1.1, etc.
+        schema:
+          type: string
+      - name: Accept
+        in: header
+        description: |-
+          The media type to output the file in (defaults to `text/csv`). Allowed options:
+
+          - `text/csv` - Outputs the data set as a compressed csv file (defaults to gzip).
+          - `application/zip` - Outputs a zip file containing the data set, its metadata and any relevant files.
+        schema:
+          type: string
+          default: text/csv
+      responses:
+        '200':
+          description: Success. A zip containing the underlying data set file.
+          content:
+            application/zip:
+              schema:
+                type: string
+                format: binary
+        '400':
+          "$ref": "#/components/responses/BadRequest"
+        '404':
+          "$ref": "#/components/responses/NotFound"
+  "/api/v1/data-sets/{dataSetId}/meta":
+    get:
+      operationId: GetDataSetMeta
+      summary: Get a data set's metadata
+      description: Get the metadata about a data set. Use this to create data set
+        queries.
+      tags:
+      - Data Set
+      parameters:
+      - name: dataSetId
+        in: path
+        description: The ID of the data set.
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: dataSetVersion
+        in: query
+        description: The version of the data set to use e.g. 2.0, 1.1, etc.
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/DataSetMetaViewModel"
+        '400':
+          "$ref": "#/components/responses/BadRequest"
+        '404':
+          "$ref": "#/components/responses/NotFound"
+  "/api/v1/data-sets/{dataSetId}/meta/filters":
+    get:
+      operationId: GetDataSetMetaFilters
+      summary: Get a data set's filter metadata
+      description: Get the filter metadata about a data set. Use this to create data
+        set queries.
+      tags:
+      - Data Set
+      parameters:
+      - name: dataSetId
+        in: path
+        description: The ID of the data set.
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: dataSetVersion
+        in: query
+        description: The version of the data set to use e.g. 2.0, 1.1, etc.
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/DataSetMetaFiltersViewModel"
+        '400':
+          "$ref": "#/components/responses/BadRequest"
+        '404':
+          "$ref": "#/components/responses/NotFound"
+  "/api/v1/data-sets/{dataSetId}/meta/indicators":
+    get:
+      operationId: GetDataSetMetaIndicators
+      summary: Get a data set's indicator metadata
+      description: Get the indicator metadata about a data set. Use this to create
+        data set queries.
+      tags:
+      - Data Set
+      parameters:
+      - name: dataSetId
+        in: path
+        description: The ID of the data set.
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: dataSetVersion
+        in: query
+        description: The version of the data set to use e.g. 2.0, 1.1, etc.
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/DataSetMetaIndicatorsViewModel"
+        '400':
+          "$ref": "#/components/responses/BadRequest"
+        '404':
+          "$ref": "#/components/responses/NotFound"
+  "/api/v1/data-sets/{dataSetId}/meta/geographic":
+    get:
+      operationId: GetDataSetMetaGeographic
+      summary: Get a data set's geographic metadata
+      description: Get the geographic metadata about a data set. Use this to create
+        data set queries.
+      tags:
+      - Data Set
+      parameters:
+      - name: dataSetId
+        in: path
+        description: The ID of the data set.
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: dataSetVersion
+        in: query
+        description: The version of the data set to use e.g. 2.0, 1.1, etc.
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/DataSetMetaGeographicViewModel"
+        '400':
+          "$ref": "#/components/responses/BadRequest"
+        '404':
+          "$ref": "#/components/responses/NotFound"
+  "/api/v1/data-sets/{dataSetId}/meta/time-periods":
+    get:
+      operationId: GetDataSetMetaTimePeriods
+      summary: Get a data set's time period metadata
+      description: Get the time period metadata about a data set. Use this to create
+        data set queries.
+      tags:
+      - Data Set
+      parameters:
+      - name: dataSetId
+        in: path
+        description: The ID of the data set.
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: dataSetVersion
+        in: query
+        description: The version of the data set to use e.g. 2.0, 1.1, etc.
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/DataSetMetaTimePeriodsViewModel"
+        '400':
+          "$ref": "#/components/responses/BadRequest"
+        '404':
+          "$ref": "#/components/responses/NotFound"
+  "/api/v1/data-sets/{dataSetId}/versions":
+    get:
+      operationId: ListDataSetVersions
+      summary: List a data set's versions
+      description: List a data set's versions. Only provides summary information of
+        each version.
+      tags:
+      - Data Set
+      parameters:
+      - name: dataSetId
+        in: path
+        description: The ID of the data set.
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: page
+        in: query
+        description: The page of results to fetch.
+        required: false
+        schema:
+          type: number
+          format: int32
+          minimum: 1
+      - name: pageSize
+        in: query
+        description: The maximum number of results per page.
+        required: false
+        schema:
+          type: number
+          format: int32
+          minimum: 0
+          maximum: 20
+          default: 10
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/PagedDataSetVersionsViewModel"
+        '400':
+          "$ref": "#/components/responses/BadRequest"
+        '404':
+          "$ref": "#/components/responses/NotFound"
+  "/api/v1/data-sets/{dataSetId}/versions/{dataSetVersion}":
+    get:
+      operationId: GetDataSetVersion
+      summary: Get a data set version
+      description: Get a data set version, including a full list of its changes.
+      tags:
+      - Data Set
+      parameters:
+      - name: dataSetId
+        in: path
+        description: The ID of the data set.
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: dataSetVersion
+        in: path
+        description: The data set version number e.g. 2.0, 1.1, etc.
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/DataSetVersionViewModel"
+        '400':
+          "$ref": "#/components/responses/BadRequest"
+        '404':
+          "$ref": "#/components/responses/NotFound"
+  "/api/v1/data-sets/{dataSetId}/versions/{dataSetVersion}/changes":
+    get:
+      operationId: GetDataSetVersionChanges
+      summary: Get a data set version's changes
+      description: Get a data set version's list of changes.
+      tags:
+      - Data Set
+      parameters:
+      - name: dataSetId
+        in: path
+        description: The ID of the data set.
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: dataSetVersion
+        in: path
+        description: The data set version number e.g. 2.0, 1.1, etc.
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/ChangeSetViewModel"
+        '400':
+          "$ref": "#/components/responses/BadRequest"
+        '404':
+          "$ref": "#/components/responses/NotFound"
+components:
+  responses:
+    BadRequest:
+      description: Bad Request. Usually indicates a validation error or a malformed
+        request.
+      content:
+        application/json:
+          schema:
+            "$ref": "#/components/schemas/ApiErrorViewModel"
+    NotFound:
+      description: Not Found. Indicates that a specified resource could not be found.
+      content:
+        application/json:
+          schema:
+            "$ref": "#/components/schemas/ApiErrorViewModel"
+  schemas:
+    ApiErrorViewModel:
+      type: object
+      description: Describes an error returned from the API.
+      required:
+      - title
+      - type
+      - status
+      properties:
+        title:
+          type: string
+          description: The title of the error. Typically summarises the error.
+        type:
+          type: string
+          description: The type of error.
+        status:
+          type: number
+          description: The HTTP status code.
+          format: int32
+        errors:
+          "$ref": "#/components/schemas/ErrorDictionary"
+    ChangeSetViewModel:
+      type: object
+      description: A set of changes made to a data set version.
+      required:
+      - _links
+      - changes
+      properties:
+        _links:
+          "$ref": "#/components/schemas/LinksViewModel"
+        changes:
+          type: array
+          items:
+            "$ref": "#/components/schemas/ChangeViewModel"
+    ChangeViewModel:
+      type: object
+      description: A specific change made as part of the data set version.
+      discriminator:
+        propertyName: metaType
+        mapping:
+          Filter: "#/components/schemas/ChangeFilterViewModel"
+          FilterOption: "#/components/schemas/ChangeFilterOptionViewModel"
+          Indicator: "#/components/schemas/ChangeIndicatorViewModel"
+          Location: "#/components/schemas/ChangeLocationViewModel"
+          TimePeriod: "#/components/schemas/ChangeTimePeriodViewModel"
+      oneOf:
+      - "$ref": "#/components/schemas/ChangeFilterViewModel"
+      - "$ref": "#/components/schemas/ChangeFilterOptionViewModel"
+      - "$ref": "#/components/schemas/ChangeIndicatorViewModel"
+      - "$ref": "#/components/schemas/ChangeLocationViewModel"
+      - "$ref": "#/components/schemas/ChangeTimePeriodViewModel"
+    ChangeFilterViewModel:
+      type: object
+      description: A change made to filter meta.
+      additionalProperties: false
+      required:
+      - id
+      - type
+      - metaType
+      properties:
+        id:
+          type: string
+          description: The ID of the change.
+          format: uuid
+        type:
+          "$ref": "#/components/schemas/ChangeType"
+        metaType:
+          type: string
+          description: The meta type changed.
+          enum:
+          - Filter
+        currentState:
+          "$ref": "#/components/schemas/ChangeFilterState"
+        previousState:
+          "$ref": "#/components/schemas/ChangeFilterState"
+    ChangeFilterOptionViewModel:
+      type: object
+      description: A change made to filter option meta.
+      additionalProperties: false
+      required:
+      - id
+      - type
+      - metaType
+      properties:
+        id:
+          type: string
+          description: The ID of the change.
+          format: uuid
+        type:
+          "$ref": "#/components/schemas/ChangeType"
+        metaType:
+          type: string
+          description: The meta type changed.
+          enum:
+          - FilterOption
+        currentState:
+          "$ref": "#/components/schemas/ChangeFilterOptionState"
+        previousState:
+          "$ref": "#/components/schemas/ChangeFilterOptionState"
+    ChangeIndicatorViewModel:
+      type: object
+      description: A change made to indicator meta.
+      additionalProperties: false
+      required:
+      - id
+      - type
+      - metaType
+      properties:
+        id:
+          type: string
+          description: The ID of the change.
+          format: uuid
+        type:
+          "$ref": "#/components/schemas/ChangeType"
+        metaType:
+          type: string
+          description: The meta type changed.
+          enum:
+          - Indicator
+        currentState:
+          "$ref": "#/components/schemas/ChangeIndicatorState"
+        previousState:
+          "$ref": "#/components/schemas/ChangeIndicatorState"
+    ChangeLocationViewModel:
+      type: object
+      description: A change made to location meta.
+      additionalProperties: false
+      required:
+      - id
+      - type
+      - metaType
+      properties:
+        id:
+          type: string
+          description: The ID of the change.
+          format: uuid
+        type:
+          "$ref": "#/components/schemas/ChangeType"
+        metaType:
+          type: string
+          description: The meta type changed.
+          enum:
+          - Location
+        currentState:
+          "$ref": "#/components/schemas/ChangeLocationState"
+        previousState:
+          "$ref": "#/components/schemas/ChangeLocationState"
+    ChangeTimePeriodViewModel:
+      type: object
+      description: A change made to time period meta.
+      additionalProperties: false
+      required:
+      - id
+      - type
+      - metaType
+      properties:
+        id:
+          type: string
+          description: The ID of the change.
+          format: uuid
+        type:
+          "$ref": "#/components/schemas/ChangeType"
+        metaType:
+          type: string
+          description: The meta type changed.
+          enum:
+          - TimePeriod
+        currentState:
+          "$ref": "#/components/schemas/ChangeTimePeriodState"
+        previousState:
+          "$ref": "#/components/schemas/ChangeTimePeriodState"
+    ChangeFilterState:
+      type: object
+      description: The state of a filter during a change.
+      additionalProperties: false
+      required:
+      - id
+      - label
+      properties:
+        id:
+          type: string
+          description: The ID of the filter.
+        label:
+          type: string
+          description: The human-readable label of the filter.
+    ChangeFilterOptionState:
+      type: object
+      description: A state of a filter option during a change.
+      additionalProperties: false
+      required:
+      - id
+      - label
+      - filterId
+      properties:
+        id:
+          type: string
+          description: The ID of the filter item.
+        label:
+          type: string
+          description: The human-readable label describing the filter item.
+        isAggregate:
+          type: boolean
+          description: Whether the filter item is an aggregate (i.e. 'all' or a 'total')
+            of the other filter items.
+        filterId:
+          type: string
+          description: The ID of the filter the filter item belongs to.
+    ChangeIndicatorState:
+      type: object
+      description: The state of an indicator during a change.
+      additionalProperties: false
+      required:
+      - id
+      - label
+      - unit
+      properties:
+        id:
+          type: string
+          description: The ID of the indicator.
+        label:
+          type: string
+          description: The human-readable label of the indicator.
+        unit:
+          "$ref": "#/components/schemas/IndicatorUnit"
+        decimalPlaces:
+          type: integer
+          format: int32
+          description: The optimal number of decimal places that the indicator should
+            use when displayed.
+    ChangeLocationState:
+      type: object
+      description: The state of a location during a change.
+      required:
+      - id
+      - label
+      - code
+      - level
+      properties:
+        id:
+          type: string
+          description: The ID of the location.
+        label:
+          type: string
+          description: The label of the location.
+        code:
+          type: string
+          description: The code of the location (if applicable).
+        level:
+          "$ref": "#/components/schemas/GeographicLevel"
+      additionalProperties:
+        type: string
+        description: Other properties of the location.
+    ChangeTimePeriodState:
+      type: object
+      description: The state of a time period during a change.
+      additionalProperties: false
+      required:
+      - code
+      - year
+      properties:
+        code:
+          "$ref": "#/components/schemas/TimePeriodCode"
+        year:
+          type: integer
+          format: int32
+          description: The year that the time period relates to.
+    ChangeType:
+      type: string
+      description: |-
+        The type of change that was made. This can be:
+
+          - `Add` - the addition of something e.g. a new facet
+          - `Update` - an update to something e.g. a facet's label or other attribute
+          - `Delete` - the removal of something e.g. a facet
+      enum:
+      - Add
+      - Update
+      - Delete
+    DataSetQuery:
+      type: object
+      description: A query for data from a data set matching specific facets.
+      required:
+      - facets
+      - indicators
+      properties:
+        facets:
+          type: object
+          description: A query to match result facets by.
+          oneOf:
+          - "$ref": "#/components/schemas/DataSetQueryCriteria"
+          - "$ref": "#/components/schemas/DataSetQueryConditionAnd"
+          - "$ref": "#/components/schemas/DataSetQueryConditionOr"
+          - "$ref": "#/components/schemas/DataSetQueryConditionNot"
+        indicators:
+          type: array
+          description: The IDs of indicators to get values for.
+          minItems: 1
+          items:
+            type: string
+        sort:
+          type: array
+          description: |-
+            List of sorts to apply to results. Sorts at the start of the list will be applied first.
+            By default, results are sorted by time period in descending order.
+          minItems: 1
+          items:
+            "$ref": "#/components/schemas/DataSetQuerySort"
+      additionalProperties: false
+    DataSetQueryConditionAnd:
+      type: object
+      description: "A query condition that can only be true when all its sub-clauses
+        resolve to true. This is \nequivalent to the `AND` operator in SQL."
+      required:
+      - and
+      properties:
+        and:
+          type: array
+          description: The list of sub-clauses.
+          minItems: 1
+          items:
+            oneOf:
+            - "$ref": "#/components/schemas/DataSetQueryCriteria"
+            - "$ref": "#/components/schemas/DataSetQueryConditionAnd"
+            - "$ref": "#/components/schemas/DataSetQueryConditionOr"
+            - "$ref": "#/components/schemas/DataSetQueryConditionNot"
+      additionalProperties: false
+      example:
+        and:
+        - filters:
+            in:
+            - filter1
+            - filter2
+        - locations:
+            eq: location1
+        - timePeriods:
+            eq:
+              code: AY
+              year: 202122
+    DataSetQueryConditionOr:
+      type: object
+      description: |-
+        A query condition that can only be true when one of its sub-clauses resolve to true. This
+        is equivalent to the `OR` operator in SQL.
+      required:
+      - or
+      properties:
+        or:
+          type: array
+          description: The list of sub-clauses.
+          minItems: 1
+          items:
+            oneOf:
+            - "$ref": "#/components/schemas/DataSetQueryCriteria"
+            - "$ref": "#/components/schemas/DataSetQueryConditionAnd"
+            - "$ref": "#/components/schemas/DataSetQueryConditionOr"
+            - "$ref": "#/components/schemas/DataSetQueryConditionNot"
+      additionalProperties: false
+      example:
+        or:
+        - filters:
+            in:
+            - filter1
+            - filter2
+          timePeriods:
+            gte:
+              code: AY
+              year: 201617
+            lte:
+              code: AY
+              year: 201819
+        - filters:
+            in:
+            - filter1
+            - filter2
+          timePeriods:
+            gte:
+              code: AY
+              year: 202021
+            lte:
+              code: AY
+              year: 202223
+    DataSetQueryConditionNot:
+      type: object
+      description: "A query condition that can only be true when its sub-clause resolves
+        to false. This is \nequivalent to the `NOT` operator in SQL."
+      required:
+      - not
+      properties:
+        not:
+          description: The sub-clause that must not be true.
+          oneOf:
+          - "$ref": "#/components/schemas/DataSetQueryCriteria"
+          - "$ref": "#/components/schemas/DataSetQueryConditionAnd"
+          - "$ref": "#/components/schemas/DataSetQueryConditionOr"
+          - "$ref": "#/components/schemas/DataSetQueryConditionNot"
+      additionalProperties: false
+      example:
+        not:
+          filters:
+            in:
+            - filter1
+            - filter2
+          locations:
+            eq: location1
+    DataSetQueryCriteria:
+      type: object
+      description: A set of criteria to match query results to. All parts must resolve
+        to true to match.
+      properties:
+        filters:
+          "$ref": "#/components/schemas/DataSetQueryCriteriaFilters"
+        locations:
+          "$ref": "#/components/schemas/DataSetQueryCriteriaLocations"
+        geographicLevels:
+          "$ref": "#/components/schemas/DataSetQueryCriteriaGeographicLevels"
+        timePeriods:
+          "$ref": "#/components/schemas/DataSetQueryCriteriaTimePeriods"
+      additionalProperties: false
+      example:
+        filters:
+          in:
+          - filter1
+          - filter2
+        locations:
+          notIn:
+          - location1
+          - location2
+        geographicLevels:
+          eq: LocalAuthority
+        timePeriods:
+          gte:
+            code: AY
+            year: 201617
+          lte:
+            code: AY
+            year: 202021
+    DataSetQueryCriteriaFilters:
+      type: object
+      description: The filter IDs to match results by.
+      properties:
+        eq:
+          type: string
+          description: Results must have a filter matching the given ID.
+        notEq:
+          type: string
+          description: Results must not have a filter that matches the given ID.
+        in:
+          type: array
+          description: Results must have at least one filter matching the given IDs.
+          minItems: 1
+          items:
+            type: string
+        notIn:
+          type: array
+          description: Results must not have any filters matching the given IDs.
+          minItems: 1
+          items:
+            type: string
+      additionalProperties: false
+    DataSetQueryCriteriaTimePeriods:
+      type: object
+      description: The time periods to match results by.
+      properties:
+        eq:
+          "$ref": "#/components/schemas/DataSetQueryTimePeriod"
+        notEq:
+          "$ref": "#/components/schemas/DataSetQueryTimePeriod"
+        gte:
+          "$ref": "#/components/schemas/DataSetQueryTimePeriod"
+        gt:
+          "$ref": "#/components/schemas/DataSetQueryTimePeriod"
+        lte:
+          "$ref": "#/components/schemas/DataSetQueryTimePeriod"
+        lt:
+          "$ref": "#/components/schemas/DataSetQueryTimePeriod"
+        in:
+          type: array
+          minItems: 1
+          items:
+            "$ref": "#/components/schemas/DataSetQueryTimePeriod"
+        notIn:
+          type: array
+          minItems: 1
+          items:
+            "$ref": "#/components/schemas/DataSetQueryTimePeriod"
+      additionalProperties: false
+    DataSetQueryCriteriaGeographicLevels:
+      type: object
+      description: The geographic levels to match results by.
+      properties:
+        eq:
+          "$ref": "#/components/schemas/GeographicLevel"
+        notEq:
+          "$ref": "#/components/schemas/GeographicLevel"
+        in:
+          type: array
+          minItems: 1
+          items:
+            "$ref": "#/components/schemas/GeographicLevel"
+        notIn:
+          type: array
+          minItems: 1
+          items:
+            "$ref": "#/components/schemas/GeographicLevel"
+      additionalProperties: false
+    DataSetQueryCriteriaLocations:
+      type: object
+      description: "The locations to match results by. These can be matched either
+        by the location ID or code. \nNote the following differences:\n\n- IDs only
+        match a **single** location\n- Codes may match **multiple** locations\n\nWhilst
+        codes are mostly unique to a single location, they sometimes are used for
+        multiple \nlocations. This may match more results than you expect so it is
+        recommended to use IDs where\npossible."
+      properties:
+        eq:
+          type: string
+          description: Results must have a location matching the given ID or code.
+        notEq:
+          type: string
+          description: Results must not have a location that matches the given ID
+            or code.
+        in:
+          type: array
+          description: Results must have at least one location matching the given
+            IDs or codes.
+          minItems: 1
+          items:
+            type: string
+        notIn:
+          type: array
+          description: Results must not have any locations matching the given IDs
+            or codes.
+          minItems: 1
+          items:
+            type: string
+      additionalProperties: false
+    DataSetQueryResultsViewModel:
+      type: object
+      description: Contains the results of a data set query, and any associated footnotes
+        or meta (where applicable).
+      required:
+      - footnotes
+      - paging
+      - results
+      - warnings
+      - _links
+      properties:
+        footnotes:
+          type: array
+          description: The footnotes relevant to the data set query results.
+          items:
+            "$ref": "#/components/schemas/FootnoteViewModel"
+        paging:
+          "$ref": "#/components/schemas/PagingViewModel"
+        results:
+          type: array
+          description: The results of the data set query.
+          items:
+            "$ref": "#/components/schemas/DataSetQueryResultViewModel"
+        warnings:
+          "$ref": "#/components/schemas/WarningDictionary"
+        _links:
+          "$ref": "#/components/schemas/LinksViewModel"
+      additionalProperties: false
+    DataSetQueryResultViewModel:
+      type: object
+      description: A result from a data set query, showing values matched to their
+        respective facets.
+      required:
+      - filters
+      - geographicLevel
+      - locations
+      - values
+      - timePeriod
+      properties:
+        filters:
+          type: object
+          description: "A dictionary containing the row's associated filters. \n\nThe
+            key is the filter name and the value is ID of the filter item."
+          additionalProperties:
+            type: string
+        geographicLevel:
+          "$ref": "#/components/schemas/GeographicLevel"
+        locations:
+          type: object
+          description: "A dictionary containing the row's associated locations. \n\nThe
+            key is the geographic level and the value is the ID or code of the location."
+          additionalProperties:
+            type: string
+            description: The ID or code of the location.
+        values:
+          type: object
+          description: A dictionary containing the row's data values. The key is the
+            indicator ID and the value is the measured indicator value.
+          additionalProperties:
+            type: string
+        timePeriod:
+          "$ref": "#/components/schemas/TimePeriodViewModel"
+      additionalProperties: false
+    DataSetQuerySort:
+      type: object
+      description: A sorting configuration to sort query results by.
+      required:
+      - name
+      properties:
+        name:
+          type: string
+          description: The name of the field to sort. This can be `TimePeriod`, a
+            geographic level e.g. `Country` or a filter.
+        direction:
+          type: string
+          description: The direction that the field should be ordered. Defaults to
+            ascending if none is set.
+          default: Asc
+          enum:
+          - Asc
+          - Desc
+    DataSetQueryTimePeriod:
+      type: object
+      description: A time period for a data set query.
+      required:
+      - code
+      - year
+      properties:
+        code:
+          "$ref": "#/components/schemas/TimePeriodCode"
+        year:
+          type: integer
+          format: int32
+          description: The year that the time period relates to.
+    DataSetViewModel:
+      type: object
+      description: Describes and provides high-level information about a data set.
+      required:
+      - id
+      - title
+      - summary
+      - status
+      - latestVersion
+      - _links
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: The ID of the data set.
+        title:
+          type: string
+          description: The title of the data set.
+        summary:
+          type: string
+          description: A summary of the data set's contents.
+        status:
+          type: string
+          description: "The status of the data set. Can be one of the following:\n\n-
+            `Published` - the data set has been published and will receive updates
+            \n- `Deprecated` - the data set is being discontinued and will no receive
+            updates\n- `Unpublished` - the data set has been unpublished and can no
+            longer be used"
+          enum:
+          - Published
+          - Deprecated
+          - Unpublished
+        latestVersion:
+          "$ref": "#/components/schemas/DataSetLatestVersionViewModel"
+        supersedingDataSetId:
+          type: string
+          description: The ID of the data set that supersedes this data set (if it
+            has been deprecated).
+        _links:
+          "$ref": "#/components/schemas/LinksViewModel"
+      additionalProperties: false
+    DataSetLatestVersionViewModel:
+      type: object
+      required:
+      - number
+      - totalResults
+      - timePeriods
+      - geographicLevels
+      - filters
+      - indicators
+      - published
+      properties:
+        number:
+          type: string
+          description: The version number.
+        published:
+          type: string
+          description: When the version was published.
+          format: datetime
+        totalResults:
+          type: number
+          description: The total number of results available to query in the data
+            set.
+        timePeriods:
+          "$ref": "#/components/schemas/TimePeriodRange"
+        geographicLevels:
+          type: array
+          description: The geographic levels available in the data set.
+          items:
+            type: string
+        filters:
+          type: array
+          description: The filters available in the data set.
+          items:
+            type: string
+        indicators:
+          type: array
+          description: The indicators available in the data set.
+          items:
+            type: string
+    DataSetMetaViewModel:
+      type: object
+      description: All the metadata associated with a data set.
+      required:
+      - _links
+      - filters
+      - indicators
+      - geographicLevels
+      - locations
+      - timePeriods
+      properties:
+        _links:
+          "$ref": "#/components/schemas/LinksViewModel"
+        filters:
+          type: array
+          description: All the filters associated with the data set.
+          items:
+            "$ref": "#/components/schemas/FilterMetaViewModel"
+        indicators:
+          type: array
+          description: All the indicators associated with the data set.
+          items:
+            "$ref": "#/components/schemas/IndicatorMetaViewModel"
+        geographicLevels:
+          type: array
+          description: All the geographic levels associated with the data set.
+          items:
+            "$ref": "#/components/schemas/GeographicLevel"
+        locations:
+          type: array
+          description: All the locations associated with the data set, grouped by
+            level.
+          items:
+            "$ref": "#/components/schemas/LocationLevelMetaViewModel"
+        timePeriods:
+          type: array
+          description: All the time periods associated with the data set.
+          items:
+            "$ref": "#/components/schemas/TimePeriodMetaViewModel"
+      additionalProperties: false
+    DataSetMetaFiltersViewModel:
+      type: object
+      description: All the filter metadata associated with a data set.
+      required:
+      - _links
+      - filters
+      properties:
+        _links:
+          "$ref": "#/components/schemas/LinksViewModel"
+        filters:
+          type: array
+          description: All the filters associated with the data set.
+          items:
+            "$ref": "#/components/schemas/FilterMetaViewModel"
+      additionalProperties: false
+    DataSetMetaIndicatorsViewModel:
+      type: object
+      description: All the indicator metadata associated with a data set.
+      required:
+      - _links
+      - indicators
+      properties:
+        _links:
+          "$ref": "#/components/schemas/LinksViewModel"
+        indicators:
+          type: array
+          description: All the indicators associated with the data set.
+          items:
+            "$ref": "#/components/schemas/IndicatorMetaViewModel"
+      additionalProperties: false
+    DataSetMetaGeographicViewModel:
+      type: object
+      description: All the geographic metadata associated with a data set.
+      required:
+      - _links
+      - geographicLevels
+      - locations
+      properties:
+        _links:
+          "$ref": "#/components/schemas/LinksViewModel"
+        geographicLevels:
+          type: array
+          description: All the geographic levels associated with the data set.
+          items:
+            "$ref": "#/components/schemas/GeographicLevel"
+        locations:
+          type: array
+          description: All the locations associated with the data set, grouped by
+            level.
+          items:
+            "$ref": "#/components/schemas/LocationLevelMetaViewModel"
+      additionalProperties: false
+    DataSetMetaTimePeriodsViewModel:
+      type: object
+      description: All the geographic metadata associated with a data set.
+      required:
+      - _links
+      - timePeriods
+      properties:
+        _links:
+          "$ref": "#/components/schemas/LinksViewModel"
+        timePeriods:
+          type: array
+          description: All the time periods associated with the data set.
+          items:
+            "$ref": "#/components/schemas/TimePeriodMetaViewModel"
+      additionalProperties: false
+    DataSetVersionViewModel:
+      type: object
+      description: Describes a version of a data set.
+      required:
+      - number
+      - type
+      - status
+      - notes
+      - totalResults
+      - timePeriods
+      - geographicLevels
+      - filters
+      - indicators
+      - published
+      - _links
+      additionalProperties: false
+      properties:
+        number:
+          type: string
+          description: The version number. Follows semantic versioning e.g. 2.0 (major),
+            1.1 (minor).
+        type:
+          type: string
+          description: "The version type. Can be one of the following:\n\n- `Major`
+            - backwards **incompatible** changes are being introduced\n- `Minor` -
+            backwards compatible changes are being introduced\n\nMajor versions typically
+            indicate that some action may be required to ensure code \nthat consumes
+            the data set continues to work.\n\nMinor versions should not cause issues
+            in the functionality of existing code."
+          enum:
+          - Major
+          - Minor
+        status:
+          type: string
+          description: |-
+            The version's status. Can be one of the following:
+
+            - `Published` - the version is published and can be used
+            - `Deprecated` - the version is being deprecated and will not be usable in the future
+            - `Unpublished` - the version has been unpublished and can no longer be used
+          enum:
+          - Published
+          - Deprecated
+          - Unpublished
+        published:
+          type: string
+          description: When the version was published.
+          format: datetime
+        unpublished:
+          type: string
+          description: When the version was unpublished.
+          format: datetime
+        notes:
+          type: string
+          description: Any notes about this version and its changes.
+        totalResults:
+          type: number
+          description: The total number of results available to query in the data
+            set.
+        timePeriods:
+          "$ref": "#/components/schemas/TimePeriodRange"
+        geographicLevels:
+          type: array
+          description: The geographic levels available in the data set.
+          items:
+            type: string
+        filters:
+          type: array
+          description: The filters available in the data set.
+          items:
+            type: string
+        indicators:
+          type: array
+          description: The indicators available in the data set.
+          items:
+            type: string
+        _links:
+          "$ref": "#/components/schemas/LinksViewModel"
+    ErrorDictionary:
+      type: object
+      description: "A dictionary of errors associated to a model.\n\n- The key represents
+        a path on the model, or the entire model when it is an empty string (`\"\"`).
+        \n- The value is a list of errors associated to the path."
+      additionalProperties:
+        type: array
+        items:
+          "$ref": "#/components/schemas/ErrorViewModel"
+    ErrorViewModel:
+      type: object
+      description: A representation of an error.
+      required:
+      - message
+      - code
+      properties:
+        message:
+          type: string
+          description: The error's message.
+        code:
+          type: string
+          description: The error's code. May be used for further diagnosis, or error
+            handling in consuming code.
+        details:
+          type: object
+          description: Further details about the error.
+          additionalProperties: true
+      additionalProperties: false
+    FilterOptionMetaViewModel:
+      type: object
+      description: A filterable facet (or characteristic) of a data point.
+      required:
+      - id
+      - label
+      properties:
+        id:
+          type: string
+          description: The ID of the filter item.
+        label:
+          type: string
+          description: The human-readable label describing the filter item.
+        isAggregate:
+          type: boolean
+          description: Whether the filter item is an aggregate (i.e. 'all' or a 'total')
+            of the other filter items.
+      additionalProperties: false
+    FilterMetaViewModel:
+      type: object
+      description: A group of filterable facets (or characteristics) for the data.
+        This is composed of filter items.
+      required:
+      - id
+      - label
+      - options
+      properties:
+        id:
+          type: string
+          description: The ID of the filter.
+        hint:
+          type: string
+          description: A hint to assist in describing the filter.
+        label:
+          type: string
+          description: The human-readable label describing the filter.
+        options:
+          type: array
+          description: The filter items belonging to this filter.
+          items:
+            "$ref": "#/components/schemas/FilterOptionMetaViewModel"
+      additionalProperties: false
+    FootnoteViewModel:
+      type: object
+      description: A footnote associated with the data.
+      required:
+      - id
+      - content
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: The ID of the footnote.
+        content:
+          type: string
+          description: The content of the footnote.
+      additionalProperties: false
+    GeographicLevel:
+      type: string
+      description: A geographic level that locations are grouped by.
+      enum:
+      - Country
+      - EnglishDevolvedArea
+      - LocalAuthority
+      - LocalAuthorityDistrict
+      - LocalEnterprisePartnership
+      - Institution
+      - MayoralCombinedAuthority
+      - MultiAcademyTrust
+      - OpportunityArea
+      - ParliamentaryConstituency
+      - PlanningArea
+      - Provider
+      - Region
+      - RscRegion
+      - School
+      - Sponsor
+      - Ward
+    IndicatorMetaViewModel:
+      type: object
+      description: The type of measurement taken by a data point.
+      required:
+      - id
+      - label
+      - unit
+      properties:
+        id:
+          type: string
+          description: The ID of the indicator.
+        label:
+          type: string
+          description: The human-readable label of the indicator.
+        unit:
+          "$ref": "#/components/schemas/IndicatorUnit"
+        decimalPlaces:
+          type: integer
+          format: int32
+          description: The optimal number of decimal places that the indicator should
+            use when displayed.
+      additionalProperties: false
+    IndicatorUnit:
+      type: string
+      description: A numeric unit for an indicator.
+      enum:
+      - ''
+      - "%"
+      - "£"
+      - "£m"
+      - pp
+    LinkViewModel:
+      type: object
+      description: A link to the endpoint for a related resource.
+      required:
+      - href
+      properties:
+        href:
+          type: string
+          description: The URI of the link.
+        title:
+          type: string
+          description: The title of the link. Can help understand what the link relates
+            to.
+        method:
+          type: string
+          description: The HTTP method to use with this link.
+      example:
+        href: https://url-to-resource
+    LinksViewModel:
+      type: object
+      description: A map of links to related resources/endpoints. A link to the current
+        resource (i.e. `self`) is always provided.
+      required:
+      - self
+      properties:
+        self:
+          "$ref": "#/components/schemas/LinkViewModel"
+      additionalProperties:
+        "$ref": "#/components/schemas/LinkViewModel"
+    LocationLevelMetaViewModel:
+      type: object
+      description: A geographic level's locations.
+      required:
+      - level
+      - options
+      properties:
+        level:
+          "$ref": "#/components/schemas/GeographicLevel"
+        options:
+          type: array
+          items:
+            "$ref": "#/components/schemas/LocationMetaViewModel"
+    LocationMetaViewModel:
+      type: object
+      description: A geographic location e.g. a country, region, local authority,
+        etc.
+      required:
+      - id
+      - label
+      - code
+      properties:
+        id:
+          type: string
+          description: The ID of the location.
+        label:
+          type: string
+          description: The label of the location.
+        code:
+          type: string
+          description: |-
+            The code of the location (if applicable). These can be:
+
+            - ONS codes for geographic levels like countries, local authorities, etc
+            - DfE codes for geographic levels like schools, providers, etc
+
+            Note that these codes may not be unique across locations at the same geographic level.
+    PagedDataSetVersionsViewModel:
+      type: object
+      additionalProperties: false
+      required:
+      - paging
+      - results
+      - _links
+      properties:
+        paging:
+          "$ref": "#/components/schemas/PagingViewModel"
+        results:
+          type: array
+          items:
+            "$ref": "#/components/schemas/DataSetVersionViewModel"
+        _links:
+          "$ref": "#/components/schemas/LinksViewModel"
+    PagedDataSetsViewModel:
+      type: object
+      additionalProperties: false
+      required:
+      - paging
+      - results
+      - _links
+      properties:
+        paging:
+          "$ref": "#/components/schemas/PagingViewModel"
+        results:
+          type: array
+          items:
+            "$ref": "#/components/schemas/DataSetViewModel"
+        _links:
+          "$ref": "#/components/schemas/LinksViewModel"
+    PagedPublicationSummaryViewModel:
+      type: object
+      additionalProperties: false
+      required:
+      - paging
+      - results
+      - _links
+      properties:
+        paging:
+          "$ref": "#/components/schemas/PagingViewModel"
+        results:
+          type: array
+          items:
+            "$ref": "#/components/schemas/PublicationSummaryViewModel"
+        _links:
+          "$ref": "#/components/schemas/LinksViewModel"
+    PagingViewModel:
+      type: object
+      description: Provides metadata for use in pagination.
+      additionalProperties: false
+      required:
+      - page
+      - pageSize
+      - totalResults
+      - totalPages
+      properties:
+        page:
+          type: number
+          description: The current page number.
+          format: int32
+          minimum: 0
+        pageSize:
+          type: number
+          description: The maximum number of results per page.
+          format: int32
+          minimum: 0
+        totalResults:
+          type: number
+          description: The total number of results across all pages.
+          format: int32
+          minimum: 0
+        totalPages:
+          type: number
+          description: The total number of pages.
+          format: int32
+          minimum: 0
+    PublicationSummaryViewModel:
+      type: object
+      description: Provides summary information about a publication.
+      required:
+      - id
+      - title
+      - slug
+      - summary
+      - lastPublished
+      - _links
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: The ID of the publication.
+        title:
+          type: string
+          description: The title of the publication.
+        slug:
+          type: string
+          description: The URL slug of the publication.
+        summary:
+          type: string
+          description: The summary of the publication.
+        lastPublished:
+          type: string
+          description: When the publication was last published.
+          format: datetime
+        _links:
+          "$ref": "#/components/schemas/LinksViewModel"
+      additionalProperties: false
+    TimePeriodCode:
+      enum:
+      - AY
+      - AYQ1
+      - AYQ2
+      - AYQ3
+      - AYQ4
+      - CY
+      - CYQ1
+      - CYQ2
+      - CYQ3
+      - CYQ4
+      - P1
+      - P2
+      - FY
+      - FYQ1
+      - FYQ2
+      - FYQ3
+      - FYQ4
+      - TY
+      - TYQ1
+      - TYQ2
+      - TYQ3
+      - TYQ4
+      - RY
+      - T1
+      - T1T2
+      - T2
+      - T3
+      - W1
+      - W2
+      - W3
+      - W4
+      - W5
+      - W6
+      - W7
+      - W8
+      - W9
+      - W10
+      - W11
+      - W12
+      - W13
+      - W14
+      - W15
+      - W16
+      - W17
+      - W18
+      - W19
+      - W20
+      - W21
+      - W22
+      - W23
+      - W24
+      - W25
+      - W26
+      - W27
+      - W28
+      - W29
+      - W30
+      - W31
+      - W32
+      - W33
+      - W34
+      - W35
+      - W36
+      - W37
+      - W38
+      - W39
+      - W40
+      - W41
+      - W42
+      - W43
+      - W44
+      - W45
+      - W46
+      - W47
+      - W48
+      - W49
+      - W50
+      - W51
+      - W52
+      - M1
+      - M2
+      - M3
+      - M4
+      - M5
+      - M6
+      - M7
+      - M8
+      - M9
+      - M10
+      - M11
+      - M12
+      type: string
+      description: "The code describing a time period. This can be one of the following:
+        \n\n- `AY` - Academic year\n- `AYQ1-4` - Academic year quarter 1 to 4\n- `CY`
+        - Calendar year\n- `RY` - Reporting year\n- `P1` - Part 1 (April to September)\n-
+        `P2` - Part 2 (October to March)\n- `FY` - Financial year\n- `FYQ1-4` - Financial
+        year quarter 1 to 4\n- `TYQ1-4` - Tax year quarter 1 to 4\n- `W1-52` - Week
+        1 to 52\n- `M1-12` - Month 1 to 12"
+    TimePeriodRange:
+      type: object
+      description: Describes a time period range in human-readable format.
+      required:
+      - start
+      - end
+      properties:
+        start:
+          type: string
+          description: The starting time period in human-readable format.
+        end:
+          type: string
+          description: The ending time period in human-readable format.
+      additionalProperties: false
+    TimePeriodViewModel:
+      type: object
+      description: A compact representation of a time period.
+      required:
+      - code
+      - year
+      properties:
+        code:
+          "$ref": "#/components/schemas/TimePeriodCode"
+        year:
+          type: integer
+          format: int32
+          description: The year that the time period relates to.
+    TimePeriodMetaViewModel:
+      type: object
+      description: A representation of a time period including a human-readable label.
+      allOf:
+      - "$ref": "#/components/schemas/TimePeriodViewModel"
+      - type: object
+        required:
+        - label
+        properties:
+          label:
+            type: string
+            description: The time period in human-readable format.
+    WarningDictionary:
+      type: object
+      description: "A dictionary of warnings associated to a model.\n\n- The key represents
+        a path on the model, or the entire model when it is an empty string (`\"\"`).
+        \n- The value is a list of warnings associated to the path."
+      additionalProperties:
+        type: array
+        items:
+          "$ref": "#/components/schemas/WarningViewModel"
+    WarningViewModel:
+      type: object
+      description: |-
+        A warning that points to a potential issue. This is not a critical error, but may require attention to
+        get the desired response.
+      required:
+      - message
+      - code
+      properties:
+        message:
+          type: string
+          description: The warning message.
+        code:
+          type: string
+          description: The warning code. May be used for further diagnosis, or error
+            handling in consuming code.
+        details:
+          type: object
+          description: Further details about the warning.
+          additionalProperties: true
+      additionalProperties: false

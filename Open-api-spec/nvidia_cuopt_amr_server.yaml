@@ -1,0 +1,1550 @@
+---
+openapi: 3.1.0
+info:
+  title: cuOpt AMR Server
+  version: '24.03'
+paths:
+  "/cuopt/health":
+    get:
+      summary: Health
+      description: To ping if server is running
+      operationId: health_cuopt_health_get
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+  "/v2/health/ready":
+    get:
+      summary: Ready
+      description: To check readiness of the server
+      operationId: ready_v2_health_ready_get
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+  "/v2/health/live":
+    get:
+      summary: Live
+      description: To check liveness of the server
+      operationId: live_v2_health_live_get
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+  "/cuopt/routes/{id}":
+    get:
+      summary: Query previous submission by id on-prem
+      description: 'Note: This is for self hosted. Query a previously submitted request
+        which timed out. The ''id'' is the uuid returned when the original request
+        timed out.'
+      operationId: routes_result_cuopt_routes__id__get
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Id
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                anyOf:
+                - "$ref": "#/components/schemas/ResponseModelPoll"
+                - "$ref": "#/components/schemas/ResponseModelWithId"
+                - "$ref": "#/components/schemas/ResponseInFile"
+                title: Response Routes Result Cuopt Routes  Id  Get
+        '400':
+          description: Value Error Or Validation Error
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/DetailModel"
+        '409':
+          description: Failed to get route
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/DetailModel"
+        '422':
+          description: Unprocessable Entity or Runtime Error or Out of memory error
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/DetailModel"
+        '500':
+          description: Any uncaught cuOpt error or Server errors
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/DetailModel"
+  "/cuopt/get_routes":
+    post:
+      summary: Get routes on-prem
+      description: Deprecated. Takes all the data and options at once, solves the
+        routing problem and returns result.
+      operationId: routes_cuopt_get_routes_post
+      deprecated: true
+      parameters:
+      - name: validation_only
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: boolean
+          - type: 'null'
+          description: If set to True, input will be validated, if input is valid,
+            returns a successful message, else returns an error.
+          default: false
+          title: Validation Only
+        description: If set to True, input will be validated, if input is valid, returns
+          a successful message, else returns an error.
+      - name: CUOPT-DATA-FILE
+        in: header
+        required: false
+        schema:
+          type: string
+          description: Name of data file to process in the server's CUOPT_DATA_DIR
+            when using the local file feature
+          default: ''
+          title: Cuopt-Data-File
+        description: Name of data file to process in the server's CUOPT_DATA_DIR when
+          using the local file feature
+      - name: CUOPT-RESULT-FILE
+        in: header
+        required: false
+        schema:
+          type: string
+          description: Result file name if output dir is enabled and size >= maxresult
+          default: ''
+          title: Cuopt-Result-File
+        description: Result file name if output dir is enabled and size >= maxresult
+      - name: CLIENT-VERSION
+        in: header
+        required: false
+        schema:
+          type: string
+          description: cuOpt client version. Set to 'custom' to skip version check
+          default: ''
+          title: Client-Version
+        description: cuOpt client version. Set to 'custom' to skip version check
+      - name: RESULT-TIMEOUT
+        in: header
+        required: false
+        schema:
+          type: number
+          description: Optional timeout. If not specified, the call will be synchronous.
+            If specified and a solution is not found before the timeout expires, a
+            request id will be returned which can be polled for a result.
+          title: Result-Timeout
+        description: Optional timeout. If not specified, the call will be synchronous.
+          If specified and a solution is not found before the timeout expires, a request
+          id will be returned which can be polled for a result.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              anyOf:
+              - "$ref": "#/components/schemas/OptimizedRoutingData"
+              - type: 'null'
+              title: Data
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                anyOf:
+                - "$ref": "#/components/schemas/ResponseModelPoll"
+                - "$ref": "#/components/schemas/ResponseModelWithId"
+                - "$ref": "#/components/schemas/ResponseInFile"
+                title: Response Routes Cuopt Get Routes Post
+        '400':
+          description: Value Error Or Validation Error
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/DetailModel"
+        '409':
+          description: Failed to get route
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/DetailModel"
+        '422':
+          description: Unprocessable Entity or Runtime Error or Out of memory error
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/DetailModel"
+        '500':
+          description: Any uncaught cuOpt error or Server errors
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/DetailModel"
+  "/cuopt/routes":
+    post:
+      summary: Get routes on-prem
+      description: 'Note: This is for self hosted. Takes all the data and options
+        at once, solves the routing problem and returns result.'
+      operationId: routes_cuopt_routes_post
+      parameters:
+      - name: validation_only
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: boolean
+          - type: 'null'
+          description: If set to True, input will be validated, if input is valid,
+            returns a successful message, else returns an error.
+          default: false
+          title: Validation Only
+        description: If set to True, input will be validated, if input is valid, returns
+          a successful message, else returns an error.
+      - name: CUOPT-DATA-FILE
+        in: header
+        required: false
+        schema:
+          type: string
+          description: Name of data file to process in the server's CUOPT_DATA_DIR
+            when using the local file feature
+          default: ''
+          title: Cuopt-Data-File
+        description: Name of data file to process in the server's CUOPT_DATA_DIR when
+          using the local file feature
+      - name: CUOPT-RESULT-FILE
+        in: header
+        required: false
+        schema:
+          type: string
+          description: Result file name if output dir is enabled and size >= maxresult
+          default: ''
+          title: Cuopt-Result-File
+        description: Result file name if output dir is enabled and size >= maxresult
+      - name: CLIENT-VERSION
+        in: header
+        required: false
+        schema:
+          type: string
+          description: cuOpt client version. Set to 'custom' to skip version check
+          default: ''
+          title: Client-Version
+        description: cuOpt client version. Set to 'custom' to skip version check
+      - name: RESULT-TIMEOUT
+        in: header
+        required: false
+        schema:
+          type: number
+          description: Optional timeout. If not specified, the call will be synchronous.
+            If specified and a solution is not found before the timeout expires, a
+            request id will be returned which can be polled for a result.
+          title: Result-Timeout
+        description: Optional timeout. If not specified, the call will be synchronous.
+          If specified and a solution is not found before the timeout expires, a request
+          id will be returned which can be polled for a result.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              anyOf:
+              - "$ref": "#/components/schemas/OptimizedRoutingData"
+              - type: 'null'
+              title: Data
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                anyOf:
+                - "$ref": "#/components/schemas/ResponseModelPoll"
+                - "$ref": "#/components/schemas/ResponseModelWithId"
+                - "$ref": "#/components/schemas/ResponseInFile"
+                title: Response Routes Cuopt Routes Post
+        '400':
+          description: Value Error Or Validation Error
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/DetailModel"
+        '409':
+          description: Failed to get route
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/DetailModel"
+        '422':
+          description: Unprocessable Entity or Runtime Error or Out of memory error
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/DetailModel"
+        '500':
+          description: Any uncaught cuOpt error or Server errors
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/DetailModel"
+  "/cuopt/cuopt":
+    post:
+      summary: Managed Service Endpoint
+      description: 'Note: This is for managed service. Takes all the data and options
+        at once, solves the routing problem and returns result.'
+      operationId: cuopt_cuopt_cuopt_post
+      parameters:
+      - name: NVCF-ASSET-DIR
+        in: header
+        required: false
+        schema:
+          type: string
+          description: Path to asset
+          default: ''
+          title: Nvcf-Asset-Dir
+        description: Path to asset
+      - name: NVCF-FUNCTION-ASSET-IDS
+        in: header
+        required: false
+        schema:
+          type: string
+          description: asset id
+          default: ''
+          title: Nvcf-Function-Asset-Ids
+        description: asset id
+      - name: NVCF-LARGE-OUTPUT-DIR
+        in: header
+        required: false
+        schema:
+          type: string
+          description: Path for large results
+          default: ''
+          title: Nvcf-Large-Output-Dir
+        description: Path for large results
+      - name: NVCF-NCAID
+        in: header
+        required: false
+        schema:
+          type: string
+          description: NVIDIA Cloud Account identifier
+          default: ''
+          title: Nvcf-Ncaid
+        description: NVIDIA Cloud Account identifier
+      - name: NVCF-REQID
+        in: header
+        required: false
+        schema:
+          type: string
+          description: NVCF request id
+          default: ''
+          title: Nvcf-Reqid
+        description: NVCF request id
+      - name: NVCF-INSTANCETYPE
+        in: header
+        required: false
+        schema:
+          type: string
+          description: host instance type
+          default: ''
+          title: Nvcf-Instancetype
+        description: host instance type
+      - name: NVCF-REGION
+        in: header
+        required: false
+        schema:
+          type: string
+          description: host region
+          default: ''
+          title: Nvcf-Region
+        description: host region
+      - name: NVCF-ENV
+        in: header
+        required: false
+        schema:
+          type: string
+          description: NVCF environment (stage or production)
+          default: ''
+          title: Nvcf-Env
+        description: NVCF environment (stage or production)
+      - name: NVCF-MAX-RESPONSE-SIZE-BYTES
+        in: header
+        required: false
+        schema:
+          type: string
+          description: Max size of direct response from NVCF
+          default: ''
+          title: Nvcf-Max-Response-Size-Bytes
+        description: Max size of direct response from NVCF
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              "$ref": "#/components/schemas/cuoptData"
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                anyOf:
+                - "$ref": "#/components/schemas/EmptyDict"
+                - "$ref": "#/components/schemas/ResponseModel"
+                title: Response Cuopt Cuopt Cuopt Post
+        '400':
+          description: Value Error Or Validation Error
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/DetailModel"
+        '409':
+          description: Failed to get route
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/DetailModel"
+        '422':
+          description: Unprocessable Entity or Runtime Error or Out of memory error
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/DetailModel"
+        '500':
+          description: Any uncaught cuOpt error or Server errors
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/DetailModel"
+components:
+  schemas:
+    DetailModel:
+      properties:
+        detail:
+          type: string
+          title: Detail
+          description: Error details
+      type: object
+      required:
+      - detail
+      title: DetailModel
+    DroppedTasks:
+      properties:
+        task_id:
+          anyOf:
+          - items:
+              type: integer
+            type: array
+          - items:
+              type: string
+            type: array
+          title: Task Id
+          description: With prize collection enabled, there is a chance of tasks being
+            dropped to make a feasible solution. This list contains infeasible task
+            ids which are dropped.
+          default: []
+        task_index:
+          items:
+            type: integer
+          type: array
+          title: Task Index
+          description: With prize collection enabled, there is a chance of tasks being
+            dropped to make a feasible solution. This list contains infeasible task
+            indices into task locations which are dropped.
+          default: []
+      additionalProperties: false
+      type: object
+      title: DroppedTasks
+    EmptyDict:
+      properties: {}
+      additionalProperties: false
+      type: object
+      title: EmptyDict
+    FeasibleResultData:
+      properties:
+        status:
+          type: integer
+          title: Status
+          description: "0 - Solution is available \n1 - Infeasible solution is available
+            \n"
+          default: 0
+          examples:
+          - 0
+        num_vehicles:
+          type: integer
+          title: Num Vehicles
+          description: Number of vehicle being used for the solution
+          default: -1
+          examples:
+          - 2
+        solution_cost:
+          type: number
+          title: Solution Cost
+          description: Total cost of the solution
+          default: -1
+          examples:
+          - 2
+        vehicle_data:
+          additionalProperties:
+            "$ref": "#/components/schemas/VehicleData"
+          type: object
+          title: Vehicle Data
+          description: All the details of vehicle routes and timestamps
+          default: {}
+          examples:
+          - vehicle_data:
+              veh-1:
+                arrival_stamp:
+                - 1
+                - 2
+                route:
+                - 1
+                - 1
+                task_id:
+                - Break
+                - Task-A
+                type:
+                - Break
+                - Delivery
+              veh-2:
+                arrival_stamp:
+                - 2
+                - 2
+                - 4
+                - 5
+                route:
+                - 0
+                - 0
+                - 2
+                - 0
+                task_id:
+                - Depot
+                - Break
+                - Task-B
+                - Depot
+                type:
+                - Depot
+                - Break
+                - Delivery
+                - Depot
+        dropped_tasks:
+          allOf:
+          - "$ref": "#/components/schemas/DroppedTasks"
+          description: Contains details of dropped tasks when prize collection is
+            enabled
+          default: []
+        msg:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Msg
+          description: Any information pertaining to the run.
+          default: ''
+      additionalProperties: false
+      type: object
+      title: FeasibleResultData
+    FeasibleSolve:
+      properties:
+        solver_response:
+          allOf:
+          - "$ref": "#/components/schemas/FeasibleResultData"
+          description: Feasible solution
+          default:
+            status: 0
+            num_vehicles: -1
+            solution_cost: -1
+            vehicle_data: {}
+            dropped_tasks: []
+            msg: ''
+        perf_times:
+          anyOf:
+          - type: object
+          - type: 'null'
+          title: Perf Times
+          description: Etl and Solve times of the solve call
+      additionalProperties: false
+      type: object
+      title: FeasibleSolve
+    FleetData:
+      properties:
+        vehicle_locations:
+          items:
+            items:
+              type: integer
+            type: array
+          type: array
+          title: Vehicle Locations
+          description: "dtype: int32, vehicle_location >= 0. \n\n Start and end location
+            of the vehicles in the given set of locations in WayPointGraph or CostMatrices.\nExample:
+            For 2 vehicles,  \n\n     [ \n\n         [veh_1_start_loc, veh_1_end_loc],
+            \n\n         [veh_2_start_loc, veh_2_end_loc] \n\n     ]"
+          examples:
+          - - - 0
+              - 0
+            - - 0
+              - 0
+        vehicle_ids:
+          anyOf:
+          - items:
+              type: string
+            type: array
+          - type: 'null'
+          title: Vehicle Ids
+          description: List of the vehicle ids or names provided as a string.
+          examples:
+          - - veh-1
+            - veh-2
+        capacities:
+          anyOf:
+          - items:
+              items:
+                type: integer
+              type: array
+            type: array
+          - type: 'null'
+          title: Capacities
+          description: "dtype: int32, capacity >= 0. \n\n Note: For this release number
+            of capacity dimensions are limited to 3. \n\n Lists of capacities of each
+            vehicle.\nMultiple capacities can be added and each list will represent
+            one kind of capacity. Order of kind of the capacities should match order
+            of the demands.\nTotal capacity for each type should be sufficient to
+            complete all demand of that type.Example: In case of two sets of capacities
+            per vehicle with 3 vehicles,  \n\n     [ \n\n         [cap_1_veh_1, cap_1_veh_2,
+            cap_1_veh_3], \n\n         [cap_2_veh_1, cap_2_veh_2, cap_2_veh_3] \n\n
+            \    ]"
+          examples:
+          - - - 2
+              - 2
+            - - 4
+              - 1
+        vehicle_time_windows:
+          anyOf:
+          - items:
+              items:
+                type: integer
+              type: array
+            type: array
+          - type: 'null'
+          title: Vehicle Time Windows
+          description: "dtype: int32, time >= 0. \n\n Earliest and Latest time window
+            pairs for each vehicle,\nfor example the data would look as follows for
+            2 vehicles, \n \n\n     [ \n\n         [veh_1_earliest, veh_1_latest],
+            \n\n         [veh_2_earliest, veh_2_latest] \n\n     ]"
+          examples:
+          - - - 0
+              - 10
+            - - 0
+              - 10
+        vehicle_break_time_windows:
+          anyOf:
+          - items:
+              items:
+                items:
+                  type: integer
+                type: array
+              type: array
+            type: array
+          - type: 'null'
+          title: Vehicle Break Time Windows
+          description: "dtype: int32, time >= 0. \n\n Multiple break time windows
+            can be added for each vehicle.Earliest and Latest break time window pairs
+            for each vehicle,\nFor example, in case of 2 sets of breaks for each vehicle
+            which translates to 2 dimensions of breaks,\n \n\n     [ \n\n         [[brk_1_veh_1_earliest,
+            brk_1_veh_1_latest], [brk_1_veh_2_earliest, brk_1_veh_2_latest]] \n\n
+            \        [[brk_2_veh_1_earliest, brk_2_veh_1_latest], [brk_2_veh_2_earliest,
+            brk_2_veh_2_latest]] \n\n     ] \n\n The break duration within this time
+            window is provided through vehicle_break_durations."
+          examples:
+          - - - - 1
+                - 2
+              - - 2
+                - 3
+        vehicle_break_durations:
+          anyOf:
+          - items:
+              items:
+                type: integer
+              type: array
+            type: array
+          - type: 'null'
+          title: Vehicle Break Durations
+          description: "dtype: int32, time >= 0. \n\n Break duration for each vehicle.
+            vehicle_break_time_windows should be provided to use this option.For example,
+            in case of having 2 breaks for each vehicle,  \n\n     [ \n\n         [brk_1_veh_1_duration,
+            brk_1_veh_2_duration], \n\n         [brk_2_veh_1_duration, brk_2_veh_2_duration],
+            \n\n     ]"
+          examples:
+          - - - 1
+              - 1
+        vehicle_break_locations:
+          anyOf:
+          - items:
+              type: integer
+            type: array
+          - type: 'null'
+          title: Vehicle Break Locations
+          description: "dtype: int32, location >= 0. \n\n Break location where vehicles
+            can take breaks. If not set, any location can be used for the break."
+          examples:
+          - - 0
+            - 1
+        vehicle_types:
+          anyOf:
+          - items:
+              type: integer
+            type: array
+          - type: 'null'
+          title: Vehicle Types
+          description: "dtype: uint8. \n\n Types of vehicles in the fleet given as
+            positive integers."
+          examples:
+          - - 1
+            - 2
+        vehicle_order_match:
+          anyOf:
+          - items:
+              "$ref": "#/components/schemas/VehicleOrderMatch"
+            type: array
+          - type: 'null'
+          title: Vehicle Order Match
+          description: A list of vehicle order match, where the match would contain
+            a vehicle id and a list of orders that vehicle can serve.
+          examples:
+          - - order_ids:
+              - 0
+              vehicle_id: 0
+            - order_ids:
+              - 1
+              vehicle_id: 1
+        skip_first_trips:
+          anyOf:
+          - items:
+              type: boolean
+            type: array
+          - type: 'null'
+          title: Skip First Trips
+          description: Drop the cost of trip to first location for that vehicle.
+          examples:
+          - - true
+            - false
+        drop_return_trips:
+          anyOf:
+          - items:
+              type: boolean
+            type: array
+          - type: 'null'
+          title: Drop Return Trips
+          description: Drop cost of return trip for each vehicle.
+          examples:
+          - - true
+            - false
+        min_vehicles:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Min Vehicles
+          description: "dtype: int32, min_vehicles >= 1. \n\n Solution should consider
+            minimum number of vehicles"
+          examples:
+          - 2
+        vehicle_max_costs:
+          anyOf:
+          - items:
+              type: number
+            type: array
+          - type: 'null'
+          title: Vehicle Max Costs
+          description: "dtype: float32, max_costs >= 0. \n\n Maximum cost a vehicle
+            can incur and it is based on cost matrix/cost waypoint graph."
+          examples:
+          - - 7
+            - 10
+        vehicle_max_times:
+          anyOf:
+          - items:
+              type: number
+            type: array
+          - type: 'null'
+          title: Vehicle Max Times
+          description: "dtype: float32, max_time >= 0. \n\n Maximum time a vehicle
+            can operate (includes drive, service and wait time), this is based on
+            travel time matrix/travel time waypoint graph."
+          examples:
+          - - 7
+            - 10
+        vehicle_fixed_costs:
+          anyOf:
+          - items:
+              type: number
+            type: array
+          - type: 'null'
+          title: Vehicle Fixed Costs
+          description: "dtype: float32, fixed_cost >= 0. \n\n Cost of each vehicle.This
+            helps in routing where may be 2 vehicles with less cost is effective compared
+            to 1 vehicle with huge cost. As example shows veh-0 (15) > veh-1 (5) +
+            veh-2 (5)"
+          examples:
+          - - 15
+            - 5
+            - 5
+      additionalProperties: false
+      type: object
+      required:
+      - vehicle_locations
+      title: FleetData
+    InFeasibleSolve:
+      properties:
+        solver_infeasible_response:
+          allOf:
+          - "$ref": "#/components/schemas/InfeasibleResultData"
+          description: Infeasible solution, this can mean the problem itself is infeasible
+            or solver requires more time to find a solution. Setting default solve
+            time is suggested in case you are not aware of the expected time.
+          default:
+            status: 1
+            num_vehicles: -1
+            solution_cost: -1
+            vehicle_data: {}
+            dropped_tasks: []
+            msg: ''
+        perf_times:
+          anyOf:
+          - type: object
+          - type: 'null'
+          title: Perf Times
+          description: Etl and Solve times of the solve call
+      additionalProperties: false
+      type: object
+      title: InFeasibleSolve
+    InfeasibleResultData:
+      properties:
+        status:
+          type: integer
+          title: Status
+          description: "1 - Infeasible solution is available \n"
+          default: 1
+          examples:
+          - 1
+        num_vehicles:
+          type: integer
+          title: Num Vehicles
+          description: Number of vehicle being used for the solution
+          default: -1
+          examples:
+          - 2
+        solution_cost:
+          type: number
+          title: Solution Cost
+          description: Total cost of the solution
+          default: -1
+          examples:
+          - 2
+        vehicle_data:
+          additionalProperties:
+            "$ref": "#/components/schemas/VehicleData"
+          type: object
+          title: Vehicle Data
+          description: All the details of vehicle routes and timestamps
+          default: {}
+          examples:
+          - vehicle_data:
+              veh-1:
+                arrival_stamp:
+                - 1
+                - 2
+                route:
+                - 1
+                - 1
+                task_id:
+                - Break
+                - Task-A
+                type:
+                - Break
+                - Delivery
+              veh-2:
+                arrival_stamp:
+                - 2
+                - 2
+                - 4
+                - 5
+                route:
+                - 0
+                - 0
+                - 2
+                - 0
+                task_id:
+                - Depot
+                - Break
+                - Task-B
+                - Depot
+                type:
+                - Depot
+                - Break
+                - Delivery
+                - Depot
+        dropped_tasks:
+          allOf:
+          - "$ref": "#/components/schemas/DroppedTasks"
+          description: 'Note: This is just a place holder since there will not be
+            any dropped tasks in infeasible solution.Contains details of dropped tasks
+            when prize collection is enabled.'
+          default: []
+        msg:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Msg
+          description: Any information pertaining to the run.
+          default: ''
+      additionalProperties: false
+      type: object
+      title: InfeasibleResultData
+    LocationTypeEnum:
+      type: string
+      enum:
+      - Depot
+      - Pickup
+      - Delivery
+      - Break
+      - w
+      title: LocationTypeEnum
+    Objective:
+      properties:
+        cost:
+          anyOf:
+          - type: number
+          - type: 'null'
+          title: Cost
+          description: "dtype: float32.  \n\n The weight assigned to minimizing the
+            cost for a given solution, default value is 1"
+          examples:
+          - 1
+        travel_time:
+          anyOf:
+          - type: number
+          - type: 'null'
+          title: Travel Time
+          description: "dtype: float32. \n\n The weight assigned to minimizing total
+            travel time for a given solution (includes drive, service and wait time)"
+          examples:
+          - 0
+        variance_route_size:
+          anyOf:
+          - type: number
+          - type: 'null'
+          title: Variance Route Size
+          description: "dtype: float32. \n\n The weight assigned to the variance in
+            the number of orders served by each route."
+          examples:
+          - 0
+        variance_route_service_time:
+          anyOf:
+          - type: number
+          - type: 'null'
+          title: Variance Route Service Time
+          description: "dtype: float32. \n\n The weight assigned to the variance in
+            the accumulated service times of each route"
+          examples:
+          - 0
+        prize:
+          anyOf:
+          - type: number
+          - type: 'null'
+          title: Prize
+          description: "dtype: float32. \n\n The weight assigned to the prize in accumulated
+            prizes for each job fulfilled.This will be negated from overall values
+            accumulated with other objectives.For example, if cost accumulated is
+            10 and objective value for it is 1, and if the prize accumulated is 3
+            and objective is 2, then total cost would look something like this 10
+            x 1 - 3 x 2 = 4."
+          examples:
+          - 0
+        vehicle_fixed_cost:
+          anyOf:
+          - type: number
+          - type: 'null'
+          title: Vehicle Fixed Cost
+          description: "dtype: float32. \n\n The weight assigned to the accumulated
+            fixed costs of each vehicle used in solution"
+          examples:
+          - 0
+      additionalProperties: false
+      type: object
+      title: Objective
+    OptimizedRoutingData:
+      properties:
+        cost_waypoint_graph_data:
+          anyOf:
+          - "$ref": "#/components/schemas/UpdateWaypointGraphData"
+          - type: 'null'
+          description: "Waypoint graph with weights as cost to travel from A to B
+            \nand B to A. If there are different types of vehicles \nthey can be provided
+            with key value pair \nwhere key is vehicle-type and value is the graph.
+            Value of \nvehicle type should be within [0, 255]"
+          default: {}
+          examples:
+          - 
+        travel_time_waypoint_graph_data:
+          anyOf:
+          - "$ref": "#/components/schemas/UpdateWaypointGraphData"
+          - type: 'null'
+          description: "Waypoint graph with weights as time to travel from A to B
+            \nand B to A. If there are different types of vehicles \nthey can be provided
+            with key value pair \nwhere key is vehicle-type and value is the graph.
+            Value of \nvehicle type should be within [0, 255]"
+          default: {}
+          examples:
+          - 
+        cost_matrix_data:
+          anyOf:
+          - "$ref": "#/components/schemas/UpdateCostMatrices"
+          - type: 'null'
+          description: "Sqaure matrix with cost to travel from A to B and B to A.
+            \nIf there are different types of vehicles which have different \ncost
+            matrices, they can be provided with key value pair \nwhere key is vehicle-type
+            and value is cost matrix. Value of \nvehicle type should be within [0,
+            255]"
+          default: {}
+          examples:
+          - cost_matrix:
+              '1':
+              - - 0
+                - 1
+                - 1
+              - - 1
+                - 0
+                - 1
+              - - 1
+                - 1
+                - 0
+              '2':
+              - - 0
+                - 1
+                - 1
+              - - 1
+                - 0
+                - 1
+              - - 1
+                - 2
+                - 0
+        travel_time_matrix_data:
+          anyOf:
+          - "$ref": "#/components/schemas/UpdateCostMatrices"
+          - type: 'null'
+          description: "Sqaure matrix with time to travel from A to B and B to A.
+            \nIf there are different types of vehicles which have different \ntravel
+            time matrices, they can be provided with key value pair \nwhere key is
+            vehicle-type and value is time matrix. Value of \nvehicle type should
+            be within [0, 255]"
+          default: {}
+          examples:
+          - cost_matrix:
+              '1':
+              - - 0
+                - 1
+                - 1
+              - - 1
+                - 0
+                - 1
+              - - 1
+                - 1
+                - 0
+              '2':
+              - - 0
+                - 1
+                - 1
+              - - 1
+                - 0
+                - 1
+              - - 1
+                - 2
+                - 0
+        fleet_data:
+          allOf:
+          - "$ref": "#/components/schemas/FleetData"
+          description: All Fleet information
+        task_data:
+          allOf:
+          - "$ref": "#/components/schemas/TaskData"
+          description: All Task information
+        solver_config:
+          anyOf:
+          - "$ref": "#/components/schemas/UpdateSolverSettingsConfig"
+          - type: 'null'
+      additionalProperties: false
+      type: object
+      required:
+      - fleet_data
+      - task_data
+      title: OptimizedRoutingData
+    OrderVehicleMatch:
+      properties:
+        order_id:
+          type: integer
+          title: Order Id
+          description: "dtype: int32, order_id >= 0. \n\n Indices of orders which
+            can be served by this particular vehicleOrder id as an integer"
+        vehicle_ids:
+          items:
+            type: integer
+          type: array
+          title: Vehicle Ids
+          description: "dtype: int32, vehicle_id >= 0. \n\n Indices of the vehicles
+            which can serve this particular order. \n"
+      additionalProperties: false
+      type: object
+      required:
+      - order_id
+      - vehicle_ids
+      title: OrderVehicleMatch
+    ResponseInFile:
+      properties:
+        result_file:
+          type: string
+          title: Result File
+          description: result_file is a file path to result
+        warnings:
+          items:
+            type: string
+          type: array
+          title: Warnings
+          description: List of warnings for users to handle issues
+          default: []
+        notes:
+          items:
+            type: string
+          type: array
+          title: Notes
+          description: Any notes for users
+          default: []
+      additionalProperties: false
+      type: object
+      required:
+      - result_file
+      title: ResponseInFile
+    ResponseModel:
+      properties:
+        response:
+          anyOf:
+          - "$ref": "#/components/schemas/FeasibleSolve"
+          - "$ref": "#/components/schemas/InFeasibleSolve"
+          title: Response
+          description: Response
+        warnings:
+          items:
+            type: string
+          type: array
+          title: Warnings
+          description: List of warnings for users to handle issues
+          default: []
+        notes:
+          items:
+            type: string
+          type: array
+          title: Notes
+          description: Any notes for users
+          default: []
+      additionalProperties: false
+      type: object
+      required:
+      - response
+      title: ResponseModel
+    ResponseModelPoll:
+      properties:
+        reqId:
+          type: string
+          title: Reqid
+          description: Id to poll for result
+      additionalProperties: false
+      type: object
+      required:
+      - reqId
+      title: ResponseModelPoll
+    ResponseModelWithId:
+      properties:
+        response:
+          anyOf:
+          - "$ref": "#/components/schemas/FeasibleSolve"
+          - "$ref": "#/components/schemas/InFeasibleSolve"
+          title: Response
+          description: Response
+        warnings:
+          items:
+            type: string
+          type: array
+          title: Warnings
+          description: List of warnings for users to handle issues
+          default: []
+        notes:
+          items:
+            type: string
+          type: array
+          title: Notes
+          description: Any notes for users
+          default: []
+        reqId:
+          type: string
+          title: Reqid
+          description: Id of request
+      additionalProperties: false
+      type: object
+      required:
+      - response
+      - reqId
+      title: ResponseModelWithId
+    TaskData:
+      properties:
+        task_locations:
+          items:
+            type: integer
+          type: array
+          title: Task Locations
+          description: "dtype: int32, location >= 0. \n\n Location where the task
+            has been requested."
+          examples:
+          - - 1
+            - 2
+        task_ids:
+          anyOf:
+          - items:
+              type: string
+            type: array
+          - type: 'null'
+          title: Task Ids
+          description: List of the task ids or names provided as a string.
+          examples:
+          - - Task-A
+            - Task-B
+        demand:
+          anyOf:
+          - items:
+              items:
+                type: integer
+              type: array
+            type: array
+          - type: 'null'
+          title: Demand
+          description: "dtype: int32 \n\n Note: For this release number of demand
+            dimensions are limited to 3. \n\n Lists of demands of each tasks.\nMultiple
+            demands can be added and each list represents one kind of demand. Order
+            of these demands should match the type of vehicle capacities provided.Example:
+            In case of two sets of demands per vehicle with 3 vehicles,  \n\n     [
+            \n\n         [dem_1_tsk_1, dem_1_tsk_2, dem_1_tsk_3], \n\n         [dem_2_tsk_1,
+            dem_2_tsk_2, dem_2_tsk_3] \n\n     ]"
+          examples:
+          - - - 1
+              - 1
+            - - 3
+              - 1
+        pickup_and_delivery_pairs:
+          anyOf:
+          - items:
+              items:
+                type: integer
+              type: array
+            type: array
+          - type: 'null'
+          title: Pickup And Delivery Pairs
+          description: "dtype: int32, pairs >= 0. \n\n List of Pick-up and delivery
+            index pairs from task locations.\nIn case we have the following pick-up
+            and delivery locations, 2->1, 4->5, 3->4, then task locations would look
+            something like, task_locations = [0, 2, 1, 4, 5, 3, 4] and pick-up and
+            delivery pairs would be index of those locations in task location and
+            would look like [[1, 2], [3, 4], [5, 6]], 1 is pickup index for location
+            2 and it should be delivered to location 1 which is at index 2.Example
+            schema:  \n\n     [ \n\n         [pcikup_1_idx_to_task, drop_1_idx_to_task],
+            \n\n         [pcikup_2_idx_to_task, drop_2_idx_to_task], \n\n     ]"
+          examples:
+          - 
+        task_time_windows:
+          anyOf:
+          - items:
+              items:
+                type: integer
+              type: array
+            type: array
+          - type: 'null'
+          title: Task Time Windows
+          description: "dtype: int32, time >= 0. \n\n Earliest and Latest time windows
+            for each tasks.\nFor example the data would look as follows, \n \n\n     [
+            \n\n         [tsk_1_earliest, tsk_1_latest], \n\n         [tsk_2_earliest,
+            tsk_2_latest] \n\n     ]"
+          examples:
+          - - - 0
+              - 5
+            - - 3
+              - 9
+        service_times:
+          anyOf:
+          - items:
+              type: integer
+            type: array
+          - additionalProperties:
+              items:
+                type: integer
+              type: array
+            type: object
+          - type: 'null'
+          title: Service Times
+          description: "dtype: int32, time >= 0. \n\n Service time for each task.
+            Accepts a list of service times for all vehicles. In case of vehicle specific
+            service times, accepts a dict with key as vehicle id and value as list
+            of service times.Example schema: In case all vehicles have same service
+            times,  \n\n     [tsk_1_srv_time, tsk_2_srv_time, tsk_3_srv_time] \n\n
+            \ \n\n In case, there are 2 types of vehicle types and each of them have
+            different service times, \n\n     { \n\n         type-1: [tsk_1_srv_time,
+            tsk_3_srv_time, tsk_3_srv_time], \n\n         type-2: [tsk_1_srv_time,
+            tsk_3_srv_time, tsk_3_srv_time] \n\n     }"
+          examples:
+          - - 0
+            - 0
+        prizes:
+          anyOf:
+          - items:
+              type: number
+            type: array
+          - type: 'null'
+          title: Prizes
+          description: "dtype: float32, prizes >= 0. \n\n List of values which signifies
+            prizes that are collected for fulfilling each task. This can be used effectively
+            in case solution is infeasible and need to drop few tasks to get feasible
+            solution. Solver will prioritize for higher prize tasks "
+          examples:
+          - 
+        order_vehicle_match:
+          anyOf:
+          - items:
+              "$ref": "#/components/schemas/OrderVehicleMatch"
+            type: array
+          - type: 'null'
+          title: Order Vehicle Match
+          description: A list of order vehicle match, where the match would contain
+            a order id and a list of vehicle ids that can serve this order.
+          examples:
+          - - order_id: 0
+              vehicle_ids:
+              - 0
+            - order_id: 1
+              vehicle_ids:
+              - 1
+      additionalProperties: false
+      type: object
+      required:
+      - task_locations
+      title: TaskData
+    UpdateCostMatrices:
+      properties:
+        data:
+          anyOf:
+          - additionalProperties:
+              items:
+                items:
+                  type: number
+                type: array
+              type: array
+            type: object
+          - type: 'null'
+          title: Data
+          description: "dtype : vehicle-type (uint8), cost (float32), cost >= 0.\n
+            \n\n Sqaure matrix with cost to travel from A to B and B to A. \nIf there
+            different types of vehicles which have different \ncost matrices, they
+            can be provided with key value pair \nwhere key is vehicle-type and value
+            is cost matrix. Value of \nvehicle type should be within [0, 255]"
+        cost_matrix:
+          anyOf:
+          - additionalProperties:
+              items:
+                items:
+                  type: number
+                type: array
+              type: array
+            type: object
+          - type: 'null'
+          title: Cost Matrix
+          description: This field is deprecated, please use the 'data' field instead
+          deprecated: true
+      additionalProperties: false
+      type: object
+      title: UpdateCostMatrices
+    UpdateSolverSettingsConfig:
+      properties:
+        time_limit:
+          anyOf:
+          - type: number
+          - type: 'null'
+          title: Time Limit
+          description: SolverSettings time limit
+          examples:
+          - 1
+        objectives:
+          anyOf:
+          - "$ref": "#/components/schemas/Objective"
+          - type: 'null'
+          description: Values provided dictate the linear combination of factors used
+            to evaluate solution quality.Only prize will be negated, all others gets
+            accumulated. That's why sometime you might come across negative value
+            as solution cost.
+        config_file:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Config File
+          description: Dump configuration information in a given file as yaml
+          examples:
+          - 
+        verbose_mode:
+          anyOf:
+          - type: boolean
+          - type: 'null'
+          title: Verbose Mode
+          description: Displaying internal information during the solver execution.
+          default: false
+        error_logging:
+          anyOf:
+          - type: boolean
+          - type: 'null'
+          title: Error Logging
+          description: Displaying constraint error information during the solver execution.
+          default: true
+      additionalProperties: false
+      type: object
+      title: UpdateSolverSettingsConfig
+    UpdateWaypointGraphData:
+      properties:
+        waypoint_graph:
+          anyOf:
+          - additionalProperties:
+              "$ref": "#/components/schemas/WaypointGraph"
+            type: object
+          - type: 'null'
+          title: Waypoint Graph
+      additionalProperties: false
+      type: object
+      title: UpdateWaypointGraphData
+    VehicleData:
+      properties:
+        task_id:
+          items:
+            type: string
+          type: array
+          title: Task Id
+          description: task_ids being assigned to vehicle along with depot and breaks
+          default: []
+        arrival_stamp:
+          items:
+            type: number
+          type: array
+          title: Arrival Stamp
+          description: arrival stamps at each task locations
+          default: []
+        route:
+          items:
+            type: integer
+          type: array
+          title: Route
+          description: Route indices as per waypoint graph or cost matrix provided
+          default: []
+        type:
+          items:
+            "$ref": "#/components/schemas/LocationTypeEnum"
+          type: array
+          title: Type
+          description: "Type of routing point, whether it is Depot, Waypoint - w \nDelivery,
+            Break, Pickup \n"
+          default: []
+      additionalProperties: false
+      type: object
+      title: VehicleData
+    VehicleOrderMatch:
+      properties:
+        vehicle_id:
+          type: integer
+          title: Vehicle Id
+          description: "dtype: int32, vehicle_id >= 0. \n\n Vehicle id as an integer,
+            and can serve all the order listed in order_ids."
+        order_ids:
+          items:
+            type: integer
+          type: array
+          title: Order Ids
+          description: "dtype: int32, order_id >= 0. \n\n Indices of orders which
+            can be served by this particular vehicle"
+      additionalProperties: false
+      type: object
+      required:
+      - vehicle_id
+      - order_ids
+      title: VehicleOrderMatch
+    WaypointGraph:
+      properties:
+        edges:
+          items:
+            type: integer
+          type: array
+          title: Edges
+          description: "dtype: int32, edge >= 0. \n\n Vertices of all the directed
+            edges."
+        offsets:
+          items:
+            type: integer
+          type: array
+          title: Offsets
+          description: "dtype: int32, offset >= 0. \n\n Offsets which provide number
+            of edges from the source vertex signified by the index."
+        weights:
+          anyOf:
+          - items:
+              type: number
+            type: array
+          - type: 'null'
+          title: Weights
+          description: "dtype: float32, weight >= 0. \n\n Weights of each edges."
+      additionalProperties: false
+      type: object
+      required:
+      - edges
+      - offsets
+      title: WaypointGraph
+    cuoptData:
+      properties:
+        action:
+          anyOf:
+          - type: string
+            enum:
+            - cuOpt_OptimizedRouting
+            - cuOpt_RoutingValidator
+          - type: 'null'
+          title: Action
+          description: Action to be performed by the service, validator action just
+            validates input against format and base rules.
+          default: cuOpt_OptimizedRouting
+        data:
+          anyOf:
+          - "$ref": "#/components/schemas/OptimizedRoutingData"
+          - type: 'null'
+          description: Data to be processed by the service
+        parameters:
+          anyOf:
+          - type: object
+          - type: 'null'
+          title: Parameters
+          description: unused/ignored but retained for compatibility
+        client_version:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Client Version
+          description: cuOpt client version. Set to 'custom' to skip version check.
+          default: ''
+      additionalProperties: false
+      type: object
+      required:
+      - data
+      title: cuoptData

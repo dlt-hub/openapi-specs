@@ -1,0 +1,56 @@
+---
+openapi: 3.0.0
+info:
+  title: Ron Swanson Quotes
+  version: 1.0.0
+  description: A HTTP API for retrieving Ron Swanson quotes
+  contact:
+    name: James Wright
+    email: james@jamesswright.co.uk
+    url: https://jamesswright.co.uk
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+servers:
+- url: https://ron-swanson-quotes.herokuapp.com/v2
+paths:
+  "/quotes":
+    get:
+      description: Returns a single Ron Swanson quote wrapped in an array
+      responses:
+        '200':
+          "$ref": "#/components/responses/success"
+  "/quotes/{count}":
+    get:
+      description: Returns {count} quotes in an array
+      responses:
+        '200':
+          "$ref": "#/components/responses/success"
+      parameters:
+      - name: count
+        in: path
+        required: true
+        schema:
+          type: integer
+  "/quotes/search/{term}":
+    get:
+      description: Returns an array of quotes matching {term} without case sensitivity
+      responses:
+        '200':
+          "$ref": "#/components/responses/success"
+      parameters:
+      - name: term
+        in: path
+        required: true
+        schema:
+          type: string
+components:
+  responses:
+    success:
+      description: OK
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              type: string

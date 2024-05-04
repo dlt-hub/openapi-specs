@@ -1,0 +1,111 @@
+openapi: 3.0.3
+info:
+  title: Your Example Integration
+  description: Using OpenAPI v3.0.3 for integration.
+  version: 1.0.0
+servers:
+  - description: Watson Machine Learning deployment URL
+    url: https://us-south.ml.cloud.ibm.com
+security:
+  - oAuth2: []
+paths:
+  /ml/v4/deployments/{deploymentid}/predictions:
+    post:
+      summary: Get the predictions
+      operationId: predictions_post
+      parameters:
+        - in: query
+          name: version
+          schema:
+            type: string
+          required: true 
+          description: Version number as a string
+        - in: path
+          name: deploymentid
+          schema:
+            type: string
+          required: true
+          description: Deployment ID as a string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Predictions_post_request'
+        required: true
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Predictions_post_response'
+components:
+  securitySchemes:
+    oAuth2:
+      type: oauth2
+      description: "See https://cloud.ibm.com/docs/account?topic=account-iamoverview"
+      flows:
+        x-apikey:
+          tokenUrl: https://iam.cloud.ibm.com/identity/token
+          grantType: "urn:ibm:params:oauth:grant-type:apikey"
+          secretKeys: ["apikey"]
+          paramKeys: []
+          scopes: {}
+  schemas:
+   Predictions_post_request:
+        type: object
+        required: [input_data]
+        properties:
+          input_data:
+            type: array
+            required: [fields, values]
+            items:
+               $ref: '#/components/schemas/Predictions_post_request_content'
+   Predictions_post_request_content:
+        type: object
+        properties:
+          fields:
+            type: array
+            items:
+              type: string
+              example: "YOUR CONTENT"
+          values:
+            type: array
+            items:
+              type: array
+              items:
+                type: string
+                example: "YOUR CONTENT"
+   Predictions_post_response:
+        type: object
+        properties:
+          predictions:
+            type: array
+            items:
+               $ref: '#/components/schemas/Predictions_post_response_content'
+   Predictions_post_response_content:
+        type: object
+        properties:
+          fields:
+            type: array
+            items:
+              type: string
+              example: ["YOUR RETURN VALUE"]
+          values:
+            type: array
+            items:
+              type: array
+              items:
+                type: object
+                properties:
+                    response:
+                        type: string
+                        example: "YOUR INFORMATION"
+                    references:
+                        type: array
+                        items:
+                            type: object
+                            properties:
+                                text:
+                                    type: string
+                                    example: "YOUR TEXT"

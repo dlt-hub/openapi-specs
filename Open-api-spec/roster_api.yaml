@@ -1,0 +1,1173 @@
+---
+openapi: 3.0.1
+info:
+  title: Roster API
+  description: "<h1>Roster API Spec</h1><p>Click the Download button above to get
+    the OpenAPI specification. The file can be imported into any tool that supports
+    the OpenAPI spec, such as Postman.</p><h1>API Version</h1><p>The current version
+    of the Roster API is v1.</p><p>Roster API v2 will be available on January 1, 2023,
+    at which point v1 will be deprecated.</p><p>Roster API v1 will be retired on June
+    30, 2023, so please plan accordingly.</p>"
+  version: v1
+  x-logo:
+    url: https://app.getroster.com/img/logo_padded_lg.png
+    backgroundColor: "#FAFAFA"
+    altText: Roster API Logo
+paths:
+  "/contact/application":
+    post:
+      tags:
+      - Contact
+      summary: New contact application submission
+      description: "Creates a new applicant for a specific application form by CampaignId.\r\nRequest
+        should contain at minimum the CampaignId and contact information.\r\nThe contact
+        information should contain at minimum an email or phone or social handle with
+        the social network type.\r\nList of properties should contain the UserCampaignPropertyId
+        and Value.\r\n\r\n<b>Header requires</b>: \"Authorization Bearer {accessToken}\""
+      requestBody:
+        content:
+          application/json-patch+json:
+            schema:
+              "$ref": "#/components/schemas/ContactApplicationHttpRequest"
+          application/json:
+            schema:
+              "$ref": "#/components/schemas/ContactApplicationHttpRequest"
+          text/json:
+            schema:
+              "$ref": "#/components/schemas/ContactApplicationHttpRequest"
+          application/*+json:
+            schema:
+              "$ref": "#/components/schemas/ContactApplicationHttpRequest"
+      responses:
+        '200':
+          description: Success
+          content:
+            text/plain:
+              schema:
+                "$ref": "#/components/schemas/LegacyApiContactResponseAppResponse"
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/LegacyApiContactResponseAppResponse"
+            text/json:
+              schema:
+                "$ref": "#/components/schemas/LegacyApiContactResponseAppResponse"
+        '202':
+          description: Success
+        '400':
+          description: Bad Request
+        '401':
+          description: Unauthorized
+        '429':
+          description: Client Error
+        '500':
+          description: Server Error
+  "/contact":
+    get:
+      tags:
+      - Contact
+      summary: Get contact
+      description: "Gets a contact's information by contactId, email or phone.\r\n
+        \            \r\n<b>Header requires</b>: \"Authorization Bearer {accessToken}\""
+      parameters:
+      - name: ContactId
+        in: query
+        description: The contact's unique id returned from the POST response.
+        schema:
+          type: integer
+          format: int64
+      - name: Email
+        in: query
+        description: The email address of the contact
+        schema:
+          type: string
+          format: email
+      - name: Phone
+        in: query
+        description: The phone number of the contact
+        schema:
+          type: string
+          format: tel
+      responses:
+        '200':
+          description: Success
+          content:
+            text/plain:
+              schema:
+                "$ref": "#/components/schemas/LegacyApiContactResponseAppResponse"
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/LegacyApiContactResponseAppResponse"
+            text/json:
+              schema:
+                "$ref": "#/components/schemas/LegacyApiContactResponseAppResponse"
+        '202':
+          description: Success
+        '400':
+          description: Bad Request
+        '401':
+          description: Unauthorized
+        '404':
+          description: Not Found
+        '429':
+          description: Client Error
+        '500':
+          description: Server Error
+    post:
+      tags:
+      - Contact
+      summary: Add new contact
+      description: "Adds a new contact to your Roster CRM.\r\nNew contact information
+        should contain at minimum an email or phone or social handle with the social
+        network type.\r\n\r\n<b>Header requires</b>: \"Authorization Bearer {accessToken}\""
+      requestBody:
+        content:
+          application/json-patch+json:
+            schema:
+              "$ref": "#/components/schemas/ContactClientApiPost"
+          application/json:
+            schema:
+              "$ref": "#/components/schemas/ContactClientApiPost"
+          text/json:
+            schema:
+              "$ref": "#/components/schemas/ContactClientApiPost"
+          application/*+json:
+            schema:
+              "$ref": "#/components/schemas/ContactClientApiPost"
+      responses:
+        '200':
+          description: Success
+          content:
+            text/plain:
+              schema:
+                "$ref": "#/components/schemas/LegacyApiContactResponseAppResponse"
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/LegacyApiContactResponseAppResponse"
+            text/json:
+              schema:
+                "$ref": "#/components/schemas/LegacyApiContactResponseAppResponse"
+        '202':
+          description: Success
+        '400':
+          description: Bad Request
+        '401':
+          description: Unauthorized
+        '429':
+          description: Client Error
+        '500':
+          description: Server Error
+    delete:
+      tags:
+      - Contact
+      summary: Delete contact
+      description: "Permanently deletes the specified contact and it's associated
+        information from the system.\r\n             \r\n<b>Header requires</b>: \"Authorization
+        Bearer {accessToken}\""
+      parameters:
+      - name: ContactId
+        in: query
+        description: The contact's unique id returned from the POST response.
+        schema:
+          type: integer
+          format: int64
+      - name: Email
+        in: query
+        description: The email address of the contact
+        schema:
+          type: string
+          format: email
+      responses:
+        '200':
+          description: Success
+          content:
+            text/plain:
+              schema:
+                "$ref": "#/components/schemas/AppResponse"
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/AppResponse"
+            text/json:
+              schema:
+                "$ref": "#/components/schemas/AppResponse"
+        '202':
+          description: Success
+        '400':
+          description: Bad Request
+        '401':
+          description: Unauthorized
+        '429':
+          description: Client Error
+        '500':
+          description: Server Error
+  "/contact/{contactId}":
+    put:
+      tags:
+      - Contact
+      summary: Update Contact
+      description: "Updates a contact in your Roster CRM.\r\n\r\n<b>Header requires</b>:
+        \"Authorization Bearer {accessToken}\""
+      parameters:
+      - name: contactId
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      requestBody:
+        content:
+          application/json-patch+json:
+            schema:
+              "$ref": "#/components/schemas/ContactClientApiUpdate"
+          application/json:
+            schema:
+              "$ref": "#/components/schemas/ContactClientApiUpdate"
+          text/json:
+            schema:
+              "$ref": "#/components/schemas/ContactClientApiUpdate"
+          application/*+json:
+            schema:
+              "$ref": "#/components/schemas/ContactClientApiUpdate"
+      responses:
+        '200':
+          description: Success
+          content:
+            text/plain:
+              schema:
+                "$ref": "#/components/schemas/LegacyApiContactResponseAppResponse"
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/LegacyApiContactResponseAppResponse"
+            text/json:
+              schema:
+                "$ref": "#/components/schemas/LegacyApiContactResponseAppResponse"
+        '202':
+          description: Success
+        '400':
+          description: Bad Request
+        '401':
+          description: Unauthorized
+        '429':
+          description: Client Error
+        '500':
+          description: Server Error
+  "/contact/program":
+    post:
+      tags:
+      - ContactProgram
+      summary: Add contact to program
+      description: "Adds a contact to a program by program key. \r\nThe program key
+        can be found in the program's settings in the Brand Portal interface.\r\n
+        \            \r\n<b>Header requires</b>: \"Authorization Bearer {accessToken}\""
+      requestBody:
+        description: ''
+        content:
+          application/json-patch+json:
+            schema:
+              "$ref": "#/components/schemas/LegacyClientApiContactProgramRequest"
+          application/json:
+            schema:
+              "$ref": "#/components/schemas/LegacyClientApiContactProgramRequest"
+          text/json:
+            schema:
+              "$ref": "#/components/schemas/LegacyClientApiContactProgramRequest"
+          application/*+json:
+            schema:
+              "$ref": "#/components/schemas/LegacyClientApiContactProgramRequest"
+      responses:
+        '200':
+          description: Success
+          content:
+            text/plain:
+              schema:
+                "$ref": "#/components/schemas/ClientApiContactProgramResponse"
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/ClientApiContactProgramResponse"
+            text/json:
+              schema:
+                "$ref": "#/components/schemas/ClientApiContactProgramResponse"
+    delete:
+      tags:
+      - ContactProgram
+      summary: Remove contact from program
+      description: "Removes a contact from a program by program key. \r\nThe program
+        key can be found in the program's settings in the Brand Portal interface.\r\n
+        \            \r\n<b>Header requires</b>: \"Authorization Bearer {accessToken}\""
+      requestBody:
+        description: ''
+        content:
+          application/json-patch+json:
+            schema:
+              "$ref": "#/components/schemas/LegacyClientApiContactProgramRequest"
+          application/json:
+            schema:
+              "$ref": "#/components/schemas/LegacyClientApiContactProgramRequest"
+          text/json:
+            schema:
+              "$ref": "#/components/schemas/LegacyClientApiContactProgramRequest"
+          application/*+json:
+            schema:
+              "$ref": "#/components/schemas/LegacyClientApiContactProgramRequest"
+      responses:
+        '200':
+          description: Success
+          content:
+            text/plain:
+              schema:
+                "$ref": "#/components/schemas/ClientApiContactProgramResponse"
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/ClientApiContactProgramResponse"
+            text/json:
+              schema:
+                "$ref": "#/components/schemas/ClientApiContactProgramResponse"
+  "/customer":
+    post:
+      tags:
+      - Customer
+      summary: Add new customer
+      description: "Adds a new contact to your Roster CRM along with customer/order
+        data to be associated with the contact.\r\nCustomer information should contain
+        at minimum an email and at least one order. \r\nThe order should contain at
+        minimum the order date and at least one order item.\r\n            \r\n<b>Header
+        requires</b>: \"Authorization Bearer {accessToken}\""
+      requestBody:
+        content:
+          application/json-patch+json:
+            schema:
+              "$ref": "#/components/schemas/ClientApiCustomerPost"
+          application/json:
+            schema:
+              "$ref": "#/components/schemas/ClientApiCustomerPost"
+          text/json:
+            schema:
+              "$ref": "#/components/schemas/ClientApiCustomerPost"
+          application/*+json:
+            schema:
+              "$ref": "#/components/schemas/ClientApiCustomerPost"
+      responses:
+        '200':
+          description: Success
+          content:
+            text/plain:
+              schema:
+                "$ref": "#/components/schemas/LegacyApiContactResponseAppResponse"
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/LegacyApiContactResponseAppResponse"
+            text/json:
+              schema:
+                "$ref": "#/components/schemas/LegacyApiContactResponseAppResponse"
+        '202':
+          description: Success
+        '400':
+          description: Bad Request
+        '401':
+          description: Unauthorized
+        '429':
+          description: Client Error
+        '500':
+          description: Server Error
+  "/get-request":
+    get:
+      tags:
+      - DelayedRequest
+      summary: Get the delayed result
+      description: "Gets the delayed processing results of a previous request that
+        exceeded the wait limit.\r\nWhen a request in the API exceeds the wait limit,
+        a RequestId will be provided in the API response.\r\nThis RequestId can be
+        used here to retrieve the json response of the associated endpoint that was
+        called previously where processing exceeded the wait limit.\r\nThis endpoint
+        is typically only needed when using this API for real-time social data collection
+        when a new contact is added to the system.\r\n\r\n<b>Header requires</b>:
+        \"Authorization Bearer {accessToken}\"\r\n\r\n<b>Response Statuses</b>:\r\n\r\n-
+        <b>COMPLETED</b>: request completed successfully<br />\r\n- <b>NEW</b>: request
+        created<br />\r\n- <b>IN_PROGRESS</b>: request is being processed. Try again
+        in a few seconds.<br />\r\n- <b>PROCESSING_LIMIT_EXCEEDED</b>: processing
+        took too long and was terminated.<br />\r\n- <b>ERROR</b>: error occurred
+        during processing<br />"
+      parameters:
+      - name: requestId
+        in: query
+        description: The id of request to get
+        schema:
+          type: integer
+          format: int64
+      responses:
+        '200':
+          description: Success
+          content:
+            text/plain:
+              schema:
+                "$ref": "#/components/schemas/LegacyApiContactResponseAppResponse"
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/LegacyApiContactResponseAppResponse"
+            text/json:
+              schema:
+                "$ref": "#/components/schemas/LegacyApiContactResponseAppResponse"
+        '400':
+          description: Bad Request
+        '401':
+          description: Unauthorized
+        '404':
+          description: Not Found
+        '429':
+          description: Client Error
+  "/program":
+    get:
+      tags:
+      - Program
+      summary: Get programs
+      description: "Returns a list of active programs.\r\n            \r\n<b>Header
+        requires</b>: \"Authorization Bearer {accessToken}\""
+      responses:
+        '200':
+          description: Success
+          content:
+            text/plain:
+              schema:
+                "$ref": "#/components/schemas/ClientApiProgramResponse"
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/ClientApiProgramResponse"
+            text/json:
+              schema:
+                "$ref": "#/components/schemas/ClientApiProgramResponse"
+  "/sales-attribution/tracking":
+    post:
+      tags:
+      - SalesAttribution
+      summary: Sales attribution tracking
+      description: "Captures website visitors from link tracking and order information
+        for sales attribution metrics.\r\nOptionally, a contact is created/updated
+        in your Roster CRM when an email is provided (based on your subscription limits).\r\n
+        \           \r\nTo generate an access token go to your <a href=\"https://app.getroster.com/settings/integrations/api-access\"
+        target=\"_blank\">brand settings page</a> to create a new \"Sales Attribution\"
+        access token.\r\nThen you'll need to add the necessary code for site wide
+        link tracking and an additional script on your order confirmation page to
+        track completed orders. \r\nVisit our <a href=\"https://support.getroster.com/en/\"
+        target=\"_blank\">knowledge-base</a> for more information."
+      parameters:
+      - name: Token
+        in: query
+        description: Authorization token
+        schema:
+          type: string
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                Email:
+                  type: string
+                  description: The customer's email address
+                  format: email
+                OrderId:
+                  type: string
+                  description: The customer's order id
+                OrderNumber:
+                  type: string
+                  description: The customer's order number
+                FirstName:
+                  type: string
+                  description: The customer's first name
+                LastName:
+                  type: string
+                  description: The customer's last name
+                Currency:
+                  type: string
+                  description: The customer's order currency(ISO 4217 - Alpha3)
+                SubtotalPrice:
+                  type: number
+                  description: The customer's order total minus discounts, but before
+                    taxes and shipping
+                  format: double
+                TotalPrice:
+                  type: number
+                  description: The customer's order total minus discounts plus taxes
+                    and shipping
+                  format: double
+                DiscountCodes:
+                  type: array
+                  items:
+                    type: string
+                  description: The list of discount codes applied to the order
+                LinkTrackingCodes:
+                  type: array
+                  items:
+                    type: string
+                  description: The list of link tracking codes applied to the order
+                IsNewCustomer:
+                  type: boolean
+                  description: Indicate if this is a new customer or not
+                OrderDate:
+                  type: string
+                  description: Order date
+                  format: date-time
+            encoding:
+              Email:
+                style: form
+              OrderId:
+                style: form
+              OrderNumber:
+                style: form
+              FirstName:
+                style: form
+              LastName:
+                style: form
+              Currency:
+                style: form
+              SubtotalPrice:
+                style: form
+              TotalPrice:
+                style: form
+              DiscountCodes:
+                style: form
+              LinkTrackingCodes:
+                style: form
+              IsNewCustomer:
+                style: form
+              OrderDate:
+                style: form
+      responses:
+        '200':
+          description: Success
+          content:
+            text/plain:
+              schema:
+                "$ref": "#/components/schemas/SalesAttributionExampleResponse"
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/SalesAttributionExampleResponse"
+            text/json:
+              schema:
+                "$ref": "#/components/schemas/SalesAttributionExampleResponse"
+        '400':
+          description: Bad Request
+        '401':
+          description: Unauthorized
+        '429':
+          description: Client Error
+        '500':
+          description: Server Error
+  "/sales-attribution":
+    post:
+      tags:
+      - SalesAttribution
+      summary: 'Pixel: Sales attribution tracking'
+      description: "Captures website visitors through link tracking and order information
+        for sales attribution metrics.\r\nOptionally, a contact is created/updated
+        in your Roster CRM when an email is provided (based on your subscription limits).\r\n
+        \           \r\nThis endpoint is primarily used by the Roster tracking pixel
+        and ALWAYS returns a 200 OK response. \r\nIt is designed to be used in a \"pixel\"
+        type way where the script fires and forgets and the API runs the request in
+        a new thread and immediately returns a response so the caller doesn't wait.\r\nThis
+        results in a more \"lightweight\" pixel with as minimal latency to the client
+        as possible. \r\nTo better accommodate deeper integrations, there is a separate
+        sales attribution endpoint that includes error handling.\r\n             \r\nTo
+        generate an access token go to your <a href=\"https://app.getroster.com/settings/integrations/api-access\"
+        target=\"_blank\">brand settings page</a> to create a new \"Sales Attribution\"
+        access token.\r\nThen you'll need to add the necessary JavaScript code for
+        site wide link tracking and an additional script on your order confirmation
+        page to track completed orders. \r\nVisit our <a href=\"https://support.getroster.com/en/\"
+        target=\"_blank\">knowledge-base</a> for more information on the JavaScript
+        library."
+      parameters:
+      - name: Token
+        in: query
+        description: Authorization token
+        schema:
+          type: string
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                Email:
+                  type: string
+                  description: The customer's email address
+                  format: email
+                OrderId:
+                  type: string
+                  description: The customer's order id
+                OrderNumber:
+                  type: string
+                  description: The customer's order number
+                FirstName:
+                  type: string
+                  description: The customer's first name
+                LastName:
+                  type: string
+                  description: The customer's last name
+                Currency:
+                  type: string
+                  description: The customer's order currency(ISO 4217 - Alpha3)
+                SubtotalPrice:
+                  type: number
+                  description: The customer's order total minus discounts, but before
+                    taxes and shipping
+                  format: double
+                TotalPrice:
+                  type: number
+                  description: The customer's order total minus discounts plus taxes
+                    and shipping
+                  format: double
+                DiscountCodes:
+                  type: array
+                  items:
+                    type: string
+                  description: The list of discount codes applied to the order
+                LinkTrackingCodes:
+                  type: array
+                  items:
+                    type: string
+                  description: The list of link tracking codes applied to the order
+                IsNewCustomer:
+                  type: boolean
+                  description: Indicate if this is a new customer or not
+                OrderDate:
+                  type: string
+                  description: Order date
+                  format: date-time
+            encoding:
+              Email:
+                style: form
+              OrderId:
+                style: form
+              OrderNumber:
+                style: form
+              FirstName:
+                style: form
+              LastName:
+                style: form
+              Currency:
+                style: form
+              SubtotalPrice:
+                style: form
+              TotalPrice:
+                style: form
+              DiscountCodes:
+                style: form
+              LinkTrackingCodes:
+                style: form
+              IsNewCustomer:
+                style: form
+              OrderDate:
+                style: form
+      responses:
+        '200':
+          description: Success
+          content:
+            text/plain:
+              schema:
+                "$ref": "#/components/schemas/SalesAttributionExampleResponse"
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/SalesAttributionExampleResponse"
+            text/json:
+              schema:
+                "$ref": "#/components/schemas/SalesAttributionExampleResponse"
+components:
+  schemas:
+    ApplicationContact:
+      type: object
+      properties:
+        email:
+          type: string
+          description: The email of the new contact
+          format: email
+          nullable: true
+        phone:
+          type: string
+          description: The phone of the new contact
+          format: tel
+          nullable: true
+        firstName:
+          type: string
+          description: The first name of the new contact
+          nullable: true
+        lastName:
+          type: string
+          description: The last name of the new contact
+          nullable: true
+        socialProfiles:
+          type: array
+          items:
+            "$ref": "#/components/schemas/ContactSocialProfile"
+          description: List of social profile handles
+          nullable: true
+      additionalProperties: false
+    AppResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        message:
+          type: string
+          nullable: true
+        udfValues:
+          type: object
+          additionalProperties: {}
+          nullable: true
+        errorCode:
+          "$ref": "#/components/schemas/ErrorCode"
+        errorLevel:
+          "$ref": "#/components/schemas/ErrorLevel"
+        errorType:
+          "$ref": "#/components/schemas/ErrorType"
+      additionalProperties: false
+    ClientApiContactProgramResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+      additionalProperties: false
+    ClientApiCustomerPost:
+      required:
+      - email
+      - order
+      type: object
+      properties:
+        email:
+          type: string
+          description: The customer's email address
+          format: email
+        order:
+          "$ref": "#/components/schemas/CustomerOrder"
+        firstName:
+          type: string
+          description: The customer's first name
+          nullable: true
+        lastName:
+          type: string
+          description: The customer's last name
+          nullable: true
+        address:
+          "$ref": "#/components/schemas/CustomerAddress"
+      additionalProperties: false
+    ClientApiProgramResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        result:
+          type: array
+          items:
+            "$ref": "#/components/schemas/LegacyClientApiUserProgram"
+          nullable: true
+      additionalProperties: false
+    ContactApplicationHttpRequest:
+      required:
+      - campaignId
+      type: object
+      properties:
+        campaignId:
+          type: integer
+          description: The CampaignId associated with your application form
+          format: int64
+        contact:
+          "$ref": "#/components/schemas/ApplicationContact"
+        properties:
+          type: array
+          items:
+            "$ref": "#/components/schemas/UserCampaignProperty"
+          description: Value for props on the form. UserCampaignPropertyId is required.
+          nullable: true
+      additionalProperties: false
+    ContactClientApiPost:
+      type: object
+      properties:
+        email:
+          type: string
+          description: The email of the new contact
+          format: email
+          nullable: true
+        phone:
+          type: string
+          description: The phone of the new contact
+          format: tel
+          nullable: true
+        firstName:
+          type: string
+          description: The first name of the new contact
+          nullable: true
+        lastName:
+          type: string
+          description: The last name of the new contact
+          nullable: true
+        socialProfiles:
+          type: array
+          items:
+            "$ref": "#/components/schemas/ContactSocialProfile"
+          description: The list of social profile handles
+          nullable: true
+        tagIds:
+          type: array
+          items:
+            type: integer
+            format: int64
+          description: The list of unique tag id's to add to the contact
+          nullable: true
+        notifications:
+          type: array
+          items:
+            "$ref": "#/components/schemas/Notification"
+          description: The list of notifications to send
+          nullable: true
+        referralLinkCode:
+          type: string
+          description: The contact's Referral Id which can be included in their referral
+            link. Use this property to set a custom Referral Id.
+          nullable: true
+        customProperties:
+          type: array
+          items:
+            "$ref": "#/components/schemas/LegacyClientApiContactCustomProperty"
+          description: Values to save custom properties on the contact. CustomPropertyId
+            is required.
+          nullable: true
+      additionalProperties: false
+    ContactClientApiUpdate:
+      type: object
+      properties:
+        email:
+          type: string
+          description: The email of the contact.
+          format: email
+          nullable: true
+        mobilePhone:
+          type: string
+          description: The phone number of the contact.
+          nullable: true
+        firstName:
+          type: string
+          description: The first name of the contact.
+          nullable: true
+        lastName:
+          type: string
+          description: The last name of the contact.
+          nullable: true
+        gender:
+          type: string
+          description: "The contact's gender.\r\nMale / Female / Non-Binary / Undisclosed"
+          nullable: true
+        instagramHandles:
+          type: string
+          description: Comma separated list of Instagram handles.
+          nullable: true
+        facebookHandles:
+          type: string
+          description: Comma separated list of Facebook handles.
+          nullable: true
+        tiktokHandles:
+          type: string
+          description: Comma separated list of Tiktok handles.
+          nullable: true
+        twitterHandles:
+          type: string
+          description: Comma separated list of Twitter handles.
+          nullable: true
+        programKey:
+          type: string
+          description: Program key of the program the contact will be added to.
+          nullable: true
+        referralLinkCode:
+          type: string
+          description: The contact's Referral Id which can be included in their referral
+            link. Use this property to set a custom Referral Id.
+          nullable: true
+        address1:
+          type: string
+          description: Street address of the contact.
+          nullable: true
+        city:
+          type: string
+          description: The contact's city.
+          nullable: true
+        postalCode:
+          type: string
+          description: The contact's postal code.
+          nullable: true
+        province:
+          type: string
+          description: The contact's province.
+          nullable: true
+        country:
+          type: string
+          description: The contact's country.
+          nullable: true
+        addTags:
+          type: string
+          description: Comma separated list of tags to add.
+          nullable: true
+        removeTags:
+          type: string
+          description: Comma separated list of tags to remove.
+          nullable: true
+        contactOwnerEmail:
+          type: string
+          description: Team member's email address who owns the contact.
+          nullable: true
+        customProperties:
+          type: array
+          items:
+            "$ref": "#/components/schemas/LegacyClientApiContactCustomProperty"
+          description: Values to save custom properties on the contact. CustomPropertyId
+            is required.
+          nullable: true
+      additionalProperties: false
+    ContactSocialProfile:
+      type: object
+      properties:
+        socialHandle:
+          type: string
+          description: The unique social handle of the new contact
+          nullable: true
+        socialNetwork:
+          type: string
+          description: 'The name of the social network. (Example: Facebook, Instagram,
+            Twitter, YouTube, LinkedIn, ect..)'
+          nullable: true
+      additionalProperties: false
+    CustomerAddress:
+      type: object
+      properties:
+        address1:
+          type: string
+          description: The customer's address
+          nullable: true
+        city:
+          type: string
+          description: The customer's city
+          nullable: true
+        province:
+          type: string
+          description: The customer's state/province
+          nullable: true
+        postalCode:
+          type: string
+          description: The customer's zip/postal code
+          nullable: true
+        country:
+          type: string
+          description: The customer's country
+          nullable: true
+        phone:
+          type: string
+          description: The customer's phone number
+          nullable: true
+        isDefault:
+          type: boolean
+          description: Is this the customer's default address?
+      additionalProperties: false
+    CustomerOrder:
+      required:
+      - orderDate
+      - orderItems
+      type: object
+      properties:
+        sourceUniqueId:
+          type: string
+          description: The order's unique id in your system
+          nullable: true
+        sourceOrderNumber:
+          type: string
+          description: The order's order number in your system
+          nullable: true
+        orderItems:
+          type: array
+          items:
+            "$ref": "#/components/schemas/CustomerOrderItem"
+          description: The list of order items
+        orderDate:
+          type: string
+          description: A valid order date
+          format: date-time
+      additionalProperties: false
+    CustomerOrderItem:
+      required:
+      - name
+      - price
+      - quantity
+      type: object
+      properties:
+        name:
+          type: string
+          description: The product name
+        quantity:
+          type: integer
+          description: Quantity purchased
+          format: int32
+        price:
+          type: number
+          description: The price of 1 item. (we calculate total price based on quantity)
+          format: double
+      additionalProperties: false
+    ErrorCode:
+      enum:
+      - 0
+      - 1
+      - 2
+      - 3
+      - 4
+      - 5
+      - 6
+      - 7
+      - 8
+      - 9
+      - 10
+      - 11
+      - 12
+      - 13
+      type: integer
+      format: int32
+    ErrorLevel:
+      enum:
+      - 0
+      - 1
+      - 2
+      - 3
+      type: integer
+      format: int32
+    ErrorType:
+      enum:
+      - 0
+      - 1
+      - 2
+      - 3
+      - 4
+      - 5
+      - 6
+      type: integer
+      format: int32
+    LegacyApiContactResponse:
+      type: object
+      properties:
+        requestId:
+          type: integer
+          description: "The RequestId used in the <a href=\"#tag/DelayedRequest\">\"DelayedRequest\"</a>
+            endpoint \r\nto get the results after the \"Wait Limit\" has exceeded."
+          format: int64
+        status:
+          type: string
+          description: The status of the request. (COMPLETED, NEW, IN_PROGRESS, PROCESSING_LIMIT_EXCEEDED,
+            ERROR)
+          nullable: true
+        data:
+          description: The JSON data results
+          nullable: true
+      additionalProperties: false
+    LegacyApiContactResponseAppResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        message:
+          type: string
+          nullable: true
+        result:
+          "$ref": "#/components/schemas/LegacyApiContactResponse"
+        udfValues:
+          type: object
+          additionalProperties: {}
+          nullable: true
+        errorCode:
+          "$ref": "#/components/schemas/ErrorCode"
+        errorLevel:
+          "$ref": "#/components/schemas/ErrorLevel"
+        errorType:
+          "$ref": "#/components/schemas/ErrorType"
+      additionalProperties: false
+    LegacyClientApiContactCustomProperty:
+      required:
+      - propertyId
+      type: object
+      properties:
+        propertyId:
+          type: integer
+          description: The custom property Id. Required to insert or update data.
+          format: int64
+        label:
+          type: string
+          description: The property label. Not used when inserting or updating data.
+          nullable: true
+        value:
+          description: The custom property value.
+          nullable: true
+      additionalProperties: false
+    LegacyClientApiContactProgramRequest:
+      type: object
+      properties:
+        email:
+          type: string
+          description: The customer's email address
+          format: email
+          nullable: true
+        programKey:
+          type: string
+          description: The program's key
+          nullable: true
+        sendEmail:
+          type: boolean
+          description: Indicate if the associated email should be sent (if also enabled
+            in program settings)
+      additionalProperties: false
+    LegacyClientApiUserProgram:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: The programs's unique id
+          format: int32
+        name:
+          type: string
+          description: The programs's name
+          nullable: true
+        key:
+          type: string
+          description: The program's key
+          nullable: true
+      additionalProperties: false
+    Notification:
+      type: object
+      properties:
+        type:
+          type: string
+          description: The type of notification ("Email", etc.)
+          nullable: true
+        templateId:
+          type: integer
+          description: Notification template Id
+          format: int32
+          nullable: true
+      additionalProperties: false
+    SalesAttributionExampleResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+      additionalProperties: false
+    UserCampaignProperty:
+      required:
+      - userCampaignPropertyId
+      - value
+      type: object
+      properties:
+        userCampaignPropertyId:
+          type: integer
+          format: int64
+        value: {}
+      additionalProperties: false
+  securitySchemes:
+    Bearer:
+      type: apiKey
+      description: "<span style='font-size: 18px;'><strong>ATTENTION!</strong><br/>This
+        v1 API is being deprecated. Please use the <a href='https://api.getroster.com/docs/v2'>v2
+        API</a> going forward.</span>"
+      name: Authorization
+      in: header
+security:
+- Bearer: []
