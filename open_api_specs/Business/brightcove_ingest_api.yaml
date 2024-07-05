@@ -1,0 +1,1771 @@
+{
+    "openapi": "3.0.0",
+    "info": {
+        "version": "1.0.0",
+        "title": "Ingest Profiles API Reference",
+        "description": "Reference for the Brightcove Ingest Profiles API, used to create and manage ingest profiles that specify video and image renditions to be created, along with instructions for archiving masters. To test API requests, you can use our <a href=\"https:\/\/support.brightcove.com\/getting-access-tokens\" target=\"_blank\">API Testing Tools<\/a>",
+        "termsOfService": "http:\/\/exmple.com\/license\/"
+    },
+    "servers": [
+        "http:\/\/ingestion.api.brightcove.com\/v1"
+    ],
+    "paths": {
+        "\/accounts\/{account_id}\/configuration": {
+            "get": {
+                "summary": "Get Default Profile",
+                "description": "Get the default ingest profile for the account. ",
+                "operationId": "GetDefaultProfile",
+                "deprecated": 0,
+                "parameters": [
+                    {
+                        "name": "account_id",
+                        "in": "path",
+                        "description": "Video Cloud account ID "
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "200",
+                        "content": {
+                            "application\/json": {
+                                "schema": {
+                                    "$href": "#\/components\/schemas\/Get_Default_Profile200"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "summary": "Set Default Profile",
+                "description": "Sets an ingest profile as the default for the account. ",
+                "operationId": "SetDefaultProfile",
+                "deprecated": 0,
+                "parameters": [
+                    {
+                        "name": "account_id",
+                        "in": "path",
+                        "description": "Video Cloud account ID "
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "200",
+                        "content": {
+                            "application\/json": {
+                                "schema": {
+                                    "$href": "#\/components\/schemas\/Get_Default_Profile200"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "put": {
+                "summary": "Update Default Profile",
+                "description": "Updates the default ingest profile for the account. ",
+                "operationId": "UpdateDefaultProfile",
+                "deprecated": 0,
+                "parameters": [
+                    {
+                        "name": "account_id",
+                        "in": "path",
+                        "description": "Video Cloud account ID "
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "200",
+                        "content": {
+                            "application\/json": {
+                                "schema": {
+                                    "$href": "#\/components\/schemas\/Get_Default_Profile200"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "\/accounts\/{account_id}\/profiles": {
+            "post": {
+                "summary": "Create Ingest Profile",
+                "description": "Create a custom ingest profile for the account. Note that you can also do this through Video Cloud Studio ",
+                "operationId": "CreateIngestProfile",
+                "deprecated": 0,
+                "parameters": [
+                    {
+                        "name": "account_id",
+                        "in": "path",
+                        "description": "Video Cloud account ID "
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "200",
+                        "content": {
+                            "application\/json": {
+                                "schema": {
+                                    "$href": "#\/components\/schemas\/Get_Default_Profile200"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "get": {
+                "summary": "Get All Ingest Profiles",
+                "description": "Get an array of all the profiles valid for the account ",
+                "operationId": "GetAllIngestProfiles",
+                "deprecated": 0,
+                "parameters": [
+                    {
+                        "name": "account_id",
+                        "in": "path",
+                        "description": "Video Cloud account ID "
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "200",
+                        "content": {
+                            "application\/json": {
+                                "schema": {
+                                    "$href": "#\/components\/schemas\/Get_Default_Profile200"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "\/accounts\/{account_id}\/profiles\/{profile_id}": {
+            "delete": {
+                "summary": "Delete Ingest Profile",
+                "description": "Delete an ingest profile ",
+                "operationId": "DeleteIngestProfile",
+                "deprecated": 0,
+                "parameters": [
+                    {
+                        "name": "account_id",
+                        "in": "path",
+                        "description": "Video Cloud account ID "
+                    },
+                    {
+                        "name": "profile_id",
+                        "in": "path",
+                        "description": "Video Cloud account ID. "
+                    }
+                ],
+                "responses": {
+                    "401": {
+                        "description": "NOT_AUTHORIZED: Credentials are required to access this resource "
+                    }
+                }
+            },
+            "get": {
+                "summary": "Get Ingest Profile by ID",
+                "description": "Get a single profile map by its ID ",
+                "operationId": "GetIngestProfileByID",
+                "deprecated": 0,
+                "parameters": [
+                    {
+                        "name": "account_id",
+                        "in": "path",
+                        "description": "Video Cloud account ID "
+                    },
+                    {
+                        "name": "profile_id",
+                        "in": "path",
+                        "description": "Video Cloud account ID. "
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "200",
+                        "content": {
+                            "application\/json": {
+                                "schema": {
+                                    "$href": "#\/components\/schemas\/Get_Default_Profile200"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "put": {
+                "summary": "Update Ingest Profile",
+                "description": "Update an existing ingest profile - the existing profile will be deactivated, and replaced by the one specified in the request body ",
+                "operationId": "UpdateIngestProfile",
+                "deprecated": 0,
+                "parameters": [
+                    {
+                        "name": "account_id",
+                        "in": "path",
+                        "description": "Video Cloud account ID "
+                    },
+                    {
+                        "name": "profile_id",
+                        "in": "path",
+                        "description": "Video Cloud account ID. "
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "200",
+                        "content": {
+                            "application\/json": {
+                                "schema": {
+                                    "$href": "#\/components\/schemas\/Get_Default_Profile200"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "components": {
+        "schemas": {
+            "Get_Default_Profile200": {
+                "type": "object",
+                "properties": {
+                    "account_id": {
+                        "description": "Video Cloud account id ",
+                        "type": "number"
+                    },
+                    "id": {
+                        "description": "configuration id ",
+                        "type": "string"
+                    },
+                    "default_profile_id": {
+                        "description": "profile name for video-on-demand ",
+                        "type": "string"
+                    },
+                    "default_live_profile_id": {
+                        "description": "default profile name for live streams ",
+                        "type": "string"
+                    },
+                    "date_created": {
+                        "description": "when the profile was created (epoch time in milliseconds) ",
+                        "type": "number"
+                    },
+                    "date_last_modified": {
+                        "description": "when the profile was last modified (epoch time in milliseconds) ",
+                        "type": "number"
+                    },
+                    "max_profile_count": {
+                        "description": "maximum number of custom profiles for the account ",
+                        "type": "number"
+                    },
+                    "max_rendition_count": {
+                        "description": "maximum number of renditions per profile ",
+                        "type": "number"
+                    },
+                    "version": {
+                        "description": "system-managed version number ",
+                        "type": "number"
+                    }
+                }
+            },
+            "Set_Default_ProfileBody": {
+                "type": "object",
+                "properties": {
+                    "account_id": {
+                        "description": "Video Cloud account id ",
+                        "type": "number"
+                    },
+                    "default_profile_id": {
+                        "description": "profile name for video-on-demand ",
+                        "type": "string"
+                    },
+                    "default_live_profile_id": {
+                        "description": "default profile name for live streams ",
+                        "type": "string"
+                    }
+                }
+            },
+            "Set_Default_Profile200": {
+                "type": "object",
+                "properties": {
+                    "account_id": {
+                        "description": "Video Cloud account id ",
+                        "type": "number"
+                    },
+                    "id": {
+                        "description": "configuration id ",
+                        "type": "string"
+                    },
+                    "default_profile_id": {
+                        "description": "profile name for video-on-demand ",
+                        "type": "string"
+                    },
+                    "default_live_profile_id": {
+                        "description": "default profile name for live streams ",
+                        "type": "string"
+                    },
+                    "date_created": {
+                        "description": "when the profile was created (epoch time in milliseconds) ",
+                        "type": "integer"
+                    },
+                    "date_last_modified": {
+                        "description": "when the profile was last modified (epoch time in milliseconds) ",
+                        "type": "integer"
+                    },
+                    "max_profile_count": {
+                        "description": "maximum number of custom profiles for the account ",
+                        "type": "integer"
+                    },
+                    "max_rendition_count": {
+                        "description": "maximum number of renditions per profile ",
+                        "type": "integer"
+                    },
+                    "version": {
+                        "description": "system-managed version number ",
+                        "type": "number"
+                    }
+                }
+            },
+            "Update_Default_ProfileBody": {
+                "type": "object",
+                "properties": {
+                    "account_id": {
+                        "description": "Video Cloud account id ",
+                        "type": "number"
+                    },
+                    "id": {
+                        "description": "configuration id ",
+                        "type": "string"
+                    },
+                    "default_profile_id": {
+                        "description": "profile name for video-on-demand ",
+                        "type": "string"
+                    },
+                    "default_live_profile_id": {
+                        "description": "default profile name for live streams ",
+                        "type": "string"
+                    }
+                }
+            },
+            "Update_Default_Profile200": {
+                "type": "object",
+                "properties": {
+                    "account_id": {
+                        "description": "Video Cloud account id ",
+                        "type": "number"
+                    },
+                    "id": {
+                        "description": "configuration id ",
+                        "type": "string"
+                    },
+                    "default_profile_id": {
+                        "description": "profile name for video-on-demand ",
+                        "type": "string"
+                    },
+                    "default_live_profile_id": {
+                        "description": "default profile name for live streams ",
+                        "type": "string"
+                    },
+                    "date_created": {
+                        "description": "when the profile was created (epoch time in milliseconds) ",
+                        "type": "integer"
+                    },
+                    "date_last_modified": {
+                        "description": "when the profile was last modified (epoch time in milliseconds) ",
+                        "type": "integer"
+                    },
+                    "max_profile_count": {
+                        "description": "maximum number of custom profiles for the account ",
+                        "type": "integer"
+                    },
+                    "max_rendition_count": {
+                        "description": "maximum number of renditions per profile ",
+                        "type": "integer"
+                    },
+                    "version": {
+                        "description": "system-managed version number ",
+                        "type": "number"
+                    }
+                }
+            },
+            "Create_Ingest_ProfileBody": {
+                "type": "object",
+                "properties": {
+                    "name": {
+                        "description": "profile name (must be unique within the account) ",
+                        "type": "string"
+                    },
+                    "account_id": {
+                        "description": "Video Cloud account ID. ",
+                        "type": "integer"
+                    },
+                    "description": {
+                        "description": "description of the profile ",
+                        "type": "string"
+                    },
+                    "digital_master": {
+                        "description": "",
+                        "type": ""
+                    },
+                    "dynamic_origin": {
+                        "description": "",
+                        "type": ""
+                    },
+                    "renditions": {
+                        "description": "array of rendition maps Legacy Ingest only ",
+                        "type": "array"
+                    },
+                    "packages": {
+                        "description": "array of package maps for DRM (see Content Security) Legacy Ingest only ",
+                        "type": "array"
+                    }
+                }
+            },
+            "digital_master": {
+                "type": "object",
+                "properties": {
+                    "rendition": {
+                        "description": "rendition to use as master - either passthrough (the source optimized for online delivery) or none if you do not want to archive a master ",
+                        "type": "string"
+                    },
+                    "distribute": {
+                        "description": "whether to make the master playable as a rendition by pushing it to the CDN(s) ",
+                        "type": "boolean"
+                    }
+                }
+            },
+            "dynamic_origin": {
+                "type": "object",
+                "properties": {
+                    "renditions": {
+                        "description": "array of rendition maps Legacy Ingest only ",
+                        "type": "array"
+                    },
+                    "images": {
+                        "description": "array of image specifications for poster and thumbnail (if omitted, no images will be captured during ingestion) ",
+                        "type": "array"
+                    },
+                    "dynamic_profile_options": {
+                        "description": "Reference",
+                        "type": "object"
+                    }
+                }
+            },
+            "renditions": {
+                "type": "object",
+                "properties": {
+                    "aspect_mode": {
+                        "description": "how to handle mismatch between source and rendition aspect ratio Legacy Ingest only ",
+                        "type": "string"
+                    },
+                    "audio_bitrate": {
+                        "description": "audio bitrate in kbps Legacy Ingest only ",
+                        "type": "integer"
+                    },
+                    "audio_channels": {
+                        "description": "number of audio channels ",
+                        "type": "integer"
+                    },
+                    "id": {
+                        "description": "configuration id ",
+                        "type": "string"
+                    },
+                    "audio_codec": {
+                        "description": "audio codec, e.g. aac Legacy Ingest only ",
+                        "type": "string"
+                    },
+                    "constant_bitrate": {
+                        "description": "whether to use constant bitrate for encoding Legacy Ingest only ",
+                        "type": "boolean"
+                    },
+                    "crf": {
+                        "description": "1-51, not used by default. Legacy Ingest only ",
+                        "type": "integer"
+                    },
+                    "decoder_bitrate_cap": {
+                        "description": "In kbps, the max bitrate fed to the decoder Legacy Ingest only ",
+                        "type": "integer"
+                    },
+                    "encryption_method": {
+                        "description": "encryption_method to use, e.g. aes-128 Legacy Ingest only ",
+                        "type": "string"
+                    },
+                    "encryption_key_rotation_period": {
+                        "description": "use a different key for each set of segments, rotating to a new key after this many segments Legacy Ingest only ",
+                        "type": "integer"
+                    },
+                    "fixed_keyframe_interval": {
+                        "description": "Forces a keyframe every X frames, but still allows additional keyframes &mdash; NOTE overrides keyframe_interval Legacy Ingest only ",
+                        "type": "integer"
+                    },
+                    "forced_keyframe_rate": {
+                        "description": "Force the keyframe rate, h264 only, ignored if forced_keyframe_interval is used ",
+                        "type": "integer"
+                    },
+                    "format": {
+                        "description": "video format, e.g. mp4, ts (for HLS), flv, m4f for video, png or jpg for images Legacy Ingest only ",
+                        "type": "string"
+                    },
+                    "frame_rate": {
+                        "description": "frame rate in frames per second Legacy Ingest only ",
+                        "type": "integer"
+                    },
+                    "h264_bframes": {
+                        "description": "number of bframes for h.264 Legacy Ingest only ",
+                        "type": "integer"
+                    },
+                    "h264_level": {
+                        "description": "h.264 profile level ",
+                        "type": "integer"
+                    },
+                    "h264_profile": {
+                        "description": "h.264 profile Legacy Ingest only ",
+                        "type": "string"
+                    },
+                    "h264_reference_frames": {
+                        "description": "number of h.264 reference frames to use Legacy Ingest only ",
+                        "type": "integer"
+                    },
+                    "hls_optimized_ts": {
+                        "description": "Time segments optimized for HLS Legacy Ingest only ",
+                        "type": "boolean"
+                    },
+                    "keyframe_interval": {
+                        "description": "Maximum number of frames between keyframes (default is 250, and overrides keyframe_rate) Legacy Ingest only ",
+                        "type": "integer"
+                    },
+                    "keyframe_rate": {
+                        "description": "Maximum number of keyframes per second Legacy Ingest only ",
+                        "type": "integer"
+                    },
+                    "label": {
+                        "description": "the kind of image this will be ",
+                        "type": "string"
+                    },
+                    "live_stream": {
+                        "description": "Whether this will be for live streaming video Legacy Ingest only ",
+                        "type": "boolean"
+                    },
+                    "live_sliding_window_duration": {
+                        "description": "Duration of stream to keep available for LiveDVR delivery (in seconds) ",
+                        "type": "integer"
+                    },
+                    "max_video_bitrate": {
+                        "description": "Maximum video bitrate (h.264 only) Legacy Ingest only ",
+                        "type": "integer"
+                    },
+                    "max_frame_rate": {
+                        "description": "Maximum framerate for renditions in fps for CAE profiles only ",
+                        "type": "integer"
+                    },
+                    "media_type": {
+                        "description": "the media type of the rendition Legacy Ingest only ",
+                        "type": "string"
+                    },
+                    "one_pass": {
+                        "description": "force one-pass encoding Legacy Ingest only ",
+                        "type": "boolean"
+                    },
+                    "package_format": {
+                        "description": "Creates a zip or tar file containing all the media files of an output, and uploads this single package rather than all the individual files ",
+                        "type": "string"
+                    },
+                    "reference_id": {
+                        "description": "A reference id for the rendition that is unique within the account - required for DRM packaging Legacy Ingest only ",
+                        "type": "string"
+                    },
+                    "skip": {
+                        "description": "Reference",
+                        "type": "object"
+                    },
+                    "skip_video": {
+                        "description": "Set to true to skip video encoding for audio-only renditions Legacy Ingest only ",
+                        "type": "boolean"
+                    },
+                    "speed": {
+                        "description": "a target transcoding speed. Slower transcoding allows for more advanced file compression, while faster transcoding is possible by skipping some advanced compression features Legacy Ingest only ",
+                        "type": "integer"
+                    },
+                    "streaming_delivery_format": {
+                        "description": "Sets the format\/protocol for an output that will be delivered using a specific streaming configuration, including necessary manifests, directory Legacy Ingest only ",
+                        "type": "string"
+                    },
+                    "streaming_delivery_profile": {
+                        "description": "Sets the profile of the streaming delivery format, ensuring options are selected for compatibility with the profile Legacy Ingest only ",
+                        "type": "string"
+                    },
+                    "type": {
+                        "description": "transmuxing type for HLS; typical value is segmented Legacy Ingest only ",
+                        "type": "string"
+                    },
+                    "upscale": {
+                        "description": "whether to upsize the frames if the source frame size is smaller than the target Legacy Ingest only ",
+                        "type": "boolean"
+                    },
+                    "video_bitrate": {
+                        "description": "target video bitrate in kbps Legacy Ingest only ",
+                        "type": "integer"
+                    },
+                    "video_codec": {
+                        "description": "target video codec Legacy Ingest only ",
+                        "type": "string"
+                    },
+                    "height": {
+                        "description": "the height of the image in pixels ",
+                        "type": "integer"
+                    },
+                    "width": {
+                        "description": "the width of the image in pixels ",
+                        "type": "integer"
+                    },
+                    "watermarks": {
+                        "description": "array of watermark maps Legacy Ingest only ",
+                        "type": "array"
+                    }
+                }
+            },
+            "packages": {
+                "type": "object",
+                "properties": {
+                    "drm": {
+                        "description": "for MPEG-DASH, array of DRM types to apply, e.g. [&quot;widevine&quot;, &quot;playready&quot;] Legacy Ingest only ",
+                        "type": "array"
+                    },
+                    "package_type": {
+                        "description": "for MPEG-DASH, the package type is dash; for other formats, the package type is the DRM type, e.g. widevine Legacy Ingest only ",
+                        "type": "string"
+                    },
+                    "renditions": {
+                        "description": "for MPEG-DASH, the renditions will be set to the reference_id for a single rendition; for other formats, renditions is set equal to an array of rendition reference_id&#39;s ",
+                        "type": "mixed"
+                    }
+                }
+            },
+            "Create_Ingest_ProfileBody.digital_master": {
+                "type": "object",
+                "properties": {
+                    "rendition": {
+                        "description": "rendition to use as master - either passthrough (the source optimized for online delivery) or none if you do not want to archive a master ",
+                        "type": "string"
+                    },
+                    "distribute": {
+                        "description": "whether to make the master playable as a rendition by pushing it to the CDN(s) ",
+                        "type": "boolean"
+                    }
+                }
+            },
+            "Create_Ingest_ProfileBody.dynamic_origin": {
+                "type": "object",
+                "properties": {
+                    "renditions": {
+                        "description": "array of rendition maps Legacy Ingest only ",
+                        "type": "array"
+                    },
+                    "temporary_renditions": {
+                        "description": "names of video renditions for Fast Publish (only for CAE profiles) - see Standard Ingest Profiles - renditions for available renditions you can choose from ",
+                        "type": "array"
+                    },
+                    "images": {
+                        "description": "array of image specifications for poster and thumbnail (if omitted, no images will be captured during ingestion) ",
+                        "type": "array"
+                    },
+                    "dynamic_profile_options": {
+                        "description": "Reference",
+                        "type": "object"
+                    }
+                }
+            },
+            "temporary_renditions": {
+                "type": "array"
+            },
+            "images": {
+                "type": "array"
+            },
+            "dynamic_profile_options": {
+                "type": "object"
+            },
+            "Create_Ingest_ProfileBody.dynamic_origin.images": {
+                "type": "object",
+                "properties": {
+                    "label": {
+                        "description": "the kind of image this will be ",
+                        "type": "string"
+                    },
+                    "height": {
+                        "description": "the height of the image in pixels ",
+                        "type": "integer"
+                    },
+                    "width": {
+                        "description": "the width of the image in pixels ",
+                        "type": "integer"
+                    }
+                }
+            },
+            "Create_Ingest_ProfileBody.dynamic_origin.dynamic_profile_options": {
+                "type": "object",
+                "properties": {
+                    "min_renditions": {
+                        "description": "Minimum number of renditions to create for CAE profiles only ",
+                        "type": "integer"
+                    },
+                    "max_renditions": {
+                        "description": "Maximum number of renditions to create for CAE profiles only ",
+                        "type": "integer"
+                    },
+                    "min_resolution": {
+                        "description": "Reference",
+                        "type": "object"
+                    },
+                    "max_resolution": {
+                        "description": "Reference",
+                        "type": "object"
+                    },
+                    "max_bitrate": {
+                        "description": "Maximum bitrate for renditions in kbps for CAE profiles only ",
+                        "type": "integer"
+                    },
+                    "max_first_rendition_bitrate": {
+                        "description": "Maximum bitrate for lowest bitrate rendition in kbps for CAE profiles only ",
+                        "type": "integer"
+                    },
+                    "max_frame_rate": {
+                        "description": "Maximum framerate for renditions in fps for CAE profiles only ",
+                        "type": "integer"
+                    },
+                    "keyframe_rate": {
+                        "description": "The number of keyframes per second for renditions (So a value of 0.5 would result in one keyframe every two seconds; a value of 3 would result in three keyframes per second) for CAE profiles only ",
+                        "type": "number"
+                    },
+                    "select_baseline_profile_configuration": {
+                        "description": "At least one rendition used in the profile will be baseline profile for CAE profiles only ",
+                        "type": "boolean"
+                    }
+                }
+            },
+            "min_resolution": {
+                "type": "object"
+            },
+            "max_resolution": {
+                "type": "object"
+            },
+            "Create_Ingest_ProfileBody.dynamic_origin.dynamic_profile_options.min_resolution": {
+                "type": "object",
+                "properties": {
+                    "height": {
+                        "description": "the height of the image in pixels ",
+                        "type": "integer"
+                    },
+                    "width": {
+                        "description": "the width of the image in pixels ",
+                        "type": "integer"
+                    }
+                }
+            },
+            "Create_Ingest_ProfileBody.dynamic_origin.dynamic_profile_options.max_resolution": {
+                "type": "object",
+                "properties": {
+                    "height": {
+                        "description": "the height of the image in pixels ",
+                        "type": "integer"
+                    },
+                    "width": {
+                        "description": "the width of the image in pixels ",
+                        "type": "integer"
+                    }
+                }
+            },
+            "Create_Ingest_ProfileBody.renditions": {
+                "type": "object",
+                "properties": {
+                    "aspect_mode": {
+                        "description": "how to handle mismatch between source and rendition aspect ratio Legacy Ingest only ",
+                        "type": "string"
+                    },
+                    "audio_bitrate": {
+                        "description": "audio bitrate in kbps Legacy Ingest only ",
+                        "type": "integer"
+                    },
+                    "audio_channels": {
+                        "description": "number of audio channels Legacy Ingest only ",
+                        "type": "number"
+                    },
+                    "audio_codec": {
+                        "description": "audio codec, e.g. aac Legacy Ingest only ",
+                        "type": "string"
+                    },
+                    "max_aac_profile": {
+                        "description": "max aaic profile - aac-lc is the recommended value Legacy Ingest only ",
+                        "type": "string"
+                    },
+                    "constant_bitrate": {
+                        "description": "whether to use constant bitrate for encoding Legacy Ingest only ",
+                        "type": "boolean"
+                    },
+                    "crf": {
+                        "description": "1-51, not used by default. Legacy Ingest only ",
+                        "type": "integer"
+                    },
+                    "decoder_bitrate_cap": {
+                        "description": "In kbps, the max bitrate fed to the decoder Legacy Ingest only ",
+                        "type": "integer"
+                    },
+                    "encryption_method": {
+                        "description": "encryption_method to use, e.g. aes-128 Legacy Ingest only ",
+                        "type": "string"
+                    },
+                    "encryption_key_rotation_period": {
+                        "description": "use a different key for each set of segments, rotating to a new key after this many segments Legacy Ingest only ",
+                        "type": "integer"
+                    },
+                    "fixed_keyframe_interval": {
+                        "description": "Forces a keyframe every X frames, but still allows additional keyframes &mdash; NOTE overrides keyframe_interval Legacy Ingest only ",
+                        "type": "integer"
+                    },
+                    "forced_keyframe_rate": {
+                        "description": "Force the keyframe rate, h264 only, ignored if forced_keyframe_interval is used Legacy Ingest only ",
+                        "type": "number"
+                    },
+                    "format": {
+                        "description": "video format, e.g. mp4, ts (for HLS), flv, m4f for video, png or jpg for images Legacy Ingest only ",
+                        "type": "string"
+                    },
+                    "frame_rate": {
+                        "description": "frame rate in frames per second Legacy Ingest only ",
+                        "type": "integer"
+                    },
+                    "h264_bframes": {
+                        "description": "number of bframes for h.264 Legacy Ingest only ",
+                        "type": "integer"
+                    },
+                    "h264_level": {
+                        "description": "h.264 profile level Legacy Ingest only ",
+                        "type": "number"
+                    },
+                    "h264_profile": {
+                        "description": "h.264 profile Legacy Ingest only ",
+                        "type": "string"
+                    },
+                    "h264_reference_frames": {
+                        "description": "number of h.264 reference frames to use Legacy Ingest only ",
+                        "type": "integer"
+                    },
+                    "hls_optimized_ts": {
+                        "description": "Time segments optimized for HLS Legacy Ingest only ",
+                        "type": "boolean"
+                    },
+                    "keyframe_interval": {
+                        "description": "Maximum number of frames between keyframes (default is 250, and overrides keyframe_rate) Legacy Ingest only ",
+                        "type": "integer"
+                    },
+                    "keyframe_rate": {
+                        "description": "Maximum number of keyframes per second Legacy Ingest only ",
+                        "type": "integer"
+                    },
+                    "label": {
+                        "description": "the kind of image this will be ",
+                        "type": "string"
+                    },
+                    "live_stream": {
+                        "description": "Whether this will be for live streaming video Legacy Ingest only ",
+                        "type": "boolean"
+                    },
+                    "live_sliding_window_duration": {
+                        "description": "Duration of stream to keep available for LiveDVR delivery (in seconds) Legacy Ingest only ",
+                        "type": "number"
+                    },
+                    "max_video_bitrate": {
+                        "description": "Maximum video bitrate (h.264 only) Legacy Ingest only ",
+                        "type": "integer"
+                    },
+                    "max_frame_rate": {
+                        "description": "Maximum framerate for renditions in fps for CAE profiles only ",
+                        "type": "integer"
+                    },
+                    "media_type": {
+                        "description": "the media type of the rendition Legacy Ingest only ",
+                        "type": "string"
+                    },
+                    "one_pass": {
+                        "description": "force one-pass encoding Legacy Ingest only ",
+                        "type": "boolean"
+                    },
+                    "reference_id": {
+                        "description": "A reference id for the rendition that is unique within the account - required for DRM packaging Legacy Ingest only ",
+                        "type": "string"
+                    },
+                    "segment_seconds": {
+                        "description": "number of seconds of content to include in segments (the default for HLS is 10; for DASH: 2) Legacy Ingest only ",
+                        "type": "number"
+                    },
+                    "skip": {
+                        "description": "Reference",
+                        "type": "object"
+                    },
+                    "skip_video": {
+                        "description": "Set to true to skip video encoding for audio-only renditions Legacy Ingest only ",
+                        "type": "boolean"
+                    },
+                    "speed": {
+                        "description": "a target transcoding speed. Slower transcoding allows for more advanced file compression, while faster transcoding is possible by skipping some advanced compression features Legacy Ingest only ",
+                        "type": "integer"
+                    },
+                    "streaming_delivery_format": {
+                        "description": "Sets the format\/protocol for an output that will be delivered using a specific streaming configuration, including necessary manifests, directory Legacy Ingest only ",
+                        "type": "string"
+                    },
+                    "streaming_delivery_profile": {
+                        "description": "Sets the profile of the streaming delivery format, ensuring options are selected for compatibility with the profile Legacy Ingest only ",
+                        "type": "string"
+                    },
+                    "type": {
+                        "description": "transmuxing type for HLS; typical value is segmented Legacy Ingest only ",
+                        "type": "string"
+                    },
+                    "upscale": {
+                        "description": "whether to upsize the frames if the source frame size is smaller than the target Legacy Ingest only ",
+                        "type": "boolean"
+                    },
+                    "video_bitrate": {
+                        "description": "target video bitrate in kbps Legacy Ingest only ",
+                        "type": "integer"
+                    },
+                    "video_codec": {
+                        "description": "target video codec Legacy Ingest only ",
+                        "type": "string"
+                    },
+                    "height": {
+                        "description": "the height of the image in pixels ",
+                        "type": "integer"
+                    },
+                    "width": {
+                        "description": "the width of the image in pixels ",
+                        "type": "integer"
+                    },
+                    "watermarks": {
+                        "description": "array of watermark maps Legacy Ingest only ",
+                        "type": "array"
+                    }
+                }
+            },
+            "skip": {
+                "type": "object"
+            },
+            "watermarks": {
+                "type": "array"
+            },
+            "Create_Ingest_ProfileBody.renditions.skip": {
+                "type": "object",
+                "properties": {
+                    "min_audio_bitrate": {
+                        "description": "the minimum audio bitrate that the source must have (kbps) Legacy Ingest only ",
+                        "type": "integer"
+                    },
+                    "max_audio_bitrate": {
+                        "description": "the maximum audio bitrate that the source must have (kbps) Legacy Ingest only ",
+                        "type": "integer"
+                    },
+                    "min_video_bitrate": {
+                        "description": "the minimum video bitrate that the source must have (kbps) Legacy Ingest only ",
+                        "type": "integer"
+                    },
+                    "max_video_bitrate": {
+                        "description": "Maximum video bitrate (h.264 only) Legacy Ingest only ",
+                        "type": "integer"
+                    },
+                    "require_audio": {
+                        "description": "if true the source must include an audio track Legacy Ingest only ",
+                        "type": "boolean"
+                    },
+                    "require_video": {
+                        "description": "if true the source must include a video track Legacy Ingest only ",
+                        "type": "boolean"
+                    },
+                    "min_size": {
+                        "description": "the source must be at least this resolution - string of the form &quot;widthxheight&quot; (e.g. &quot;400x225&quot;) Legacy Ingest only ",
+                        "type": "string"
+                    },
+                    "max_size": {
+                        "description": "the source must be at most this resolution - string of the form &quot;widthxheight&quot; (e.g. &quot;1920x1080&quot;) Legacy Ingest only ",
+                        "type": "string"
+                    }
+                }
+            },
+            "Create_Ingest_ProfileBody.renditions.watermarks": {
+                "type": "object",
+                "properties": {
+                    "url": {
+                        "description": "URL for the watermark image Legacy Ingest only ",
+                        "type": "string"
+                    },
+                    "width": {
+                        "description": "width in pixels or percent of frame width; e.g. 20 or 10% - decimal values like 10.5% are not permitted Legacy Ingest only ",
+                        "type": "string"
+                    },
+                    "height": {
+                        "description": "height in pixels or percent of frame width; e.g. 20 or 10% - decimal values like 10.5% are not permitted Legacy Ingest only ",
+                        "type": "string"
+                    },
+                    "x": {
+                        "description": "distance from left edge to center of image as pixels or precent of frame width; e.g. 20 or 10% (use negative values like -10 to position the watermark relative to the right edge) - decimal values like 10.5% are not permitted Legacy Ingest only ",
+                        "type": "string"
+                    },
+                    "y": {
+                        "description": "distance from top edge to center if image as pixels or percent of frame height; e.g. 20 or 10% (use negative values like -10 to position the watermark relative to the bottom edge) - decimal values like 10.5% are not permitted Legacy Ingest only ",
+                        "type": "string"
+                    }
+                }
+            },
+            "Create_Ingest_ProfileBody.packages": {
+                "type": "object",
+                "properties": {
+                    "drm": {
+                        "description": "for MPEG-DASH, array of DRM types to apply, e.g. [&quot;widevine&quot;, &quot;playready&quot;] Legacy Ingest only ",
+                        "type": "array"
+                    },
+                    "package_type": {
+                        "description": "for MPEG-DASH, the package type is dash; for other formats, the package type is the DRM type, e.g. widevine Legacy Ingest only ",
+                        "type": "string"
+                    },
+                    "renditions": {
+                        "description": "array of rendition maps Legacy Ingest only ",
+                        "type": "array"
+                    }
+                }
+            },
+            "drm": {
+                "type": "array"
+            },
+            "Create_Ingest_Profile200": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "description": "configuration id ",
+                        "type": "string"
+                    },
+                    "name": {
+                        "description": "profile name (must be unique within the account) ",
+                        "type": "string"
+                    },
+                    "date_created": {
+                        "description": "when the profile was created (epoch time in milliseconds) ",
+                        "type": "integer"
+                    },
+                    "date_last_modified": {
+                        "description": "when the profile was last modified (epoch time in milliseconds) ",
+                        "type": "integer"
+                    },
+                    "account_id": {
+                        "description": "Video Cloud account id ",
+                        "type": "number"
+                    },
+                    "description": {
+                        "description": "description of the profile ",
+                        "type": "string"
+                    },
+                    "digital_master": {
+                        "description": "",
+                        "type": ""
+                    },
+                    "dynamic_origin": {
+                        "description": "",
+                        "type": ""
+                    },
+                    "renditions": {
+                        "description": "array of rendition maps Legacy Ingest only ",
+                        "type": "array"
+                    },
+                    "packages": {
+                        "description": "array of package maps for DRM (see Content Security) Legacy Ingest only ",
+                        "type": "array"
+                    }
+                }
+            },
+            "dynamic_origin.images": {
+                "type": "object",
+                "properties": {
+                    "label": {
+                        "description": "the kind of image this will be ",
+                        "type": "string"
+                    },
+                    "height": {
+                        "description": "the height of the image in pixels ",
+                        "type": "integer"
+                    },
+                    "width": {
+                        "description": "the width of the image in pixels ",
+                        "type": "integer"
+                    }
+                }
+            },
+            "dynamic_origin.dynamic_profile_options": {
+                "type": "object",
+                "properties": {
+                    "min_renditions": {
+                        "description": "Minimum number of renditions to create for CAE profiles only ",
+                        "type": "integer"
+                    },
+                    "max_renditions": {
+                        "description": "Maximum number of renditions to create for CAE profiles only ",
+                        "type": "integer"
+                    },
+                    "min-resolution": {
+                        "description": "Reference",
+                        "type": "object"
+                    },
+                    "max-resolution": {
+                        "description": "Reference",
+                        "type": "object"
+                    },
+                    "max_bitrate": {
+                        "description": "Maximum bitrate for renditions in kbps for CAE profiles only ",
+                        "type": "integer"
+                    },
+                    "max_first_rendition_bitrate": {
+                        "description": "Maximum bitrate for lowest bitrate rendition in kbps for CAE profiles only ",
+                        "type": "integer"
+                    },
+                    "max_frame_rate": {
+                        "description": "Maximum framerate for renditions in fps for CAE profiles only ",
+                        "type": "integer"
+                    },
+                    "keyframe_rate": {
+                        "description": "Maximum number of keyframes per second Legacy Ingest only ",
+                        "type": "integer"
+                    },
+                    "select_baseline_profile_configuration": {
+                        "description": "At least one rendition used in the profile will be baseline profile for CAE profiles only ",
+                        "type": "boolean"
+                    }
+                }
+            },
+            "min-resolution": {
+                "type": "object"
+            },
+            "max-resolution": {
+                "type": "object"
+            },
+            "dynamic_origin.dynamic_profile_options.min-resolution": {
+                "type": "object",
+                "properties": {
+                    "width": {
+                        "description": "the width of the image in pixels ",
+                        "type": "integer"
+                    },
+                    "height": {
+                        "description": "the height of the image in pixels ",
+                        "type": "integer"
+                    }
+                }
+            },
+            "dynamic_origin.dynamic_profile_options.max-resolution": {
+                "type": "object",
+                "properties": {
+                    "width": {
+                        "description": "the width of the image in pixels ",
+                        "type": "integer"
+                    },
+                    "height": {
+                        "description": "the height of the image in pixels ",
+                        "type": "integer"
+                    }
+                }
+            },
+            "renditions.skip": {
+                "type": "object",
+                "properties": {
+                    "min_audio_bitrate": {
+                        "description": "the minimum audio bitrate that the source must have (kbps) Legacy Ingest only ",
+                        "type": "integer"
+                    },
+                    "max_audio_bitrate": {
+                        "description": "the maximum audio bitrate that the source must have (kbps) Legacy Ingest only ",
+                        "type": "integer"
+                    },
+                    "min_video_bitrate": {
+                        "description": "the minimum video bitrate that the source must have (kbps) Legacy Ingest only ",
+                        "type": "integer"
+                    },
+                    "max_video_bitrate": {
+                        "description": "Maximum video bitrate (h.264 only) Legacy Ingest only ",
+                        "type": "integer"
+                    },
+                    "require_audio": {
+                        "description": "if true the source must include an audio track Legacy Ingest only ",
+                        "type": "boolean"
+                    },
+                    "require_video": {
+                        "description": "if true the source must include a video track Legacy Ingest only ",
+                        "type": "boolean"
+                    },
+                    "min_size": {
+                        "description": "the source must be at least this resolution - string of the form &quot;widthxheight&quot; (e.g. &quot;400x225&quot;) Legacy Ingest only ",
+                        "type": "string"
+                    },
+                    "max_size": {
+                        "description": "the source must be at most this resolution - string of the form &quot;widthxheight&quot; (e.g. &quot;1920x1080&quot;) Legacy Ingest only ",
+                        "type": "string"
+                    }
+                }
+            },
+            "renditions.watermarks": {
+                "type": "object",
+                "properties": {
+                    "url": {
+                        "description": "URL for the watermark image Legacy Ingest only ",
+                        "type": "string"
+                    },
+                    "width": {
+                        "description": "width in pixels or percent of frame width; e.g. 20 or 10% - decimal values like 10.5% are not permitted Legacy Ingest only ",
+                        "type": "string"
+                    },
+                    "height": {
+                        "description": "height in pixels or percent of frame width; e.g. 20 or 10% - decimal values like 10.5% are not permitted Legacy Ingest only ",
+                        "type": "string"
+                    },
+                    "x": {
+                        "description": "distance from left edge to center of image as pixels or precent of frame width; e.g. 20 or 10% (use negative values like -10 to position the watermark relative to the right edge) - decimal values like 10.5% are not permitted Legacy Ingest only ",
+                        "type": "string"
+                    },
+                    "y": {
+                        "description": "distance from top edge to center if image as pixels or percent of frame height; e.g. 20 or 10% (use negative values like -10 to position the watermark relative to the bottom edge) - decimal values like 10.5% are not permitted Legacy Ingest only ",
+                        "type": "string"
+                    }
+                }
+            },
+            "Get_All_Ingest_Profiles200": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "description": "configuration id ",
+                        "type": "string"
+                    },
+                    "name": {
+                        "description": "profile name (must be unique within the account) ",
+                        "type": "string"
+                    },
+                    "date_created": {
+                        "description": "when the profile was created (epoch time in milliseconds) ",
+                        "type": "integer"
+                    },
+                    "date_last_modified": {
+                        "description": "when the profile was last modified (epoch time in milliseconds) ",
+                        "type": "integer"
+                    },
+                    "account_id": {
+                        "description": "Video Cloud account id ",
+                        "type": "number"
+                    },
+                    "description": {
+                        "description": "description of the profile ",
+                        "type": "string"
+                    },
+                    "digital_master": {
+                        "description": "",
+                        "type": ""
+                    },
+                    "dynamic_origin": {
+                        "description": "",
+                        "type": ""
+                    },
+                    "renditions": {
+                        "description": "array of rendition maps Legacy Ingest only ",
+                        "type": "array"
+                    },
+                    "packages": {
+                        "description": "array of package maps for DRM (see Content Security) Legacy Ingest only ",
+                        "type": "array"
+                    }
+                }
+            },
+            "Get_Ingest_Profile_by_ID200": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "description": "configuration id ",
+                        "type": "string"
+                    },
+                    "name": {
+                        "description": "profile name (must be unique within the account) ",
+                        "type": "string"
+                    },
+                    "date_created": {
+                        "description": "when the profile was created (epoch time in milliseconds) ",
+                        "type": "integer"
+                    },
+                    "date_last_modified": {
+                        "description": "when the profile was last modified (epoch time in milliseconds) ",
+                        "type": "integer"
+                    },
+                    "account_id": {
+                        "description": "Video Cloud account id ",
+                        "type": "number"
+                    },
+                    "description": {
+                        "description": "description of the profile ",
+                        "type": "string"
+                    },
+                    "digital_master": {
+                        "description": "",
+                        "type": ""
+                    },
+                    "dynamic_origin": {
+                        "description": "",
+                        "type": ""
+                    },
+                    "renditions": {
+                        "description": "array of rendition maps Legacy Ingest only ",
+                        "type": "array"
+                    },
+                    "packages": {
+                        "description": "array of package maps for DRM (see Content Security) Legacy Ingest only ",
+                        "type": "array"
+                    }
+                }
+            },
+            "Update_Ingest_ProfileBody": {
+                "type": "object",
+                "properties": {
+                    "name": {
+                        "description": "profile name (must be unique within the account) ",
+                        "type": "string"
+                    },
+                    "account_id": {
+                        "description": "Video Cloud account id ",
+                        "type": "number"
+                    },
+                    "description": {
+                        "description": "description of the profile ",
+                        "type": "string"
+                    },
+                    "digital_master": {
+                        "description": "",
+                        "type": ""
+                    },
+                    "dynamic_origin": {
+                        "description": "",
+                        "type": ""
+                    },
+                    "renditions": {
+                        "description": "array of rendition maps Legacy Ingest only ",
+                        "type": "array"
+                    },
+                    "packages": {
+                        "description": "array of package maps for DRM (see Content Security) Legacy Ingest only ",
+                        "type": "array"
+                    }
+                }
+            },
+            "Update_Ingest_ProfileBody.digital_master": {
+                "type": "object",
+                "properties": {
+                    "rendition": {
+                        "description": "rendition to use as master - either passthrough (the source optimized for online delivery) or none if you do not want to archive a master ",
+                        "type": "string"
+                    },
+                    "distribute": {
+                        "description": "whether to make the master playable as a rendition by pushing it to the CDN(s) ",
+                        "type": "boolean"
+                    }
+                }
+            },
+            "Update_Ingest_ProfileBody.dynamic_origin": {
+                "type": "object",
+                "properties": {
+                    "renditions": {
+                        "description": "array of rendition maps Legacy Ingest only ",
+                        "type": "array"
+                    },
+                    "images": {
+                        "description": "array of image specifications for poster and thumbnail (if omitted, no images will be captured during ingestion) ",
+                        "type": "array"
+                    },
+                    "dynamic_profile_options": {
+                        "description": "Reference",
+                        "type": "object"
+                    }
+                }
+            },
+            "Update_Ingest_ProfileBody.dynamic_origin.images": {
+                "type": "object",
+                "properties": {
+                    "label": {
+                        "description": "the kind of image this will be ",
+                        "type": "string"
+                    },
+                    "height": {
+                        "description": "the height of the image in pixels ",
+                        "type": "number"
+                    },
+                    "width": {
+                        "description": "the width of the image in pixels ",
+                        "type": "number"
+                    }
+                }
+            },
+            "Update_Ingest_ProfileBody.dynamic_origin.dynamic_profile_options": {
+                "type": "object",
+                "properties": {
+                    "min_renditions": {
+                        "description": "Minimum number of renditions to create for CAE profiles only ",
+                        "type": "integer"
+                    },
+                    "max_renditions": {
+                        "description": "Maximum number of renditions to create for CAE profiles only ",
+                        "type": "integer"
+                    },
+                    "min_resolution": {
+                        "description": "Reference",
+                        "type": "object"
+                    },
+                    "max_resolution": {
+                        "description": "Reference",
+                        "type": "object"
+                    },
+                    "max_bitrate": {
+                        "description": "Maximum bitrate for renditions in kbps ",
+                        "type": "number"
+                    },
+                    "max_first_rendition_bitrate": {
+                        "description": "Maximum bitrate for lowest bitrate rendition in kbps ",
+                        "type": "number"
+                    },
+                    "max_frame_rate": {
+                        "description": "Maximum framerate for renditions in fps ",
+                        "type": "number"
+                    },
+                    "keyframe_rate": {
+                        "description": "The number of keyframes per second for renditions (So a value of 0.5 would result in one keyframe every two seconds; a value of 3 would result in three keyframes per second) for CAE profiles only ",
+                        "type": "number"
+                    },
+                    "select_baseline_profile_configuration": {
+                        "description": "At least one rendition used in the profile will be baseline profile for CAE profiles only ",
+                        "type": "boolean"
+                    }
+                }
+            },
+            "Update_Ingest_ProfileBody.dynamic_origin.dynamic_profile_options.min_resolution": {
+                "type": "object",
+                "properties": {
+                    "height": {
+                        "description": "the height of the image in pixels ",
+                        "type": "number"
+                    },
+                    "width": {
+                        "description": "the width of the image in pixels ",
+                        "type": "number"
+                    }
+                }
+            },
+            "Update_Ingest_ProfileBody.dynamic_origin.dynamic_profile_options.max_resolution": {
+                "type": "object",
+                "properties": {
+                    "height": {
+                        "description": "the height of the image in pixels ",
+                        "type": "number"
+                    },
+                    "width": {
+                        "description": "the width of the image in pixels ",
+                        "type": "number"
+                    }
+                }
+            },
+            "Update_Ingest_ProfileBody.renditions": {
+                "type": "object",
+                "properties": {
+                    "aspect_mode": {
+                        "description": "how to handle mismatch between source and rendition aspect ratio Legacy Ingest only ",
+                        "type": "string"
+                    },
+                    "audio_bitrate": {
+                        "description": "audio bitrate in kbps Legacy Ingest only ",
+                        "type": "integer"
+                    },
+                    "audio_channels": {
+                        "description": "number of audio channels Legacy Ingest only ",
+                        "type": "number"
+                    },
+                    "audio_codec": {
+                        "description": "audio codec, e.g. aac Legacy Ingest only ",
+                        "type": "string"
+                    },
+                    "max_aac_profile": {
+                        "description": "max aaic profile - aac-lc is the recommended value Legacy Ingest only ",
+                        "type": "string"
+                    },
+                    "constant_bitrate": {
+                        "description": "whether to use constant bitrate for encoding Legacy Ingest only ",
+                        "type": "boolean"
+                    },
+                    "crf": {
+                        "description": "1-51, not used by default. ",
+                        "type": "number"
+                    },
+                    "decoder_bitrate_cap": {
+                        "description": "In kbps, the max bitrate fed to the decoder Legacy Ingest only ",
+                        "type": "integer"
+                    },
+                    "encryption_method": {
+                        "description": "encryption_method to use, e.g. aes-128 Legacy Ingest only ",
+                        "type": "string"
+                    },
+                    "encryption_key_rotation_period": {
+                        "description": "use a different key for each set of segments, rotating to a new key after this many segments ",
+                        "type": "number"
+                    },
+                    "fixed_keyframe_interval": {
+                        "description": "Forces a keyframe every X frames, but still allows additional keyframes &mdash; NOTE overrides keyframe_interval ",
+                        "type": "number"
+                    },
+                    "forced_keyframe_rate": {
+                        "description": "Force the keyframe rate, h264 only, ignored if forced_keyframe_interval is used Legacy Ingest only ",
+                        "type": "number"
+                    },
+                    "format": {
+                        "description": "video format, e.g. mp4, ts (for HLS), flv, m4f for video, png or jpg for images Legacy Ingest only ",
+                        "type": "string"
+                    },
+                    "frame_rate": {
+                        "description": "frame rate in frames per second ",
+                        "type": "number"
+                    },
+                    "h264_bframes": {
+                        "description": "number of bframes for h.264 ",
+                        "type": "number"
+                    },
+                    "h264_level": {
+                        "description": "h.264 profile level Legacy Ingest only ",
+                        "type": "number"
+                    },
+                    "h264_profile": {
+                        "description": "h.264 profile Legacy Ingest only ",
+                        "type": "string"
+                    },
+                    "h264_reference_frames": {
+                        "description": "number of h.264 reference frames to use ",
+                        "type": "number"
+                    },
+                    "hls_optimized_ts": {
+                        "description": "Time segments optimized for HLS Legacy Ingest only ",
+                        "type": "boolean"
+                    },
+                    "keyframe_interval": {
+                        "description": "Maximum number of frames between keyframes (default is 250, and overrides keyframe_rate) ",
+                        "type": "number"
+                    },
+                    "keyframe_rate": {
+                        "description": "The number of keyframes per second for renditions (So a value of 0.5 would result in one keyframe every two seconds; a value of 3 would result in three keyframes per second) for CAE profiles only ",
+                        "type": "number"
+                    },
+                    "label": {
+                        "description": "the kind of image this will be ",
+                        "type": "string"
+                    },
+                    "live_stream": {
+                        "description": "Whether this will be for live streaming video Legacy Ingest only ",
+                        "type": "boolean"
+                    },
+                    "live_sliding_window_duration": {
+                        "description": "Duration of stream to keep available for LiveDVR delivery (in seconds) Legacy Ingest only ",
+                        "type": "number"
+                    },
+                    "max_video_bitrate": {
+                        "description": "Maximum video bitrate (h.264 only) ",
+                        "type": "number"
+                    },
+                    "max_frame_rate": {
+                        "description": "Maximum framerate for renditions in fps ",
+                        "type": "number"
+                    },
+                    "media_type": {
+                        "description": "the media type of the rendition Legacy Ingest only ",
+                        "type": "string"
+                    },
+                    "one_pass": {
+                        "description": "force one-pass encoding Legacy Ingest only ",
+                        "type": "boolean"
+                    },
+                    "reference_id": {
+                        "description": "A reference id for the rendition that is unique within the account - required for DRM packaging Legacy Ingest only ",
+                        "type": "string"
+                    },
+                    "segment_seconds": {
+                        "description": "number of seconds of content to include in segments (the default for HLS is 10; for DASH: 2) Legacy Ingest only ",
+                        "type": "number"
+                    },
+                    "skip": {
+                        "description": "Reference",
+                        "type": "object"
+                    },
+                    "skip_video": {
+                        "description": "Set to true to skip video encoding for audio-only renditions Legacy Ingest only ",
+                        "type": "boolean"
+                    },
+                    "speed": {
+                        "description": "a target transcoding speed. Slower transcoding allows for more advanced file compression, while faster transcoding is possible by skipping some advanced compression features ",
+                        "type": "number"
+                    },
+                    "streaming_delivery_format": {
+                        "description": "Sets the format\/protocol for an output that will be delivered using a specific streaming configuration, including necessary manifests, directory Legacy Ingest only ",
+                        "type": "string"
+                    },
+                    "streaming_delivery_profile": {
+                        "description": "Sets the profile of the streaming delivery format, ensuring options are selected for compatibility with the profile Legacy Ingest only ",
+                        "type": "string"
+                    },
+                    "type": {
+                        "description": "transmuxing type for HLS; typical value is segmented Legacy Ingest only ",
+                        "type": "string"
+                    },
+                    "upscale": {
+                        "description": "whether to upsize the frames if the source frame size is smaller than the target Legacy Ingest only ",
+                        "type": "boolean"
+                    },
+                    "video_bitrate": {
+                        "description": "target video bitrate in kbps Legacy Ingest only ",
+                        "type": "integer"
+                    },
+                    "video_codec": {
+                        "description": "target video codec Legacy Ingest only ",
+                        "type": "string"
+                    },
+                    "height": {
+                        "description": "the height of the image in pixels ",
+                        "type": "integer"
+                    },
+                    "width": {
+                        "description": "the width of the image in pixels ",
+                        "type": "integer"
+                    },
+                    "watermarks": {
+                        "description": "array of watermark maps Legacy Ingest only ",
+                        "type": "array"
+                    }
+                }
+            },
+            "Update_Ingest_ProfileBody.renditions.skip": {
+                "type": "object",
+                "properties": {
+                    "min_audio_bitrate": {
+                        "description": "the minimum audio bitrate that the source must have (kbps) ",
+                        "type": "number"
+                    },
+                    "max_audio_bitrate": {
+                        "description": "the maximum audio bitrate that the source must have (kbps) ",
+                        "type": "number"
+                    },
+                    "min_video_bitrate": {
+                        "description": "the minimum video bitrate that the source must have (kbps) ",
+                        "type": "number"
+                    },
+                    "max_video_bitrate": {
+                        "description": "Maximum video bitrate (h.264 only) ",
+                        "type": "number"
+                    },
+                    "require_audio": {
+                        "description": "if true the source must include an audio track Legacy Ingest only ",
+                        "type": "boolean"
+                    },
+                    "require_video": {
+                        "description": "if true the source must include a video track Legacy Ingest only ",
+                        "type": "boolean"
+                    },
+                    "min_size": {
+                        "description": "the source must be at least this resolution - string of the form &quot;widthxheight&quot; (e.g. &quot;400x225&quot;) Legacy Ingest only ",
+                        "type": "string"
+                    },
+                    "max_size": {
+                        "description": "the source must be at most this resolution - string of the form &quot;widthxheight&quot; (e.g. &quot;1920x1080&quot;) Legacy Ingest only ",
+                        "type": "string"
+                    }
+                }
+            },
+            "Update_Ingest_ProfileBody.renditions.watermarks": {
+                "type": "object",
+                "properties": {
+                    "url": {
+                        "description": "URL for the watermark image Legacy Ingest only ",
+                        "type": "string"
+                    },
+                    "width": {
+                        "description": "width in pixels or percent of frame width; e.g. 20 or 10% - decimal values like 10.5% are not permitted Legacy Ingest only ",
+                        "type": "string"
+                    },
+                    "height": {
+                        "description": "height in pixels or percent of frame width; e.g. 20 or 10% - decimal values like 10.5% are not permitted Legacy Ingest only ",
+                        "type": "string"
+                    },
+                    "x": {
+                        "description": "distance from left edge to center of image as pixels or precent of frame width; e.g. 20 or 10% (use negative values like -10 to position the watermark relative to the right edge) - decimal values like 10.5% are not permitted Legacy Ingest only ",
+                        "type": "string"
+                    },
+                    "y": {
+                        "description": "distance from top edge to center if image as pixels or percent of frame height; e.g. 20 or 10% (use negative values like -10 to position the watermark relative to the bottom edge) - decimal values like 10.5% are not permitted Legacy Ingest only ",
+                        "type": "string"
+                    }
+                }
+            },
+            "Update_Ingest_ProfileBody.packages": {
+                "type": "object",
+                "properties": {
+                    "drm": {
+                        "description": "for MPEG-DASH, array of DRM types to apply, e.g. [&quot;widevine&quot;, &quot;playready&quot;] Legacy Ingest only ",
+                        "type": "array"
+                    },
+                    "package_type": {
+                        "description": "for MPEG-DASH, the package type is dash; for other formats, the package type is the DRM type, e.g. widevine Legacy Ingest only ",
+                        "type": "string"
+                    },
+                    "renditions": {
+                        "description": "for MPEG-DASH, the renditions will be set to the reference_id for a single rendition; for other formats, renditions is set equal to an array of rendition reference_id&#39;s ",
+                        "type": "mixed"
+                    }
+                }
+            },
+            "Update_Ingest_Profile200": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "description": "configuration id ",
+                        "type": "string"
+                    },
+                    "name": {
+                        "description": "profile name (must be unique within the account) ",
+                        "type": "string"
+                    },
+                    "date_created": {
+                        "description": "when the profile was created (epoch time in milliseconds) ",
+                        "type": "integer"
+                    },
+                    "date_last_modified": {
+                        "description": "when the profile was last modified (epoch time in milliseconds) ",
+                        "type": "integer"
+                    },
+                    "account_id": {
+                        "description": "Video Cloud account id ",
+                        "type": "number"
+                    },
+                    "description": {
+                        "description": "description of the profile ",
+                        "type": "string"
+                    },
+                    "digital_master": {
+                        "description": "",
+                        "type": ""
+                    },
+                    "dynamic_origin": {
+                        "description": "",
+                        "type": ""
+                    },
+                    "renditions": {
+                        "description": "array of rendition maps Legacy Ingest only ",
+                        "type": "array"
+                    },
+                    "packages": {
+                        "description": "array of package maps for DRM (see Content Security) Legacy Ingest only ",
+                        "type": "array"
+                    }
+                }
+            }
+        }
+    }
+}

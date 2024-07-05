@@ -1,0 +1,2052 @@
+openapi: 3.0.0
+info:
+  title: 'HiPay Enterprise Gateway API'
+  description: "The Gateway API allows you to get paid and manage orders and transactions.\n\nPlease note: this documentation describes the Gateway API parameters and response fields and allows you to test the platform in real time.\nThis page is to be used alongside the **[HiPay Enterprise Platform Overview documentation](/online-payments/overview)**, which gives you more information and details on the HiPay Enterprise workflow. You may use both documents in parallel when integrating HiPay Enterprise.\n\n# Integration\n\nChoose from three types of integration to select the one best adapted to your business:\n\n## Hosted integration\n\nHiPay Enterprise hosts your payment page on a secured site. With this option you can benefit from a single point of contact, adaptable payment pages, and the PCI-DSS standard. You can therefore outsource heavy security requirements that are related to payment acceptance.\n\nIn order to use this integration, please refer to the **Generate Hosted Payment Page (`POST /hpayment`)** API service below.\n\n## iFrame integration\n\nThis is a hybrid solution in which the buyer remains on your website to make payment. In order to use this integration you need to generate a hosted payment page (as above) with a special template, allowing you to properly display it in an iFrame.\n\nFor more information, please refer to the **Generate Hosted Payment Page (`POST /hpayment`)** documentation below.\n\n## Integration via our API\n\nIn this case, the payment page is hosted on your website, allowing you to have a unified, fully customized workflow. Please refer to the **Request New Order API (`POST Order`)** below for more information.\n\nPlease note that if you want to execute transactions with credit or debit card payment products, you will need to tokenize card numbers beforehand by using the HiPay Enterprise Tokenization API.\n\n# Managing transactions\n\nOnce a transaction is executed, you may need to perform operations on it, such as a refund, a capture, etc. To do so, please refer to the `maintenance` web service.\n\nYou can also get all transaction details at any time by leveraging the `transaction` web services.\n\nBesides, you may need to be automatically informed when a transaction status gets updated. To this end, you need to leverage server-to-server notifications. For more information, please check the [HiPay Enterprise Overview](/payment-fundamentals/requirements/notifications).\n\n# Web service information\n\n## Gateway API base URLs\n\n| Environment | Base URL |\n| --- | --- |\n| Stage | [https://stage-secure-gateway.hipay-tpp.com/rest/](https://stage-secure-gateway.hipay-tpp.com/rest/) |\n| Production | [https://secure-gateway.hipay-tpp.com/rest/](https://secure-gateway.hipay-tpp.com/rest/) |\n\n## Authentication\n\nAll requests to the HiPay Enterprise API require identification through *HTTP Basic Authentication*. Your API credentials can be found in the Integration section of your HiPay Enterprise back office. Most HTTP clients (including web browsers) have built-in support for HTTP basic authentication. If not, the following header must be included in all HTTP requests.\n\n`Authorization: Basic base64('API login>:<API password>')`"
+  contact:
+    email: pi-commerce@hipay.com
+  version: 1.2.3
+servers:
+  -
+    url: 'https://stage-secure-gateway.hipay-tpp.com/rest'
+    description: Stage
+  -
+    url: 'https://secure-gateway.hipay-tpp.com/rest'
+    description: Production
+paths:
+  /v1/hpayment:
+    post:
+      tags:
+        - payments
+      summary: 'Creates a secure payment page which you can redirect your customer to, in order to proceed checkout'
+      description: "This service allows you to **redirect your customer to a payment page\n(hosted by HiPay)** in order to proceed checkout. This service creates\nan order and returns a forward URL. This forward URL is dedicated to\ndisplay a payment page with your CSS and validated payment products.\nAfter payment form validation, the checkout is processed and the customer is\nbeing returned to your website.\n\nAccording to transaction state and `authentication_indicator` parameter (see below), the customer will be redirected either to the accept or the decline page.\n\nThere are two strategies for implementing this service:\n\n### Hosted: Full redirection mode\n\nOnce the payment page is created, you redirect your customer to it. Your customer is redirected back to your website once the transaction si executed.\n\n### iFrame mode\n\nYou may also display the payment page in an iFrame, in order to have a unified checkout workflow. To do so, you have to provide the `template` parameter with the value `iframe-js` (see below)."
+      operationId: generateHostedPaymentPage
+      requestBody:
+        description: 'HPayment information'
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/hpayment'
+      responses:
+        '200':
+          description: 'Order successfully created and transaction executed.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Forward'
+        '400':
+          description: 'The request was rejected due to a validation error.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: 'An authentication error occurred/invalid credentials.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: 'Access to this resource is fordidden.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      security:
+        -
+          basicAuth: []
+  '/v1/maintenance/transaction/{transaction_reference}':
+    post:
+      tags:
+        - maintenance
+      summary: 'Performs a maintenance operation on a given transaction'
+      description: 'Performs a maintenance operation on a given transaction.'
+      operationId: performMaintenanceOperation
+      parameters:
+        -
+          name: transaction_reference
+          in: path
+          description: 'The unique identifier of the transaction.'
+          required: true
+          schema:
+            type: string
+          example: '800000420435'
+          x-sort: 1
+      requestBody:
+        description: 'Maintenance information'
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Maintenance'
+      responses:
+        '200':
+          description: 'The maintenance operation was executed successfully.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Operation'
+        '400':
+          description: 'The request was rejected due to a validation error.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: 'An authentication error occurred/invalid credentials.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: 'Access to this resource is fordidden.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: 'Transaction was not found.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      security:
+        -
+          basicAuth: []
+  /v1/order:
+    post:
+      tags:
+        - payments
+      summary: 'Creates an order and a transaction based on payment details'
+      description: "This service allows you to execute transactions through API with no need\nto redirect your customer to the payment page hosted by HiPay. This\nservice supports payments with credit or debit cards as well as\nalternative payment methods.\n\nIn **order** to make a payment with a credit or debit card, a token must\nhave been generated beforehand. In fact, this service cannot receive\ncredit or debit card numbers in clear. Instead, you must provide this\nservice with a token associated to a card number. Use the HiPay\nEnterprise SDK for JavaScript in order to generate tokens.\n\nIf you need to make payments with alternative payment methods, you can\nuse this service directly. Note that the use of some alternative payment\nproducts implies that you redirect your user to an external URL. In such\na case, the `forwardUrl` parameter will be set with the appropriate URL.\nMoreover, the activation of *3-D Secure* also implies a redirection of\nyour customer."
+      operationId: requestNewOrder
+      requestBody:
+        description: 'Order information'
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/InputOrder'
+      responses:
+        '200':
+          description: 'Order successfully created and transaction executed.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Transaction'
+        '400':
+          description: 'The request was rejected due to a validation error.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: 'An authentication error occurred/invalid credentials.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: 'Access to this resource is fordidden.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      security:
+        -
+          basicAuth: []
+  '/v1/transaction/{transaction_reference}':
+    get:
+      tags:
+        - transaction
+      summary: 'Gets details of existing transactions based on a transaction ID'
+      description: 'Gets details of existing transactions based on a transaction ID.'
+      operationId: getTransactionByReference
+      parameters:
+        -
+          name: transaction_reference
+          in: path
+          description: 'The unique identifier of the transaction.'
+          required: true
+          schema:
+            type: string
+          example: '800000420435'
+          x-sort: 1
+      responses:
+        '200':
+          description: 'Transaction retrieved successfully.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TransactionDetail'
+        '400':
+          description: 'The request was rejected due to a validation error.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: 'An authentication error occurred/invalid credentials.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: 'Access to this resource is fordidden.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      security:
+        -
+          basicAuth: []
+  /v1/transaction:
+    get:
+      tags:
+        - transaction
+      summary: 'Gets details of existing transactions related to a given order'
+      description: 'Gets details of existing transactions related to a given order.'
+      operationId: getTransactionsByReference
+      parameters:
+        -
+          name: orderid
+          in: query
+          description: 'Merchant unique order id. Return all the transactions related to an order id.'
+          required: true
+          schema:
+            type: string
+          example: ORDER_1487239265080
+          x-sort: 1
+      responses:
+        '200':
+          description: 'Transactions retrieved successfully.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TransactionDetail'
+        '400':
+          description: 'The request was rejected due to a validation error.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: 'An authentication error occurred/invalid credentials.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: 'Access to this resource is fordidden.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      security:
+        -
+          basicAuth: []
+components:
+  schemas:
+    Forward:
+      title: Forward
+      description: Forward
+      properties:
+        forwardUrl:
+          description: ''
+          type: string
+          example: 'https://stage-secure-gateway.hipay-tpp.com/payment/web/pay/df4d20da-7b6f-4fed-8603-c4ed3dca48'
+          x-sort: 1
+        mid:
+          description: ''
+          type: string
+          example: '00001326589'
+          x-sort: 5
+        order:
+          type: object
+          allOf:
+            -
+              $ref: '#/components/schemas/OrderResponse'
+          x-sort: 10
+      type: object
+    hpayment:
+      title: HPayment
+      description: 'HPayment model'
+      required:
+        - orderid
+        - description
+        - currency
+        - amount
+      type: object
+      allOf:
+        -
+          properties:
+            payment_product_list:
+              description: "The list of payment products to display on the payment page. (cb have to be used with mastercard / visa / maestro)\n\n`visa`, `mastercard`, `maestro`, `cb`, `3xcb`, `3xcb-no-fees`, `4xcb`, `4xcb-no-fees`, `american-express`, `bank-transfer`, `bcmc`, `bcmc-mobile`, `cbc-online`, `dexia-directnet`, `giropay`, `ideal`, `ing-homepay`, `kbc-online`, `paypal`, `paysafecard`, `payulatam`, `przelewy24`, `qiwi-wallet`, `sdd`, `sisal`, `sofort-uberweisung`, `yandex`, `aura`, `boleto-bancario`, `oxxo`, `itau`, `payshop`, `ukash`, `webmoney-transfer`, `elo-card`, `carte-cadeau`, `safetypay`, `skrill`, `bnpp-4xcb`, `bnpp-3xcb`, `discover`, `banco-do-brasil`, `bradesco`, `caixa`, `multibanco`, `cofinoga`, `hipercard`, `santander-home-banking`, `santander-cash`, `banamex`, `bbva-bancomer`, `credit-long`, `carte-titre-restaurant`, `alipay-ecommerce`, `divido`, `bacs`, `wechatpay`, `cup`, `bancontactqrcode`"
+              type: string
+              example: 'mastercard,visa,american-express'
+              x-sort: 20
+            payment_product_category_list:
+              description: "The categories of payment products to be displayed on the payment page.\n\n`credit-card`, `debit-card`, `realtime-banking`, `ewallet`, `prepaid-card`, `open-invoice`, `credit-consumption`"
+              type: string
+              enum:
+                - credit-card
+                - debit-card
+                - realtime-banking
+                - ewallet
+                - prepaid-card
+                - open-invoice
+                - credit-consumption
+              example: credit-card
+              additionalProperties:
+                default: credit-card
+              x-sort: 25
+            css:
+              description: 'URL to merchant style sheet. **HTTPS protocol is required.**'
+              type: string
+              example: 'https://developer.hipay.com/misc/simulator/css-responsive.css'
+              x-sort: 30
+            template:
+              description: "The template name. Possible values:\n\n* `basic-js` : Template with customizable CSS\n* `basic` [Deprecated] : Template with customizable CSS\n* `iframe-js` : Template with hosted iFrame integration\n* `iframe` [Deprecated] : Template with hosted iFrame integration\n* `autodetection` : Automatic detection of the brand of the card, if the merchant has the option"
+              type: string
+              enum:
+                - basic-js
+                - iframe-js
+                - autodetection
+                - basic
+                - iframe
+              example: basic-js
+              x-sort: 35
+            merchant_display_name:
+              description: 'The merchant name displayed on payment page, otherwise the name is retrieved from order.'
+              type: string
+              example: 'ACME Consolidated'
+              x-sort: 40
+            display_selector:
+              description: "Enable/disable the payment products selector. Possible values:\n\n* `0`: the selector is not displayed\n* `1`: the selector is displayed"
+              type: integer
+              enum:
+                - 0
+                - 1
+              example: '1'
+              x-sort: 45
+            time_limit_to_pay:
+              description: 'The time limit to pay allows you to specify the validity period of a payment page in seconds starting from the moment the payment link (forwardUrl) is generated. If empty, default value is fixed to 7 days. Max value: 24 days (2140000 seconds).'
+              type: string
+              example: '1800'
+              x-sort: 55
+            sca_preference:
+              description: "To indicate the preference for a frictionless flow during the authentication request, the merchant may send the sca_preference parameter.\nDepending on the merchant's assessment of the risk of fraud, specific values may be sent.\nThis parameter can only be used by merchants who have a fraud risk assessment mechanism of their own and who have subscribed to the SCA Preference merchant option.\nPlease contact your account manager to request it.\n\n`1` : No Preference.\n    If you are not sure about the transaction's risk of fraud, use this value. Using this value for all your transactions may result in a high strong customer authentication rate.\n`2` : No Challenge\n    If you think this transaction is safe. This will tell the acquirer a frictionless flow is preferred.\n`3` : Challenge Requested\n    If you think this transaction may be at risk, use this value. This will tell the acquirer that a strong customer authentication may be required, depending on the PSD2 specific information you sent along with the transaction."
+              type: integer
+              enum:
+                - 1
+                - 2
+                - 3
+              example: 1
+              x-sort: 60
+        -
+          $ref: '#/components/schemas/Common'
+        -
+          $ref: '#/components/schemas/Order'
+    Maintenance:
+      title: Maintenance
+      description: 'Maintenance model'
+      required:
+        - operation
+      properties:
+        operation:
+          description: "The operation to perform on the transaction.\n\n    The payment gateway supports the following types of maintenance transactions.\n\n    | Operation Type | Description |\n    | -------------- | ----------- |\n    | `capture` | A request instructing the payment gateway to capture a previously-authorized transaction, i.e. transfer the funds from the customer’s bank account to the merchant’s bank account. This transaction is always preceded by an authorization. |\n    | `refund` | A request instructing the payment gateway to refund a previously captured transaction. A captured transaction can be partly or fully refunded. |\n    | `cancel` | A request instructing the payment gateway to cancel a previously authorized transaction. Only authorized transactions can be cancelled, captured transactions must be refunded. |\n    | `acceptChallenge` | A request instructing the payment gateway to accept a previously challenged transaction. |\n    | `denyChallenge` | A request instructing the payment gateway to deny a previously challenged transaction. |\n    | `finalize` | A request instructing the payment gateway to finalize an asynchronous operation. |"
+          type: string
+          enum:
+            - capture
+            - refund
+            - cancel
+            - acceptChallenge
+            - denyChallenge
+            - finalize
+          example: capture
+          x-sort: 1
+        currency:
+          description: 'Base currency for this order. This three-character currency code complies with ISO 4217.'
+          type: string
+          enum:
+            - FRF
+            - SKK
+            - EEK
+            - TMT
+            - AED
+            - AFN
+            - ALL
+            - AMD
+            - ANG
+            - AOA
+            - ARS
+            - AUD
+            - AWG
+            - AZN
+            - BAM
+            - BBD
+            - BDT
+            - BGN
+            - BHD
+            - BIF
+            - BMD
+            - BND
+            - BOB
+            - BRL
+            - BSD
+            - BTN
+            - BWP
+            - BYR
+            - BZD
+            - CAD
+            - CDF
+            - CHF
+            - CLP
+            - CNY
+            - COP
+            - CRC
+            - CUC
+            - CUP
+            - CVE
+            - CZK
+            - DJF
+            - DKK
+            - DOP
+            - DZD
+            - EGP
+            - ERN
+            - ETB
+            - EUR
+            - FJD
+            - FKP
+            - GBP
+            - GEL
+            - GHS
+            - GIP
+            - GMD
+            - GNF
+            - GTQ
+            - GYD
+            - HKD
+            - HNL
+            - HRK
+            - HTG
+            - HUF
+            - IDR
+            - ILS
+            - INR
+            - IQD
+            - IRR
+            - ISK
+            - JMD
+            - JOD
+            - JPY
+            - KES
+            - KGS
+            - KHR
+            - KMF
+            - KPW
+            - KRW
+            - KWD
+            - KYD
+            - KZT
+            - LAK
+            - LBP
+            - LKR
+            - LRD
+            - LSL
+            - LTL
+            - LVL
+            - LYD
+            - MAD
+            - MDL
+            - MGA
+            - MKD
+            - MMK
+            - MNT
+            - MOP
+            - MRO
+            - MUR
+            - MVR
+            - MWK
+            - MXN
+            - MYR
+            - MZN
+            - NAD
+            - NGN
+            - NIO
+            - NOK
+            - NPR
+            - NZD
+            - OMR
+            - PAB
+            - PEN
+            - PGK
+            - PHP
+            - PKR
+            - PLN
+            - PYG
+            - QAR
+            - RON
+            - RSD
+            - RUB
+            - RWF
+            - SAR
+            - SBD
+            - SCR
+            - SDG
+            - SEK
+            - SGD
+            - SHP
+            - SLL
+            - SOS
+            - SRD
+            - STD
+            - SVC
+            - SYP
+            - SZL
+            - THB
+            - TJS
+            - TND
+            - TOP
+            - TRY
+            - TTD
+            - TWD
+            - TZS
+            - UAH
+            - UGX
+            - USD
+            - UYU
+            - UZS
+            - VEF
+            - VND
+            - VUV
+            - TMM
+            - WST
+            - XAF
+            - XCD
+            - XOF
+            - XPF
+            - YER
+            - ZAR
+            - ZMK
+            - ZWL
+          example: EUR
+          additionalProperties:
+            default: EUR
+          x-sort: 5
+        amount:
+          description: 'Amount is required for partial maintenances. Do not specify amount for full captures or refunds.'
+          type: string
+          example: '3.5'
+          x-sort: 10
+        operation_id:
+          description: 'Operation merchant ID. This value will be returned to merchant with the notifications related to this operation.'
+          type: string
+          example: 204OJ23LKJ234
+          x-sort: 15
+        basket:
+          description: "Shopping cart details. **You must send only items that must be captured or refunded.**\n\n    Please refer to [HiPay Enterprise - Payment Gateway - Shopping cart managment](https://support.hipay.com/hc/fr/articles/115001660469-Payment-Gateway-Shopping-cart-management) technical documentation."
+          type: string
+          x-sort: 20
+        sub_transaction_reference:
+          description: 'Number of the subtransaction to be refunded.'
+          type: string
+          example: '134470136955'
+          x-sort: 25
+        source:
+          description: "To identify the origin of the transaction. Here are the authorized values for source property:\n\n    `AUTO`, `SAPI`, `CONS`, `PAGE`, `TPE`, `RTRY`, `MANU`, `PREF`, `REVI`, `CMS`, `SSDK`, `CSDK`"
+          type: string
+          example: '{"integration_version":"1.9.0","brand":"DEVPORTAL","source":"CSDK","brand_version":"12.2.0"}'
+          x-sort: 30
+      type: object
+    Operation:
+      title: Operation
+      description: 'Operation model'
+      properties:
+        operation:
+          description: 'The operation to perform on the transaction.'
+          type: string
+          enum:
+            - capture
+            - refund
+            - cancel
+            - acceptChallenge
+            - denyChallenge
+          example: capture
+          x-sort: 1
+        mid:
+          description: ''
+          type: string
+          example: '00001326589'
+          x-sort: 5
+        authorizationCode:
+          description: ''
+          type: string
+          example: author
+          x-sort: 10
+        transactionReference:
+          description: ''
+          type: string
+          example: '800000968431'
+          x-sort: 15
+        status:
+          description: ''
+          type: string
+          example: '118'
+          x-sort: 35
+        message:
+          description: ''
+          type: string
+          example: Captured
+          x-sort: 40
+        dateCreated:
+          description: ''
+          type: string
+          example: '2019-02-07T10:07:09+0000'
+          x-sort: 20
+        dateUpdated:
+          description: ''
+          type: string
+          example: '2019-02-07T10:07:09+0000'
+          x-sort: 25
+        dateAuthorized:
+          description: ''
+          type: string
+          example: '2019-02-07T10:07:09+0000'
+          x-sort: 30
+        authorizedAmount:
+          description: ''
+          type: string
+          example: '125.85'
+          x-sort: 45
+        capturedAmount:
+          description: ''
+          type: string
+          example: '125.85'
+          x-sort: 50
+        refundedAmount:
+          description: ''
+          type: string
+          example: '0.00'
+          x-sort: 55
+        decimals:
+          description: ''
+          type: string
+          example: '2'
+          x-sort: 60
+        currency:
+          description: ''
+          type: string
+          example: EUR
+          x-sort: 65
+      type: object
+    InputOrder:
+      title: InputOrder
+      description: 'InputOrder model'
+      required:
+        - orderid
+        - payment_product
+        - description
+        - currency
+        - amount
+        - cardtoken
+      type: object
+      allOf:
+        -
+          properties:
+            payment_product:
+              description: 'The payment method used to proceed checkout. Depending on the payment product, parameters specific to the payment method are required. The list of payment products to display on the payment page.'
+              type: string
+              enum:
+                - visa
+                - mastercard
+                - maestro
+                - cb
+                - 3xcb
+                - 3xcb-no-fees
+                - 4xcb
+                - 4xcb-no-fees
+                - american-express
+                - bank-transfer
+                - bcmc
+                - bcmc-mobile
+                - cbc-online
+                - dexia-directnet
+                - giropay
+                - ideal
+                - ing-homepay
+                - kbc-online
+                - paypal
+                - paysafecard
+                - payulatam
+                - przelewy24
+                - qiwi-wallet
+                - sdd
+                - sisal
+                - sofort-uberweisung
+                - yandex
+                - aura
+                - boleto-bancario
+                - oxxo
+                - itau
+                - payshop
+                - dankort
+                - postepay
+                - ukash
+                - mercadopago
+                - webmoney-transfer
+                - diners
+                - jcb
+                - dcb-cz-tmobile
+                - dcb-cz-o2
+                - dcb-cz-vodafone
+                - dcb-at-tmobile
+                - dcb-at-a1
+                - dcb-at-orange
+                - dcb-at-drei
+                - dcb-be-mobistar
+                - dcb-ch-easypay
+                - dcb-it-mobilepay
+                - sct
+                - elo-card
+                - dcb-be-proximus
+                - postfinance-card
+                - postfinance-efinance
+                - carte-cadeau
+                - mybank
+                - safetypay
+                - skrill
+                - bnpp-4xcb
+                - bnpp-3xcb
+                - unionpay
+                - alipay-pos
+                - multi-payment
+                - discover
+                - sepa-refund-transfer
+                - banco-do-brasil
+                - bradesco
+                - carte-accord
+                - caixa
+                - edankort
+                - multibanco
+                - dcb-es-pagosmovistar
+                - cashu
+                - moneybookers
+                - afterpay
+                - cofinoga
+                - aurore
+                - 1eurocom
+                - hipercard
+                - santander-home-banking
+                - santander-cash
+                - banamex
+                - bbva-bancomer
+                - ecarte-bleue
+                - credit-long
+                - carte-titre-restaurant
+                - alipay-ecommerce
+                - divido
+                - bacs
+                - tpe
+                - wechatpay
+                - sofort-lastschrift
+                - sepa-direct-debit
+                - cup
+                - bancontactqrcode
+              example: visa
+              x-sort: 20
+            browser_info:
+              description: "**This parameter is specific to the PSD2.**\n\nBrowser Information"
+              required:
+                - language
+              properties:
+                java_enabled:
+                  description: 'Boolean that represents the ability of the cardholder browser to execute Java.'
+                  type: boolean
+                  example: true
+                javascript_enabled:
+                  description: 'Boolean that represents the ability of the cardholder browser to execute JavaScript.'
+                  type: boolean
+                  example: true
+                ipaddr:
+                  description: 'Customer’s IP address.'
+                  type: string
+                  maximum: 45
+                  example: 127.0.0.1
+                http_accept:
+                  description: 'This element should contain the exact content of the HTTP Accept header as sent to the merchant from the customer’s browser.'
+                  type: string
+                  maximum: 2048
+                  example: '*\/*'
+                http_user_agent:
+                  description: 'This element should contain the exact content of the HTTP User-Agent header as sent to the merchant from the customer’s browser.'
+                  type: string
+                  maximum: 2048
+                  example: Mozilla/4.0
+                language:
+                  description: 'Value representing the browser language as defined in IETF BCP47.'
+                  type: string
+                  maximum: 8
+                  minimum: 1
+                  example: fr-FR
+                color_depth:
+                  description: "Value representing the bit depth of the colour palette for displaying images, in bits per pixel.\n\n* `1` : 1 bit\n* `4` : 4 bits\n* `8` : 8 bits\n* `15` : 15 bits\n* `16` : 16 bits\n* `24` : 24 bits\n* `32` : 32 bits\n* `48` : 48 bits"
+                  type: integer
+                  maximum: 2
+                  minimum: 1
+                  enum: [1, 4, 8, 15, 16, 24, 32, 48]
+                  example: 1
+                screen_height:
+                  description: 'Total height of the Cardholder’s screen in pixels.'
+                  type: integer
+                  maximum: 6
+                  minimum: 1
+                screen_width:
+                  description: 'Total width of the cardholder’s screen in pixels.'
+                  type: integer
+                  maximum: 6
+                  minimum: 1
+                timezone:
+                  description: 'Time-zone offset in minutes between UTC and the Cardholder browser local time.'
+                  type: string
+                  maximum: 5
+                  minimum: 1
+                  example: '-120'
+                device_fingerprint:
+                  description: 'This element should contain the value of the ioBB hidden field.'
+                  type: string
+                  example: 042q0aAXOogFCkNMNf94lis1ztsdwpJAn3AFS6wesUIr2q
+              type: object
+              x-sort: 360
+        -
+          $ref: '#/components/schemas/Common'
+        -
+          $ref: '#/components/schemas/Order'
+    Error:
+      title: Error
+      description: 'Error model'
+      properties:
+        code:
+          description: Code
+          type: integer
+          x-sort: 1
+        message:
+          description: Message
+          type: string
+          x-sort: 5
+        description:
+          description: Description
+          type: string
+          x-sort: 10
+      type: object
+    TransactionDetail:
+      title: 'Transaction detail'
+      description: 'Transaction detail'
+      properties:
+        transaction:
+          description: ''
+          type: object
+          allOf:
+            -
+              $ref: '#/components/schemas/Transaction'
+          x-sort: 1
+      type: object
+    Common:
+      title: Common
+      description: 'Common model'
+      properties:
+        orderid:
+          description: 'Unique order ID.'
+          type: string
+          example: ORDER_1537532589263
+          x-uniqId: true
+          x-sort: 1
+        operation:
+          description: "Transaction type:\n\n* `Sale` indicates that the transaction is automatically submitted for capture.\n* `Authorization` indicates that this transaction is sent for authorization only."
+          type: string
+          enum:
+            - Authorization
+            - Sale
+          example: Authorization
+          additionalProperties:
+            default: Authorization
+          x-sort: 5
+        basket:
+          description: "Shopping cart details.\n\nPlease refer to [HiPay Enterprise - Payment Gateway - Shopping cart managment](https://support.hipay.com/hc/fr/articles/115001660469-Payment-Gateway-Shopping-cart-management) technical documentation."
+          type: string
+          example: '[{"european_article_numbering":"4711892728946","product_reference":"NF-a1690","name":"My first product","type":"good","quantity":1,"unit_price":8.99,"discount":0,"tax_rate":"8.20","total_amount":8.99}]'
+          x-sort: 69
+        description:
+          description: 'The order short description.'
+          type: string
+          example: 'A super short description here...'
+          x-sort: 60
+        long_description:
+          description: 'Additional order description. You can show this description in HiPay payment page if desired.'
+          type: string
+          example: 'A super long description here...'
+          x-sort: 65
+        currency:
+          description: 'Base currency for this order. This three-character currency code complies with ISO 4217.'
+          type: string
+          enum:
+            - FRF
+            - SKK
+            - EEK
+            - TMT
+            - AED
+            - AFN
+            - ALL
+            - AMD
+            - ANG
+            - AOA
+            - ARS
+            - AUD
+            - AWG
+            - AZN
+            - BAM
+            - BBD
+            - BDT
+            - BGN
+            - BHD
+            - BIF
+            - BMD
+            - BND
+            - BOB
+            - BRL
+            - BSD
+            - BTN
+            - BWP
+            - BYR
+            - BZD
+            - CAD
+            - CDF
+            - CHF
+            - CLP
+            - CNY
+            - COP
+            - CRC
+            - CUC
+            - CUP
+            - CVE
+            - CZK
+            - DJF
+            - DKK
+            - DOP
+            - DZD
+            - EGP
+            - ERN
+            - ETB
+            - EUR
+            - FJD
+            - FKP
+            - GBP
+            - GEL
+            - GHS
+            - GIP
+            - GMD
+            - GNF
+            - GTQ
+            - GYD
+            - HKD
+            - HNL
+            - HRK
+            - HTG
+            - HUF
+            - IDR
+            - ILS
+            - INR
+            - IQD
+            - IRR
+            - ISK
+            - JMD
+            - JOD
+            - JPY
+            - KES
+            - KGS
+            - KHR
+            - KMF
+            - KPW
+            - KRW
+            - KWD
+            - KYD
+            - KZT
+            - LAK
+            - LBP
+            - LKR
+            - LRD
+            - LSL
+            - LTL
+            - LVL
+            - LYD
+            - MAD
+            - MDL
+            - MGA
+            - MKD
+            - MMK
+            - MNT
+            - MOP
+            - MRO
+            - MUR
+            - MVR
+            - MWK
+            - MXN
+            - MYR
+            - MZN
+            - NAD
+            - NGN
+            - NIO
+            - NOK
+            - NPR
+            - NZD
+            - OMR
+            - PAB
+            - PEN
+            - PGK
+            - PHP
+            - PKR
+            - PLN
+            - PYG
+            - QAR
+            - RON
+            - RSD
+            - RUB
+            - RWF
+            - SAR
+            - SBD
+            - SCR
+            - SDG
+            - SEK
+            - SGD
+            - SHP
+            - SLL
+            - SOS
+            - SRD
+            - STD
+            - SVC
+            - SYP
+            - SZL
+            - THB
+            - TJS
+            - TND
+            - TOP
+            - TRY
+            - TTD
+            - TWD
+            - TZS
+            - UAH
+            - UGX
+            - USD
+            - UYU
+            - UZS
+            - VEF
+            - VND
+            - VUV
+            - TMM
+            - WST
+            - XAF
+            - XCD
+            - XOF
+            - XPF
+            - YER
+            - ZAR
+            - ZMK
+            - ZWL
+          example: EUR
+          additionalProperties:
+            default: EUR
+          x-sort: 70
+        amount:
+          description: 'Total order amount, calculated as the sum of purchased items, plus shipping fees (if present), plus tax fees (if present).'
+          type: number
+          minimum: 1
+          example: 8.99
+          x-sort: 75
+        shipping:
+          description: 'The order shipping fee. It can be omitted if the shipping fee value is zero.'
+          type: number
+          example: 1.3
+          x-sort: 80
+        tax:
+          description: 'The order tax fee. It can be omitted if the order tax value is zero.'
+          type: number
+          example: 1.1
+          x-sort: 85
+        tax_rate:
+          description: 'The order tax rate.'
+          type: number
+          example: 1
+          x-sort: 90
+        cid:
+          description: 'Merchant’s customer id. For fraud detection reasons.'
+          type: string
+          example: '283749291'
+          x-sort: 95
+        ipaddr:
+          description: 'The IP address of your customer making a purchase.'
+          type: string
+          example: 127.0.0.1
+          x-sort: 100
+        accept_url:
+          description: "The URL to return your customer to once the payment process is completed successfully.\n\nFor more information about the user redirection workflow, check the [HiPay Enterprise Overview](/payment-fundamentals/requirements/redirect-pages)."
+          type: string
+          example: 'https://developer.hipay.com/simulator/success/'
+          x-sort: 105
+        decline_url:
+          description: "The URL to return your customer to after the acquirer declines the payment.\n\nFor more information about the user redirection workflow, check the [HiPay Enterprise Overview](/payment-fundamentals/requirements/redirect-pages). "
+          type: string
+          example: 'https://developer.hipay.com/simulator/decline/'
+          x-sort: 110
+        pending_url:
+          description: "The URL to return your customer to when the payment request was submitted to the acquirer but response is not yet available.\n\nFor more information about the user redirection workflow, check the [HiPay Enterprise Overview](/payment-fundamentals/requirements/redirect-pages)."
+          type: string
+          example: 'https://developer.hipay.com/simulator/pending/'
+          x-sort: 115
+        exception_url:
+          description: "The URL to return your customer to after a system failure.\n\nFor more information about the user redirection workflow, check the [HiPay Enterprise Overview](/payment-fundamentals/requirements/redirect-pages)."
+          type: string
+          example: 'https://developer.hipay.com/simulator/exception/'
+          x-sort: 120
+        cancel_url:
+          description: "The URL to return your customer to after a system failure.\n\nFor more information about the user redirection workflow, check the [HiPay Enterprise Overview](/payment-fundamentals/requirements/redirect-pages)."
+          type: string
+          example: 'https://developer.hipay.com/simulator/cancel/'
+          x-sort: 125
+        notify_url:
+          description: 'This field allows you to override the notification URL, available in the configuration in the HiPay back office, with the URL of your choice that will process the notification sent by the HiPay platform.'
+          type: string
+          example: 'https://developer.hipay.com/simulator/notify/'
+          x-sort: 130
+        http_accept:
+          description: 'This element should contain the exact content of the HTTP Accept header as sent to the merchant from the customer’s browser.'
+          type: string
+          example: '*\/*'
+          x-sort: 135
+        http_user_agent:
+          description: 'This element should contain the exact content of the HTTP User-Agent header as sent to the merchant from the customer’s browser.'
+          type: string
+          example: 'Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.0)'
+          x-sort: 140
+        language:
+          description: 'Locale code of your customer. This will be used to display payment page in correct language.'
+          type: string
+          example: en_GB
+          x-sort: 150
+        custom_data:
+          description: 'Custom data. You can use these parameters to submit custom values you wish to show in HiPay back office transaction details, receive back in the API response messages, in the notifications or to activate specific FPS rules. Please note that cdata have been deprecated. If you are still using them, they can’t be combined with custom data. We thus recommend migrating to custom data as soon as possible.'
+          type: string
+          example: '{"internal_reference":"ORD_987465","customer_first_order":true,"other_sample_parameter":"Other sample value"}'
+          x-sort: 155
+        cdata1:
+          description: 'Custom data 1. Deprecated, please use *custom_data* parameter.'
+          type: string
+          deprecated: true
+          x-sort: 156
+        cdata2:
+          description: 'Custom data 2. Deprecated, please use *custom_data* parameter.'
+          type: string
+          deprecated: true
+          x-sort: 156
+        cdata3:
+          description: 'Custom data 3. Deprecated, please use *custom_data* parameter.'
+          type: string
+          deprecated: true
+          x-sort: 156
+        cdata4:
+          description: 'Custom data 4. Deprecated, please use *custom_data* parameter.'
+          type: string
+          deprecated: true
+          x-sort: 156
+        cdata5:
+          description: 'Custom data 5. Deprecated, please use *custom_data* parameter.'
+          type: string
+          deprecated: true
+          x-sort: 156
+        cdata6:
+          description: 'Custom data 6. Deprecated, please use *custom_data* parameter.'
+          type: string
+          deprecated: true
+          x-sort: 156
+        cdata7:
+          description: 'Custom data 7. Deprecated, please use *custom_data* parameter.'
+          type: string
+          deprecated: true
+          x-sort: 156
+        cdata8:
+          description: 'Custom data 8. Deprecated, please use *custom_data* parameter.'
+          type: string
+          deprecated: true
+          x-sort: 156
+        cdata9:
+          description: 'Custom data 9. Deprecated, please use *custom_data* parameter.'
+          type: string
+          deprecated: true
+          x-sort: 156
+        cdata10:
+          description: 'Custom data 10. Deprecated, please use *custom_data* parameter.'
+          type: string
+          deprecated: true
+          x-sort: 157
+        eci:
+          description: "**This parameter is specific to SEPA Direct Debit as well as credit or debit card payment products.**\n\nElectronic Commerce Indicator (ECI).\n\nThe ECI indicates the security level at which the payment information is processed between the cardholder and merchant.\n\n### Credit or debit card\n\nIf the payment product is a credit or debit card:\n\n* `1`: MO/TO (Mail Order/Telephone Order)\n* `2`: MO/TO – Recurring\n* `7`: E-commerce with SSL/TLS Encryption\n* `9`: Recurring E-commerce\n* `10`: TPE payment\n\nA default ECI value can be set in the preferences page. An ECI value sent along in the transaction will overwrite the default ECI value.\n\n### SEPA Direct Debit\n\nIf the payment product is SEPA Direct Debit:\n\n* `7`: First transaction/one-shot transaction\n* `9`: Recurring transaction"
+          type: string
+          enum:
+            - '1'
+            - '2'
+            - '7'
+            - '9'
+            - '10'
+          example: '9'
+          additionalProperties:
+            default: '7'
+          x-sort: 10
+        authentication_indicator:
+          description: "**This parameter is specific to SEPA Direct Debit as well as credit or debit card payment products.**\n\n### Credit or debit card\n\nIf the payment product is a credit or debit card, this parameter indicates if the 3-D Secure authentication should be performed for this transaction.\n\n* `0`: Bypass 3-D Secure authentication.\n* `1`: 3-D Secure authentication if available.\n* `2`: 3-D Secure authentication mandatory.\n\nFor more information about the 3-D Secure workflow, check the [HiPay Enterprise Overview](/online-payments/features/3ds).\n\n### SEPA Direct Debit\n\nIf the payment product is SEPA Direct Debit, this parameter indicates if the debit agreement (mandate) must be electronically signed or not.\n\n* `0`: Bypass electronic signature.\n* `1`: Ask for electronic signature.\n\nFor more information about the SEPA Direct Debit integration (including examples), check the [HiPay Enterprise Overview](/online-payments/payment-means/sepa-direct-debit)."
+          type: string
+          enum:
+            - '0'
+            - '1'
+            - '2'
+          example: '0'
+          additionalProperties:
+            default: '0'
+          x-sort: 15
+        expiration_limit:
+          description: "**This parameter is specific to provider COMPRAFACIL.**\n\nValidity period of the payment code in days."
+          type: integer
+          example: '3'
+          x-sort: 206
+        payment_connectivity:
+          description: "**This parameter is specific to providers QIWIWALLET and DIMOCO.**\n\nOrigin of payment."
+          type: string
+          example: web
+          x-sort: 206
+        prepaid_card_number:
+          description: "**This parameter is specific to provider ONEY (Gift Card).**\n\nGift Card number."
+          type: string
+          example: 6086300010000022383=35121011031363497
+          x-sort: 206
+        prepaid_card_security_code:
+          description: "**This parameter is specific to provider ONEY (Gift Card).**\n\nGift Card CVC."
+          type: string
+          example: '123'
+          x-sort: 206
+        website_id:
+          description: "**This parameter is specific to providers PAGOSMOVISTAR and MOBILEPAY, only into the discover.**\n\nWebsite identifier."
+          type: string
+          example: STWAK4897048
+          x-sort: 206
+      type: object
+    Order:
+      title: Order
+      description: 'Order model'
+      properties:
+        email:
+          description: 'The customer’s e-mail address.'
+          type: string
+          example: john.doe@foobar99.com
+          x-sort: 210
+        national_identification_number:
+          description: "**This parameter is specific to Astropay payment methods.**\n\nCustomer’s personal identification number."
+          type: string
+          example: 'AA 01 23 44 B'
+          x-sort: 217
+        phone:
+          description: 'The customer’s phone number.'
+          type: string
+          example: '33012345678'
+          x-sort: 215
+        msisdn:
+          description: "**This parameter is specific to the 3x and 4x Carte Bancaire payment products.**\n\nThe customer’s ship-to mobile phone number."
+          type: string
+          example: '33612345678'
+          x-sort: 216
+        birthdate:
+          description: 'Birth date of the customer (YYYYMMDD). For fraud detection reasons.'
+          type: string
+          minimum: 18000102
+          example: '19880612'
+          x-sort: 220
+        gender:
+          description: "Gender of the customer:\n\n* `M`: male\n* `F`: female\n* `U`: unknown"
+          type: string
+          enum:
+            - U
+            - F
+            - M
+          example: U
+          x-sort: 225
+        firstname:
+          description: 'The customer’s first name. This value will be use to pre-fill cardholder name on credit card payment form.'
+          type: string
+          example: Cathy
+          x-sort: 230
+        lastname:
+          description: 'The customer’s last name. This value will be use to pre-fill cardholder name on credit card payment form.'
+          type: string
+          example: Doe
+          x-sort: 235
+        card_holder:
+          description: "**This parameter is specific to provider PAYON.**\n\nThe customer’s card holder."
+          type: string
+          example: 'Cathy Doe'
+          x-sort: 236
+        recipientinfo:
+          description: 'Additional information about the customer (e.g., quality or function, company name, department, etc.).'
+          type: string
+          example: Dr.
+          x-sort: 240
+        house_extension:
+          description: 'House extension of the customer.'
+          type: string
+          example: B
+          x-sort: 243
+        house_number:
+          description: 'House number of the customer.'
+          type: string
+          example: '101'
+          x-sort: 244
+        streetaddress:
+          description: 'Street address of the customer.'
+          type: string
+          example: '101 Rue de Rivoli'
+          x-sort: 245
+        streetaddress2:
+          description: 'Additional address information of the customer (e.g., building, floor, flat, etc.).'
+          type: string
+          example: 'Immeuble B'
+          x-sort: 250
+        city:
+          description: 'The customer’s city.'
+          type: string
+          example: Paris
+          x-sort: 255
+        state:
+          description: 'The USA state or the Canada state of the customer making the purchase. Send this information only if the address country of the customer is US (USA) or CA (Canada).'
+          type: string
+          x-sort: 260
+        zipcode:
+          description: 'The zip or postal code of the customer.'
+          type: string
+          example: '75001'
+          x-sort: 265
+        country:
+          description: 'The zip or postal code of the customer.'
+          type: string
+          example: FR
+          x-sort: 270
+        shipto_firstname:
+          description: 'The first name of the order recipient.'
+          type: string
+          example: Cathy
+          x-sort: 285
+        shipto_lastname:
+          description: 'The last name of the order recipient.'
+          type: string
+          example: Doe
+          x-sort: 290
+        shipto_recipientinfo:
+          description: 'Additional information about the order recipient (e.g., quality or function, company name, department, etc.).'
+          type: string
+          example: Dr.
+          x-sort: 295
+        shipto_house_number:
+          description: 'House number of the recipient.'
+          type: string
+          example: '101'
+          x-sort: 299
+        shipto_streetaddress:
+          description: 'Street address to which the order is to be shipped.'
+          type: string
+          example: '101 Rue de Rivoli'
+          x-sort: 300
+        shipto_streetaddress2:
+          description: 'The additional information about address to which the order is to be shipped (e.g., building, floor, flat, etc.).'
+          type: string
+          example: 'Immeuble B'
+          x-sort: 305
+        shipto_city:
+          description: 'The city to which the order is to be shipped.'
+          type: string
+          example: Paris
+          x-sort: 310
+        shipto_state:
+          description: 'The USA state or Canada state to which the order is being shipped. Send this information only if the shipping country is US (USA) or CA (Canada).'
+          type: string
+          x-sort: 315
+        shipto_zipcode:
+          description: 'The zip or postal code to which the order is being shipped.'
+          type: string
+          example: '75001'
+          x-sort: 320
+        shipto_country:
+          description: 'Country code to which the order is being shipped. This two-letter country code complies with ISO 3166-1 (alpha 2).'
+          type: string
+          example: FR
+          x-sort: 325
+        device_fingerprint:
+          description: "This element should contain the value of the 'ioBB' hidden field.\n\nFor more information about the device fingerprint integration, check the [HiPay Enterprise Overview](/payment-fundamentals/requirements/device-fingerprint-integration)."
+          type: string
+          example: 042q0aAXOogFCkNMNf94lis1ztsdwpJAn3AFS6wesUIr2q
+          x-sort: 145
+        source:
+          description: "To identify the origin of the transaction. Here are the authorized values for source property:\n\n`AUTO`, `SAPI`, `CONS`, `PAGE`, `TPE`, `RTRY`, `MANU`, `PREF`, `REVI`, `CMS`, `SSDK`, `CSDK`"
+          type: string
+          example: '{"integration_version":"1.9.0","brand":"DEVPORTAL","source":"CSDK","brand_version":"12.2.0"}'
+          x-sort: 146
+        issuer_bank_id:
+          description: "**This parameter is specific to the iDEAL and the SEPA Direct Debit payment products.**\n\nThis is the Business Identifier Code (BIC) of the customer’s issuer bank."
+          type: string
+          example: BNPAFRPPXXX
+          x-sort: 165
+        qiwiuser:
+          description: "**This parameter is specific to the Qiwi Wallet payment product.**\n\nThe Qiwi user’s ID, whom the invoice is issued to. It is the user’s phone number, in international format."
+          type: string
+          example: '33670985712'
+          x-sort: 170
+        shipto_gender:
+          description: "**This parameter is specific to the 3x and 4x Carte Bancaire payment products.**\n\nGender of the recipient:\n\n* `M`: male\n* `F`: female\n* `U`: unknown"
+          type: string
+          example: U
+          x-sort: 280
+        shipto_phone:
+          description: "**This parameter is specific to the 3x and 4x Carte Bancaire payment products.**\n\nThe recipient’s ship-to phone number."
+          type: string
+          example: '33112345678'
+          x-sort: 275
+        shipto_msisdn:
+          description: "**This parameter is specific to the 3x and 4x Carte Bancaire payment products.**\n\nThe recipient’s ship-to mobile phone number."
+          type: string
+          example: '3362345678'
+          x-sort: 276
+        order_category_code:
+          description: "**This parameter is specific to the 3x and 4x Carte Bancaire payment products.**\n\nThe order category code.\n\nPlease refer to the following list:\n\n| Code | Description |\n| ---- | ----------- |\n| 5499 | Alimentation & gastronomie |\n| 5571 | Auto & moto |\n| 7929 | Culture & divertissements |\n| 5261 | Maison & jardin |\n| 5200 | Electroménager |\n| 7278 | Enchères et achats groupés |\n| 5193 | Fleurs & cadeaux |\n| 5734 | Informatique & logiciels |\n| 7298 | Santé & beauté |\n| 0 | Services aux particuliers |\n| 7361 | Services aux professionnels |\n| 5941 | Sport |\n| 5651 | Vêtements & accessoires |\n| 4722 | Voyage & tourisme |\n| 5946 | Hifi, photo & vidéos |\n| 4812 | Téléphonie & communication |"
+          type: integer
+          enum:
+            - '5499'
+            - '5571'
+            - '7929'
+            - '5261'
+            - '5200'
+            - '7278'
+            - '5193'
+            - '5734'
+            - '7298'
+            - '0'
+            - '7361'
+            - '5941'
+            - '5651'
+            - '4722'
+            - '5946'
+            - '4812'
+          example: '5941'
+          x-sort: 175
+        delivery_date:
+          description: "**This parameter is specific to the 3x and 4x Carte Bancaire payment products.**\n\nEstimated delivery date. Format is YYYY-MM-DD."
+          type: string
+          example: '2022-12-20'
+          x-sort: 180
+        delivery_method:
+          description: "**This parameter is specific to the 3x and 4x Carte Bancaire payment products.**`\n\nThe delivery method."
+          type: string
+          enum:
+            - EXPRESS24H
+            - EXPRESS48H
+            - STORE
+            - STORE24H
+            - CARRIER
+            - CARRIER24H
+            - RELAYPOINT
+            - RELAYPOINT24H
+          example: CARRIER
+          x-sort: 185
+        carrier_description:
+          description: "**This parameter is specific to the 3x and 4x Carte Bancaire payment products.**\n\nCarrier description."
+          type: string
+          example: 'La Poste, 27 Rue des Francs Bourgeois'
+          x-sort: 190
+        recurring_payment:
+          description: "**This parameter is specific to the SEPA Direct Debit payment product.**\n\nIndicates if the debit agreement will be created for a single-use or a multi-use.\n\nPossible values:\n\n* `0`: Generate a single-use agreement id.\n* `1`: Generate a multi-use agreement id."
+          type: string
+          enum:
+            - '0'
+            - '1'
+          example: '0'
+          additionalProperties:
+            default: '0'
+          x-sort: 195
+        iban:
+          description: "**This parameter is specific to the SEPA Direct Debit payment product.**\n\nInternational Bank Account Number (IBAN)."
+          type: string
+          example: FR1420041010050500013M02606
+          x-sort: 200
+        bank_name:
+          description: "**This parameter is specific to the SEPA Direct Debit payment product.**\n\nIssuer Bank Name."
+          type: string
+          example: BNP
+          x-sort: 205
+        sales_channel:
+          description: "Sales channel :\n\n* `0`: Default.\n* `1`: Ecommerce API.\n* `2`: Hosted Payment Page.\n* `3`: POS."
+          type: string
+          enum:
+            - '0'
+            - '1'
+            - '2'
+            - '3'
+          example: ''
+          x-sort: 205
+        soft_descriptor:
+          description: 'Billing descriptor for machine learning.'
+          type: string
+          example: 'Dell Inspiron 15 3583 (i3583-3112BLK-PFR)'
+          x-sort: 205
+        cardtoken:
+          description: "**This parameter is specific to credit or debit card payment products.**\n\nThis is the token obtained from the HiPay Enterprise Secure Vault API when tokenizing a credit or debit card. To generate a token, please refer to the [HiPay Enterprise Tokenization API documentation](/api-explorer/api-tokenization#/tokenization/createToken)."
+          type: string
+          example: db0eef6bfd4cd30ae4e30dc46b89d375b977656d04249741d8b60f533ffa0020
+          x-sort: 160
+        request_id:
+          description: 'The request ID linked to the token.'
+          type: integer
+          example: '7879454'
+          x-sort: 161
+        merchant_risk_statement:
+          description: "**This parameter is specific to the PSD2.**\n\nMerchant’s statement about the transaction he wants to proceed."
+          properties:
+            email_delivery_address:
+              description: 'Email address to which the goods needs to be sent to.'
+              type: string
+              maximum: 254
+              example: jane.doe@test.com
+            delivery_time_frame:
+              description: "Indicates when the goods are willing to be received by the customer.\n\n* `1` : ELECTRONIC DELIVERY\n* `2` : SAME DAY SHIPPING\n* `3` : OVERNIGHT SHIPPING\n* `4` : TWO DAY OR MORE SHIPPING"
+              type: integer
+              enum:
+                - 1
+                - 2
+                - 3
+                - 4
+              example: 1
+            purchase_indicator:
+              description: "Availabilty of the goods.\n\n* `1` : MERCHANDISE AVAILABLE\n* `2` : FUTURE AVAILABILITY"
+              type: integer
+              enum:
+                - 1
+                - 2
+              example: 1
+            pre_order_date:
+              description: 'For a pre-ordered purchase, the expected date that the merchandise will be available.'
+              type: integer
+              maximum: 8
+              example: 20190925
+            reorder_indicator:
+              description: "Unicity of the order for the customer.\n\n* `1` : FIRST TIME ORDERED\n* `2` : REORDERED"
+              type: integer
+              enum:
+                - 1
+                - 2
+              example: 1
+            shipping_indicator:
+              description: "Address to whom the goods are to be sent.\n\n* `1` : SHIP TO CARDHOLDER'S BILLING ADDRESS\n* `2` : SHIP TO ANOTHER VERIFIED ADDRESS ON FILE WITH MERCHANT\n* `3` : SHIP TO ADDRESS THAT IS DIFFERENT THAN THE CARDHOLDER'S BILLING ADDRESS\n* `4` : SHIP TO STORE / PICK UP AT LOCAL STORE\n* `5` : DIGITAL GOODS\n* `6` : TRAVEL AND EVENT TICKETS, NOT SHIPPED\n* `7` : OTHER (Gaming, digital services not shipped, emedia subscriptions)"
+              type: integer
+              enum:
+                - 1
+                - 2
+                - 3
+                - 4
+                - 5
+                - 6
+                - 7
+              example: 1
+            gift_card:
+              description: 'Information on order making throught a gift card.'
+              properties:
+                amount:
+                  description: 'Amount of the gift card.'
+                  type: number
+                  example: 15
+                count:
+                  description: 'Total count of individual gift cards purchased.'
+                  type: integer
+                  example: 0
+                currency:
+                  description: 'Currency of the gift card.'
+                  type: string
+                  example: EUR
+              type: object
+          type: object
+          x-sort: 335
+        account_info:
+          description: "**This parameter is specific to the PSD2.**\n\nInformation about the customer’s account on the merchant’s website."
+          properties:
+            customer:
+              description: 'Customer’s account information'
+              properties:
+                account_possession:
+                  description: "Account's type of seniority, based on when the customer created their account on the merchant's website.\n\n * `1` : Guest\n * `2` : Created during this transaction\n * `3` : Less than 30 days\n * `4` : 30 - 60 days\n * `5` : More than 60 days"
+                  type: integer
+                  enum: [1, 2, 3, 4, 5]
+                  example: 1
+                account_change:
+                  description: 'Customer’s last change on his account. (YYYYMMDD)'
+                  type: integer
+                  example: 20180507
+                opening_account_date:
+                  description: 'Date when the customer created his account on the merchant’s website. (YYYYMMDD)'
+                  type: integer
+                  example: 20180507
+                password_change:
+                  description: 'Date when the customer made a password change on his account. (YYYYMMDD)'
+                  type: integer
+                  example: 20180507
+              type: object
+            purchase:
+              description: 'Customer’s purchase information'
+              properties:
+                count:
+                  description: 'Number of purchases with the customer’s account during the last six months.'
+                  type: integer
+                  maximum: 4
+                  example: 2
+                card_stored_24h:
+                  description: 'Number of attempts to add a card into the customer’s account in the last 24 hours.'
+                  type: integer
+                  maximum: 3
+                  example: 0
+                payment_attempts_24h:
+                  description: 'Number of transactions (successful and abandoned) for this customer’s account across all payment accounts in the previous 24 hours.'
+                  type: integer
+                  maximum: 3
+                  example: 0
+                payment_attempts_1y:
+                  description: 'Number of transactions (successful and abandoned) for this customer’s account across all payment accounts in the previous year.'
+                  type: integer
+                  maximum: 3
+                  example: 0
+              type: object
+            payment:
+              description: 'Customer’s payment information'
+              properties:
+                enrollment_date:
+                  description: 'Date that the payment account was enrolled in the cardholder’s account with the 3DS Requestor.(YYYYMMDD)'
+                  type: integer
+                  example: 20180507
+              type: object
+            shipping:
+              description: 'Customer’s shipping information'
+              properties:
+                shipping_used_date:
+                  description: 'Date when the shipping address used for this transaction was first used. (YYYYMMDD)'
+                  type: integer
+                  example: 2
+                address_usage_duration:
+                  description: "Indicates when the shipping address used for this transaction was first used with the merchant.\n\n* `1` : THIS TRANSACTION\n* `2` : LESS THAN 30 DAYS\n* `3` : 30-60 DAYS\n* `4` : MORE THAN 60 DAYS"
+                  type: integer
+                  enum: [1, 2, 3, 4]
+                  example: 1
+                name_indicator:
+                  description: "Indicates if the Cardholder Name on the account is identical to the shipping Name used for this transaction.\n\n* `1` : Account Name Identical to Shipping Name\n* `2` : Account Name different than shipping Name"
+                  type: integer
+                  enum: [1, 2]
+                  example: 1
+                suspicious_activity:
+                  description: "Indicates whether the merchant has experienced suspicious activity (including previous fraud) on the cardholder account.\n\n* `1` : No suspicious activity has been observed\n* `2` : Suspicious activity has been observed"
+                  type: integer
+                  enum: [1, 2]
+                  example: 1
+              type: object
+          type: object
+          x-sort: 340
+        device_channel:
+          description: "**This parameter is specific to the PSD2.**\n\nChannel through which the transaction is being processed. By default this value is set to 2.\n\n* `1` : App-based (APP)\n* `2` : Browser (BRW)\n* `3` : 3DS Requestor Initiated (3RI)"
+          type: integer
+          enum:
+            - 1
+            - 2
+            - 3
+          example: 1
+          x-sort: 345
+        recurring_info:
+          description: "**This parameter is specific to the PSD2.**\n\nInformation on recurring transaction"
+          required:
+            - expiration_date
+            - frequency
+          properties:
+            expiration_date:
+              description: 'Date after which no further authorisations shall be performed. (YYYYMMDD)'
+              type: integer
+              example: 20180507
+            frequency:
+              description: 'Indicates the minimum number of days between authorisations.'
+              type: integer
+              example: 31
+          type: object
+          x-sort: 350
+      type: object
+    OrderResponse:
+      title: 'Order Response'
+      description: 'Order Response model'
+      properties:
+        id:
+          description: ''
+          type: string
+          example: '1549547828947'
+          x-sort: 1
+        dateCreated:
+          description: ''
+          type: string
+          example: '2019-02-07T13:57:08+0000'
+          x-sort: 5
+        attempts:
+          description: ''
+          type: string
+          example: '0'
+          x-sort: 10
+        amount:
+          description: ''
+          type: string
+          example: '125.75'
+          x-sort: 15
+        shipping:
+          description: ''
+          type: string
+          example: '0'
+          x-sort: 20
+        tax:
+          description: ''
+          type: string
+          example: '1.10'
+          x-sort: 25
+        decimals:
+          description: ''
+          type: string
+          example: '2'
+          x-sort: 30
+        currency:
+          description: ''
+          type: string
+          example: EUR
+          x-sort: 35
+        customerId:
+          description: ''
+          type: string
+          example: '283749291'
+          x-sort: 40
+        language:
+          description: ''
+          type: string
+          example: en_GB
+          x-sort: 45
+        email:
+          description: ''
+          type: string
+          example: john.doe@foobar99.com
+          x-sort: 50
+        sca_preference:
+          description: "To indicate the preference for a frictionless flow during the authentication request, the merchant may send the sca_preference parameter.\nDepending on the merchant's assessment of the risk of fraud, specific values may be sent.\nThis parameter can only be used by merchants who have a fraud risk assessment mechanism of their own and who have subscribed to the SCA Preference merchant option.\nPlease contact your account manager to request it.\n\n`1` : No Preference.\n    If you are not sure about the transaction's risk of fraud, use this value. Using this value for all your transactions may result in a high strong customer authentication rate.\n`2` : No Challenge\n    If you think this transaction is safe. This will tell the acquirer a frictionless flow is preferred.\n`3` : Challenge Requested\n    If you think this transaction may be at risk, use this value. This will tell the acquirer that a strong customer authentication may be required, depending on the PSD2 specific information you sent along with the transaction."
+          type: integer
+          enum:
+            - 1
+            - 2
+            - 3
+          example: 1
+          x-sort: 346
+      type: object
+    debitAgreement:
+      title: 'Debit Agreement'
+      description: 'Debit Agreement model'
+      properties:
+        id:
+          type: string
+          x-sort: 1
+        status:
+          type: string
+          x-sort: 5
+      type: object
+    paymentMethod:
+      title: Payment
+      description: 'Payment model'
+      properties:
+        token:
+          description: ''
+          type: string
+          x-sort: 1
+        brand:
+          description: ''
+          type: string
+          x-sort: 5
+        pan:
+          description: ''
+          type: string
+          x-sort: 10
+        cardExpiryMonth:
+          description: ''
+          type: string
+          example: '03'
+          x-sort: 20
+        cardExpiryYear:
+          description: ''
+          type: string
+          example: '2020'
+          x-sort: 25
+        issuer:
+          description: "Name of the financial institution that\nissued the payment method."
+          type: string
+          x-sort: 30
+        country:
+          description: 'The country code where payment method was issued.'
+          type: string
+          example: US
+          x-sort: 35
+        cardHolder:
+          description: ''
+          type: string
+          example: 'JOHN DOE'
+          x-sort: 15
+      type: object
+    Transaction:
+      title: Transaction
+      description: 'Transaction model'
+      properties:
+        order:
+          type: object
+          allOf:
+            -
+              $ref: '#/components/schemas/OrderResponse'
+          x-sort: 140
+        authorizationCode:
+          description: ''
+          type: string
+          example: author
+          x-sort: 25
+        dateCreated:
+          description: ''
+          type: string
+          example: '2019-02-07T10:07:09+0000'
+          x-sort: 35
+        dateAuthorized:
+          description: ''
+          type: string
+          example: '2019-02-07T10:07:09+0000'
+          x-sort: 45
+        authorizedAmount:
+          description: ''
+          type: string
+          example: '125.85'
+          x-sort: 60
+        decimals:
+          description: ''
+          type: string
+          example: '2'
+          x-sort: 80
+        currency:
+          description: ''
+          type: string
+          example: EUR
+          x-sort: 85
+        ipAddress:
+          description: ''
+          type: string
+          example: 0.0.0.0
+          x-sort: 90
+        ipCountry:
+          description: ''
+          type: string
+          example: 0.0.0.0
+          x-sort: 95
+        avsResult:
+          description: ''
+          type: string
+          x-sort: 105
+        cvcResult:
+          description: ''
+          type: string
+          x-sort: 110
+        threeDSecure:
+          type: object
+          allOf:
+            -
+              $ref: '#/components/schemas/ThreeDSecure'
+          x-sort: 130
+        transactionReference:
+          description: 'Unique Transaction Identifier.'
+          type: string
+          example: '800000790677'
+          x-sort: 30
+        attemptId:
+          description: 'Attempt identifier.'
+          type: integer
+          example: '1'
+          x-sort: 20
+        dateUpdated:
+          description: "Date of last status change.\n\nThis date must comply with ISO 8601."
+          type: string
+          x-sort: 40
+        state:
+          description: 'Transaction state.'
+          type: string
+          example: completed
+          x-sort: 1
+        mid:
+          description: "Merchant id (MID).\n\nUnique identifier assigned to the merchant."
+          type: integer
+          x-sort: 15
+        capturedAmount:
+          description: 'Captured amount.'
+          type: string
+          example: '125.75'
+          x-sort: 65
+        refundedAmount:
+          description: 'Refunded amount.'
+          type: string
+          example: '00.00'
+          x-sort: 70
+        creditedAmount:
+          description: 'Total credited.'
+          type: string
+          x-sort: 75
+        paymentProduct:
+          description: 'The payment product used for processing current transaction.'
+          type: string
+          example: visa
+          x-sort: 120
+        paymentMethod:
+          description: 'The payment method used for processing current transaction.'
+          type: object
+          allOf:
+            -
+              $ref: '#/components/schemas/paymentMethod'
+          x-sort: 125
+        status:
+          description: 'Transaction status.'
+          type: integer
+          example: '116'
+          x-sort: 50
+        reason:
+          description: 'The numeric value of the error.'
+          type: object
+          allOf:
+            -
+              $ref: '#/components/schemas/reason'
+          x-sort: 5
+        forwardUrl:
+          description: 'URL of the page on which to redirect the customer.'
+          type: string
+          x-sort: 10
+        deviceId:
+          description: ''
+          type: string
+          x-sort: 100
+        fraudScreening:
+          description: 'Fraud screening result.'
+          type: object
+          allOf:
+            -
+              $ref: '#/components/schemas/fraud'
+          x-sort: 135
+        eci:
+          description: "Electronic Commerce Indicator (ECI).\n\nThe Electronic Commerce Indicator (ECI) is used by acquirers/issuers\nto determine the type of transaction being processed. The ECI value\nshould represent the source of the transaction request. That is, the\nenvironment that the cardholder used to provide the payment card details\nto the merchant. It is important that merchants set the correct ECI\nvalue during transaction processing to ensure that appropriate merchant\nservice rates are received."
+          type: integer
+          example: '7'
+          x-sort: 115
+        debitAgreement:
+          type: object
+          allOf:
+            -
+              $ref: '#/components/schemas/debitAgreement'
+          x-sort: 145
+        message:
+          type: string
+          x-sort: 55
+      type: object
+    ThreeDSecure:
+      title: ThreeDSecure
+      description: 'ThreeDSecure model'
+      properties:
+        eci:
+          description: ''
+          type: string
+          example: '6'
+          x-sort: 1
+        enrollmentStatus:
+          description: ''
+          type: string
+          example: 'N'
+          x-sort: 5
+        enrollmentMessage:
+          description: ''
+          type: string
+          example: 'Cardholder Not Enrolled'
+          x-sort: 10
+        authenticationStatus:
+          description: ''
+          type: string
+          example: ''
+          x-sort: 15
+        authenticationMessage:
+          description: ''
+          type: string
+          example: ''
+          x-sort: 20
+        authenticationToken:
+          description: ''
+          type: string
+          example: ''
+          x-sort: 25
+        xid:
+          description: ''
+          type: string
+          example: ''
+          x-sort: 30
+      type: object
+    reason:
+      title: Reason
+      description: 'Reason model'
+      properties:
+        code:
+          description: ''
+          type: string
+          x-sort: 1
+        message:
+          description: ''
+          type: string
+          x-sort: 5
+      type: object
+    fraud:
+      title: 'Fraud screening'
+      description: 'Fraud screening model'
+      properties:
+        scoring:
+          description: ''
+          type: string
+          example: '0'
+          x-sort: 1
+        result:
+          description: ''
+          type: string
+          example: ACCEPTED
+          x-sort: 5
+        review:
+          description: ''
+          type: string
+          example: ''
+          x-sort: 15
+      type: object
+  securitySchemes:
+    basicAuth:
+      type: http
+      scheme: basic
+tags:
+  -
+    name: payments
+    description: 'Everything you need to create orders and transactions'
+  -
+    name: maintenance
+    description: 'Perform operations (capture, refund) on transactions'
+  -
+    name: transaction
+    description: 'Request all the details of existing transactions and orders'
+externalDocs:
+  description: 'Find out more about HiPay'
+  url: 'https://developer.hipay.com/'
