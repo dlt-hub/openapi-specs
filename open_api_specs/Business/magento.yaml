@@ -20245,8 +20245,6 @@ paths:
           required: true
           schema:
             type: string
-      requestBody:
-        $ref: "#/components/requestBodies/rmaRmaManagementV1SaveRmaPostRmarmamanagementv1savermapostbody"
       responses:
         "200":
           content:
