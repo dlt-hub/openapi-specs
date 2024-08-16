@@ -1,0 +1,1094 @@
+openapi: 3.0.1
+info:
+  title: AviationAPI API
+  description: |-
+    AviationAPI was created for the use on VATSIM, but can be used for any web application. Please check the valid date for ANY aeronautical information prior to use.
+              <br><br>
+              No authentication is required and the API is open to anyone and everyone. If you are looking for the website for AviationAPI, that can be found at https://www.aviationapi.com.
+              <br><br>
+              Lastly, AviationAPI will always be free and available to everyone. Hosting an API is not free and all donations of any amount are always welcome at https://www.aviationapi.com/about.
+              <br><br>
+              Enjoy!
+  contact:
+    name: Ian Cowan
+    url: https://www.aviationapi.com
+  version: "1.0"
+  x-logo:
+    url: https://www.aviationapi.com/photos/aviationapi_logo.png
+servers:
+- url: https://api.aviationapi.com/v1
+tags:
+- name: charts
+  description: "Get charts and chart changes with different sorting and searching\
+    \ options, automatically updated every 28 days"
+- name: airports
+  description: "Get airport data, automatically updated daily"
+- name: preferred routes
+  description: "Get FAA preferred routes, automatically updated daily"
+- name: weather
+  description: "Get weather information (METAR/TAF) for any airport in the world,\
+    \ automatically updates on request"
+- name: VATSIM
+  description: "Get VATSIM pilot and controller connections, automatically updated\
+    \ every two minutes"
+paths:
+  /airports:
+    get:
+      tags:
+      - airports
+      summary: Get an airport by its ICAO or FAA identifier
+      description: Search for an airport by its ICAO or FAA identifier
+      parameters:
+      - name: apt
+        in: query
+        description: FAA or ICAO facility identifier (KAVL or AVL). Separate multiple
+          entries with a comma
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  site_number:
+                    type: string
+                    description: FAA unique airport site number
+                    example: 16517.5*A
+                  type:
+                    type: string
+                    description: Type of facility (AIRPORT/HELIPORT)
+                    example: AIRPORT
+                  facility_name:
+                    type: string
+                    description: Name of the facility
+                    example: ASHEVILLE RGNL
+                  faa_ident:
+                    type: string
+                    description: FAA identifier
+                    example: AVL
+                  icao_ident:
+                    type: string
+                    description: ICAO identifier
+                    example: KAVL
+                  district_office:
+                    type: string
+                    description: FSDO of jurisdiction
+                    example: MEM
+                  state:
+                    type: string
+                    description: Two letter abbreviation of the state the facility
+                      resides in
+                    example: NC
+                  state_full:
+                    type: string
+                    description: Full name of the state the facility resides in
+                    example: NORTH CAROLINA
+                  county:
+                    type: string
+                    description: Name of the county the facility resides in
+                    example: BUNCOMBE
+                  city:
+                    type: string
+                    description: Name of the city the facility resides in
+                    example: ASHEVILLE
+                  ownership:
+                    type: string
+                    description: "Facility ownership, PU -> Public, PR -> Private"
+                    example: PU
+                  use:
+                    type: string
+                    description: "Facility use, PU -> Public, PR -> Private"
+                    example: PU
+                  manager:
+                    type: string
+                    description: Name of the facility's manager
+                    example: "LEW S. BLEIWEIS, A.A.E."
+                  manager_phone:
+                    type: string
+                    description: Phone number of the facility's manager
+                    example: 828-684-2226
+                  latitude:
+                    type: string
+                    description: Latitude of the facility
+                    example: 35-26-04.0000N
+                  latitude_sec:
+                    type: string
+                    description: Latitude in seconds of the facility
+                    example: 127564.0000N
+                  longitude:
+                    type: string
+                    description: Longitude of the facility
+                    example: 082-32-33.8240W
+                  longitude_sec:
+                    type: string
+                    description: Longitude in seconds of the facility
+                    example: 297153.8240W
+                  elevation:
+                    type: string
+                    description: Elevation of the facility
+                    example: "2162"
+                  magnetic_variation:
+                    type: string
+                    description: Magnetic variation at the facility
+                    example: 07W
+                  tpa:
+                    type: string
+                    description: "Traffic pattern altitude, Blank -> Standard"
+                    example: "3162"
+                  vfr_sectional:
+                    type: string
+                    description: Name of the VFR sectional the facility lies on
+                    example: ATLANTA
+                  boundary_artcc:
+                    type: string
+                    description: ARTCC that bounds the facility
+                    example: ZTL
+                  boundary_artcc_name:
+                    type: string
+                    description: Name of the ARTCC that bounds the facility
+                    example: ATLANTA
+                  responsible_artcc:
+                    type: string
+                    description: "ARTCC that is responsible for the facility, Blank\
+                      \ -> Same as boundary"
+                    example: ZTL
+                  responsible_artcc_name:
+                    type: string
+                    description: "Name of the ARTCC that is responsible for the facility,\
+                      \ Blank -> Same as boundary"
+                    example: ATLANTA
+                  fss_phone_number:
+                    type: string
+                    description: Local flight service station phone number
+                    example: 1-828-WX-BRIEF
+                  fss_phone_numer_tollfree:
+                    type: string
+                    description: Tollfree flight service station phone number
+                    example: 1-800-WX-BRIEF
+                  notam_facility_ident:
+                    type: string
+                    description: Facility identifier for the NOTAM database
+                    example: AVL
+                  status:
+                    type: string
+                    description: "Facility status, O -> Open, C -> Closed"
+                    example: O
+                  certification_typedate:
+                    type: string
+                    description: Type and date of the facility's certification
+                    example: I B S 05/1973
+                  customs_airport_of_entry:
+                    type: string
+                    description: "Customs airport of entry, Y -> Yes, N -> No"
+                    example: "N"
+                  military_joint_use:
+                    type: string
+                    description: "Military join use of facility, Y -> Yes, N -> No"
+                    example: "N"
+                  military_landing:
+                    type: string
+                    description: "Military authorized for landing at facility, Y ->\
+                      \ Yes, N -> No"
+                    example: "Y"
+                  lighting_schedule:
+                    type: string
+                    description: "Lighting schedule at the facility, if applicable"
+                    example: SEE RMK
+                  beacon_schedule:
+                    type: string
+                    description: Beacon schedule at the facility
+                    example: SS-SR
+                  control_tower:
+                    type: string
+                    description: "Control tower present at the facility, Y -> Yes,\
+                      \ N -> No"
+                    example: "Y"
+                  unicom:
+                    type: string
+                    description: Facility UNICOM frequency
+                    example: "122.950"
+                  ctaf:
+                    type: string
+                    description: Facility CTAF
+                    example: "121.100"
+                  effective_date:
+                    type: string
+                    description: Effective date of this data
+                    example: 01/03/2019
+        "404":
+          description: No airport found in search
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+              example:
+                status: error
+                status_code: "404"
+                message: You must search by at least one parameter
+  /charts:
+    get:
+      tags:
+      - charts
+      summary: Get charts for a specified airport
+      description: Search for charts by ICAO or FAA identifier with optional grouping
+      parameters:
+      - name: apt
+        in: query
+        description: FAA or ICAO airport identifier (KAVL or AVL). Separate multiple
+          entries with a comma
+        required: true
+        schema:
+          type: string
+      - name: group
+        in: query
+        description: "Optional grouping of the charts. 1 -> General, Departures, Arrivals,\
+          \ Approaches; 2 -> Airport Diagram only; 3 -> General only; 4 -> Departures\
+          \ only; 5 -> Arrivals only; 6 -> Approaches only; 7 -> Everything but General"
+        schema:
+          type: integer
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  state:
+                    type: string
+                    description: Two letter abbreviation of the state the facility
+                      resides in
+                    example: NC
+                  state_full:
+                    type: string
+                    description: Full name of the state the facility resides in
+                    example: NORTH CAROLINA
+                  city:
+                    type: string
+                    description: Name of the city the facility resides in
+                    example: ASHEVILLE
+                  airport_name:
+                    type: string
+                    description: Name of the facility
+                    example: ASHEVILLE RGNL
+                  military:
+                    type: string
+                    description: "Military chart, Y -> Yes, N -> No"
+                    example: "N"
+                  faa_ident:
+                    type: string
+                    description: Facility FAA identifier
+                    example: AVL
+                  icao_ident:
+                    type: string
+                    description: Facility ICAO identifier
+                    example: KAVL
+                  chart_seq:
+                    type: string
+                    description: Chart sequence number
+                    example: "10100"
+                  chart_code:
+                    type: string
+                    description: Code for the chart type
+                    example: MIN
+                  chart_name:
+                    type: string
+                    description: Name of the chart
+                    example: TAKEOFF MINIMUMS
+                  pdf_name:
+                    type: string
+                    description: Name of the chart PDF
+                    example: SE2TO.PDF
+                  pdf_path:
+                    type: string
+                    description: URL to the chart PDF
+                    example: https://charts.aviationapi.com/AIRAC_190103/SE2TO.PDF
+        "403":
+          description: Invalid group code
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+              example:
+                status: error
+                status_code: "403"
+                message: That is not a valid grouping code.
+        "404":
+          description: No airport specified
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+              example:
+                status: error
+                status_code: "404"
+                message: Please specify an airport.
+  /charts/changes:
+    get:
+      tags:
+      - charts
+      summary: Get chart changes by airport or chart name
+      description: Search for charts by ICAO or FAA identifier or chart name
+      parameters:
+      - name: apt
+        in: query
+        description: FAA or ICAO airport identifier (KAVL or AVL)
+        required: true
+        schema:
+          type: string
+      - name: chart_name
+        in: query
+        description: Partial or full name of the chart/procedure
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  state:
+                    type: string
+                    description: Two letter abbreviation of the state the facility
+                      resides in
+                    example: NC
+                  state_full:
+                    type: string
+                    description: Full name of the state the facility resides in
+                    example: NORTH CAROLINA
+                  city:
+                    type: string
+                    description: Name of the city the facility resides in
+                    example: CHARLOTTE
+                  airport_name:
+                    type: string
+                    description: Name of the facility
+                    example: CHARLOTTE/DOUGLAS INTL
+                  military:
+                    type: string
+                    description: "Military chart, Y -> Yes, N -> No"
+                    example: "N"
+                  faa_ident:
+                    type: string
+                    description: Facility FAA identifier
+                    example: CLT
+                  icao_ident:
+                    type: string
+                    description: Facility ICAO identifier
+                    example: KCLT
+                  chart_seq:
+                    type: string
+                    description: Chart sequence number
+                    example: "19003"
+                  chart_code:
+                    type: string
+                    description: Code for the chart type
+                    example: DP
+                  chart_name:
+                    type: string
+                    description: Name of the chart
+                    example: WEAZL FOUR
+                  pdf_name:
+                    type: string
+                    description: Name of the chart comparison PDF
+                    example: 00078WEAZL_CMP.PDF
+                  pdf_path:
+                    type: string
+                    description: URL to the chart comparison PDF
+                    example: https://charts.aviationapi.com/AIRAC_190103/DDTPPE_190103/compare_pdf/00078WEAZL_CMP.PDF
+        "404":
+          description: No airport specified
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+              example:
+                status: error
+                status_code: "404"
+                message: Please specify either an airport or a procedure name.
+  /charts/afd:
+    get:
+      tags:
+      - charts
+      summary: Get the AFD for a specified airport
+      description: Search for AFD by ICAO or FAA identifier
+      parameters:
+      - name: apt
+        in: query
+        description: FAA or ICAO airport identifier (KCLT or CLT)
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  state:
+                    type: string
+                    description: Full name of the state the facility resides in
+                    example: NORTH CAROLINA
+                  city:
+                    type: string
+                    description: Name of the city the facility resides in
+                    example: CHARLOTTE
+                  airport_name:
+                    type: string
+                    description: Name of the facility
+                    example: CHARLOTTE/DOUGLAS INTL
+                  icao_ident:
+                    type: string
+                    description: Facility ICAO identifier
+                    example: KCLT
+                  pdf_name:
+                    type: string
+                    description: Name of the AFD PDF
+                    example: SE_269_03JAN2019.PDF
+                  pdf_path:
+                    type: string
+                    description: URL to the AFD PDF
+                    example: https://charts.aviationapi.com/AFD/AIRAC_190103/2_single_page_PDFs/SE_269_03JAN2019.PDF
+        "404":
+          description: No airport specified
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+              example:
+                status: error
+                status_code: "404"
+                message: Please specify an airport.
+  /preferred-routes:
+    get:
+      tags:
+      - preferred routes
+      summary: Get all of the preferred routes
+      description: Get all of the preferred routes with no search parameters
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  origin:
+                    type: string
+                    description: Originating airport of the route
+                    example: ABQ
+                  route:
+                    type: string
+                    description: Preferred route. May be partial or full
+                    example: ABQ DIESL TTORO3 IAH
+                  destination:
+                    type: string
+                    description: Destination airport of the route
+                    example: IAH
+                  hours1:
+                    type: string
+                    description: First group of active hours
+                    example: 0900-1100
+                  hours2:
+                    type: string
+                    description: Second group of active hours
+                    example: "null"
+                  hours3:
+                    type: string
+                    description: Third group of active hours
+                    example: "null"
+                  type:
+                    type: string
+                    description: "Type of route, H -> High, L -> low, LSD -> Low Single\
+                      \ Direction, HSD -> High Single Direction, SLD -> Special Low\
+                      \ Altitude Directional, SHD -> Special High Altitude Directional,\
+                      \ TEC -> Tower Enroute Control, Blank -> N/A"
+                    example: H
+                  area:
+                    type: string
+                    description: Area description
+                    example: "null"
+                  altitude:
+                    type: string
+                    description: Altitude for use with the route
+                    example: "350"
+                  aircraft:
+                    type: string
+                    description: Limitation on the type of aircraft that can fly the
+                      route
+                    example: TURBOJETS & TURBOPROPS - DME/DME/IRU OR GPS
+                  flow:
+                    type: string
+                    description: Flow requirements for using the route
+                    example: IAH EAST FLOW
+                  seq:
+                    type: integer
+                    description: Sequence to use the route in
+                    example: 1
+                  d_artcc:
+                    type: string
+                    description: Originating airport ARTCC
+                    example: ZAB
+                  a_artcc:
+                    type: string
+                    description: Arrival airport ARTCC
+                    example: ZHU
+  /preferred-routes/search:
+    get:
+      tags:
+      - preferred routes
+      summary: Get preferred routes based on search criteria
+      description: "Search for preferred routes by various parameters. At least one\
+        \ search criteria is required, although a combination of any can be used"
+      parameters:
+      - name: origin
+        in: query
+        description: Originating airport FAA identifier
+        schema:
+          type: string
+      - name: dest
+        in: query
+        description: Destination airport FAA identifier
+        schema:
+          type: string
+      - name: type
+        in: query
+        description: "Type of route, H -> High, L -> low, LSD -> Low Single Direction,\
+          \ HSD -> High Single Direction, SLD -> Special Low Altitude Directional,\
+          \ SHD -> Special High Altitude Directional, TEC -> Tower Enroute Control,\
+          \ Blank -> N/A"
+        schema:
+          type: string
+      - name: alt
+        in: query
+        description: Hard altitude for the route
+        schema:
+          type: string
+      - name: lower_alt
+        in: query
+        description: Lower altitude limit
+        schema:
+          type: string
+      - name: upper_alt
+        in: query
+        description: Upper altitude limit
+        schema:
+          type: string
+      - name: aircraft
+        in: query
+        description: Type of aircraft for the route
+        schema:
+          type: string
+      - name: d_artcc
+        in: query
+        description: Departure airport ARTCC three letter identifier
+        schema:
+          type: string
+      - name: a_artcc
+        in: query
+        description: Arrival airport ARTCC three letter identifier
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  origin:
+                    type: string
+                    description: Originating airport of the route
+                    example: ABQ
+                  route:
+                    type: string
+                    description: Preferred route. May be partial or full
+                    example: ABQ DIESL TTORO3 IAH
+                  destination:
+                    type: string
+                    description: Destination airport of the route
+                    example: IAH
+                  hours1:
+                    type: string
+                    description: First group of active hours
+                    example: 0900-1100
+                  hours2:
+                    type: string
+                    description: Second group of active hours
+                    example: "null"
+                  hours3:
+                    type: string
+                    description: Third group of active hours
+                    example: "null"
+                  type:
+                    type: string
+                    description: "Type of route, H -> High, L -> low, LSD -> Low Single\
+                      \ Direction, HSD -> High Single Direction, SLD -> Special Low\
+                      \ Altitude Directional, SHD -> Special High Altitude Directional,\
+                      \ TEC -> Tower Enroute Control, Blank -> N/A"
+                    example: H
+                  area:
+                    type: string
+                    description: Area description
+                    example: "null"
+                  altitude:
+                    type: string
+                    description: Altitude for use with the route
+                    example: "350"
+                  aircraft:
+                    type: string
+                    description: Limitation on the type of aircraft that can fly the
+                      route
+                    example: TURBOJETS & TURBOPROPS - DME/DME/IRU OR GPS
+                  flow:
+                    type: string
+                    description: Flow requirements for using the route
+                    example: IAH EAST FLOW
+                  seq:
+                    type: integer
+                    description: Sequence to use the route in
+                    example: 1
+                  d_artcc:
+                    type: string
+                    description: Originating airport ARTCC
+                    example: ZAB
+                  a_artcc:
+                    type: string
+                    description: Arrival airport ARTCC
+                    example: ZHU
+        "404":
+          description: No search parameter
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+              example:
+                status: error
+                status_code: "404"
+                message: You must search by at least one parameter.
+        "500":
+          description: ICAO identifier used
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+            status:
+              example: error
+            status_code:
+              example: "500"
+            message:
+              example: It appears you searched with an ICAO identifier. Please use
+                the FAA 3 letter identifier.
+  /vatsim/pilots:
+    get:
+      tags:
+      - VATSIM
+      summary: Get all the arrivals and/or departures into an airport on VATSIM
+      description: Search for all the arrivals and/or departures into an airport on
+        VATSIM
+      parameters:
+      - name: apt
+        in: query
+        description: FAA or ICAO airport identifier (KATL or ATL). Separate multiple
+          entries with a comma
+        required: true
+        schema:
+          type: string
+      - name: dep
+        in: query
+        description: Show only departures? 1 -> true
+        schema:
+          type: integer
+      - name: arr
+        in: query
+        description: Show only arrivals? 1 -> true
+        schema:
+          type: integer
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  callsign:
+                    type: string
+                    description: Callsign of the aircraft
+                    example: AAL1567
+                  cid:
+                    type: integer
+                    description: CID of the pilot
+                    example: 921828
+                  name:
+                    type: string
+                    description: Name of the pilot and home base (if applicable)
+                    example: Carl Stanbridge EGLL
+                  latitude:
+                    type: string
+                    description: Latitude of the aircraft
+                    example: "32.30375"
+                  longitutde:
+                    type: string
+                    description: Longitutde of the aircraft
+                    example: "-94.69470"
+                  altitude:
+                    type: string
+                    description: "Reported aircraft altitude, in feet"
+                    example: "35974"
+                  ground_speed:
+                    type: string
+                    description: "Reported aircraft ground speed, in knots"
+                    example: "403"
+                  heading:
+                    type: integer
+                    description: Reported aircraft heading
+                    example: 265
+                  transponder:
+                    type: integer
+                    description: Aircraft's transponder code
+                    example: 2011
+                  aircraft:
+                    type: string
+                    description: Aircraft's aircraft type and equipment code (if applicable)
+                    example: B738/L
+                  departure:
+                    type: string
+                    description: Departure airport identifier
+                    example: KATL
+                  nm_from_dep:
+                    type: string
+                    description: "Distance from departure airport, in NM"
+                    example: "630.48"
+                  arrival:
+                    type: string
+                    description: Arrival airport identifier
+                    example: KDFW
+                  nm_from_arr:
+                    type: string
+                    description: "Distance from arrival airport, in NM"
+                    example: "14.39"
+                  alternate:
+                    type: string
+                    description: "Alternate airport identifier, if applicable"
+                    example: KIAH
+                  route:
+                    type: string
+                    description: Aircraft's route of flight
+                    example: KAJIN2 STNGA MLU YUYUN BEREE1
+                  flight_rules:
+                    type: string
+                    description: "Flight rules, VFR -> Visual Flight Rules, IFR ->\
+                      \ Instrument Flight Rules"
+                    example: IFR
+                  filed_altitude:
+                    type: string
+                    description: Planned altitude of flight
+                    example: "36000"
+                  filed_tas:
+                    type: string
+                    description: Filed cruise true airspeed
+                    example: "465"
+                  filed_time_enroute:
+                    type: string
+                    description: Estimated filed time enroute
+                    example: 1:56
+                  filed_fuel_onboard:
+                    type: string
+                    description: Estimated filed maximum cruise time for fuel onboard
+                    example: 3:30
+                  remarks:
+                    type: string
+                    description: Flightplan remarks
+                    example: +VFPS+/V/PBN/A1B1C1D1S1S2 DOF/190128 REG/N806SB EET/KZME0030
+                      KZFW0059 OPR/AAL PER/C RMK/TCAS SIMBRIEF
+                  stage_of_flight:
+                    type: string
+                    description: Estimated current stage of flight
+                    example: Descent
+        "404":
+          description: No airport specified
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+              example:
+                status: error
+                status_code: "404"
+                message: Please specify an airport.
+  /vatsim/controllers:
+    get:
+      tags:
+      - VATSIM
+      summary: Get all the controllers at a specified facility on VATSIM
+      description: Search for all the at a specified facility on VATSIM
+      parameters:
+      - name: fac
+        in: query
+        description: Airport facility identifier. This should be what is used in the
+          callsign on VATSIM (CLT). Separate multiple entries with a comma
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  callsign:
+                    type: string
+                    description: Controller callsign
+                    example: CHI_35_CTR
+                  cid:
+                    type: integer
+                    description: CID of the controller
+                    example: 991063
+                  name:
+                    type: string
+                    description: Name of the controller
+                    example: Darryl Flora
+                  frequency:
+                    type: string
+                    description: Frequency the controller is transmitting and receiving
+                      on
+                    example: "134.870"
+                  atis:
+                    type: string
+                    description: Controller ATIS
+                    example: $ rw.liveatc.net/ZAU_134.870
+                  time_online:
+                    type: string
+                    description: "Amount of time the controller has been logged on\
+                      \ in hours, minutes, and seconds"
+                    example: 01:04:24
+        "404":
+          description: No facility specified
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+              example:
+                status: error
+                status_code: "404"
+                message: Please specify a facility.
+  /weather/metar:
+    get:
+      tags:
+      - weather
+      summary: Get the METAR for a specified airport
+      description: Search for an airport's METAR
+      parameters:
+      - name: apt
+        in: query
+        description: ICAO airport identifier (KAVL). Separate multiple entries with
+          a comma
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  station_id:
+                    type: string
+                    description: ICAO identifier of the reporting station
+                    example: KDVK
+                  raw:
+                    type: string
+                    description: "Raw, uninterpreted METAR"
+                    example: KDVK 281515Z AUTO 19008KT 10SM BKN090 03/00 A2989 RMK
+                      AO2
+                  temp:
+                    type: string
+                    description: "Temperature, in degrees celsius"
+                    example: "3.0"
+                  dewpoint:
+                    type: string
+                    description: "Dewpoint, in degrees celsius"
+                    example: "0.0"
+                  wind:
+                    type: string
+                    description: "Wind direction, in degrees"
+                    example: "190"
+                  wind_vel:
+                    type: string
+                    description: "Wind velocity, in knots"
+                    example: "8"
+                  visibility:
+                    type: string
+                    description: "Visibility, in statue miles"
+                    example: "10.0"
+                  alt_hg:
+                    type: string
+                    description: "Altimeter setting (atmospheric pressure), in inches\
+                      \ of mercury"
+                    example: "29.89"
+                  alt_mb:
+                    type: string
+                    description: "Altimeter setting (atmospheric pressure), in millibars,\
+                      \ if applicable"
+                    example: "1012.19"
+                  wx:
+                    type: string
+                    description: "Weather string abbreviations, if applicable"
+                    example: "null"
+                  auto_report:
+                    type: boolean
+                    description: Automatic report?
+                    example: true
+                  sky_conditions:
+                    type: array
+                    description: List of all the applicable cloud types and bases.
+                      Clear skys will be reported with no bases
+                    items:
+                      type: object
+                      properties:
+                        coverage:
+                          type: string
+                          description: Sky coverage code
+                          example: BKN
+                        base_agl:
+                          type: string
+                          description: "Altitude in AGL of the cloud bases, null if\
+                            \ skies clear"
+                          example: "9000"
+                  category:
+                    type: string
+                    description: "Current flight category classification, VFR -> VFR,\
+                      \ MVFR -> Marginal VFR, IFR -> IFR, LIFR -> Low IFR"
+                    example: VFR
+                  report_type:
+                    type: string
+                    description: "Type of report, METAR -> Routine hourly report,\
+                      \ SPECI -> Special report"
+                    example: METAR
+        "403":
+          description: No airport found in the search
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+              example:
+                status: error
+                status_code: "403"
+                message: You must search for at least one airport.
+        "404":
+          description: No METAR found for the specified airport
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+              example:
+                status: error
+                status_code: "404"
+                message: No METAR found for that airport.
+  /weather/taf:
+    get:
+      tags:
+      - weather
+      summary: Get the TAF for a specified airport
+      description: Search for an airport's TAF
+      parameters:
+      - name: apt
+        in: query
+        description: ICAO airport identifier (KAVL). Separate multiple entries with
+          a comma
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  station_id:
+                    type: string
+                    description: ICAO identifier of the reporting station
+                    example: KAVL
+                  raw:
+                    type: string
+                    description: "Raw, uninterpreted TAF"
+                    example: KAVL 301133Z 3012/3112 32008KT P6SM SKC FM301500 33015G25KT
+                      P6SM FEW250
+                  line_by_line:
+                    type: array
+                    description: TAF split into each line of the report
+                    items:
+                      type: object
+                      properties:
+                        "1":
+                          type: string
+                          description: Line 1
+                          example: KAVL 301133Z 3012/3112 32008KT P6SM SKC
+                        "2":
+                          type: string
+                          description: Line 2
+                          example: FM301500 33015G25KT P6SM FEW250
+        "403":
+          description: No airport found in the search
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+              example:
+                status: error
+                status_code: "403"
+                message: You must search for at least one airport.
+        "404":
+          description: No TAF found for the specified airport
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+              example:
+                status: error
+                status_code: "404"
+                message: No TAF found for that airport.
+components:
+  schemas:
+    error:
+      type: object
+      properties:
+        status:
+          type: string
+          example: error
+        status_code:
+          type: integer
+          example: 404
+        message:
+          type: string
+    OK:
+      type: object
+      properties:
+        status:
+          type: string
+          example: OK
+    OKID:
+      type: object
+      properties:
+        status:
+          type: string
+          example: OK
+        id:
+          type: integer
+          example: 0
+x-original-swagger-version: "2.0"
